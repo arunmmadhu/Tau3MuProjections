@@ -1,0 +1,31 @@
+
+imax 1 number of bins
+jmax * number of processes minus 1
+kmax * number of nuisance parameters
+--------------------------------------------------------------------------------
+shapes background    Wtau3mu_C18bdt0.994       ../../../workspaces/W/2018/CMS_T3M_13TeV_W_C18bdt0.994.root t3m_shapes:bkg
+shapes signal        Wtau3mu_C18bdt0.994       ../../../workspaces/W/2018/CMS_T3M_13TeV_W_C18bdt0.994.root t3m_shapes:sig
+shapes data_obs      Wtau3mu_C18bdt0.994       ../../../workspaces/W/2018/CMS_T3M_13TeV_W_C18bdt0.994.root t3m_shapes:data_obs
+--------------------------------------------------------------------------------
+bin               Wtau3mu_C18bdt0.994
+observation       -1
+--------------------------------------------------------------------------------
+bin                                     Wtau3mu_C18bdt0.994       Wtau3mu_C18bdt0.994
+process                                 signal              background
+process                                 0                   1
+rate                                    1.1580        18.4953
+--------------------------------------------------------------------------------
+xs_W          lnN                       1.037               -
+br_Wtaunu          lnN                       1.018               -
+br_Wmunu          lnN                       1.014               -
+WNLO          lnN                       1.04               -
+Lumi18          lnN                       1.025               -
+muonID_C18          lnN                       1.052               -
+HLT_Mu_C18          lnN                       1.01               -
+HLT_iso18          lnN                       1.07               -
+HLT_TkMu_C18          lnN                       1.09               -
+mc_stat_C18bdt0.994 lnN                       1.0150        -   
+--------------------------------------------------------------------------------
+bkgNorm_C18bdt0.994 rateParam                 Wtau3mu_C18bdt0.994        background      1.
+sigma_C18bdt0.994 param 0.0265 0.0005
+a0_C18bdt0.994      flatParam   1.8129
