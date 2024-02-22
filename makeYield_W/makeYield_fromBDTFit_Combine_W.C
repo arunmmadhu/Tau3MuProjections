@@ -36,7 +36,7 @@ void makeYield_fromBDTFit_Combine_W ()
     
     //specify the luminosities here
     //double lumi_values[] = {97.7, 129.0, 377.0, 700.0, 1500.0, 2250.0, 3000.0, 3750.0, 4500.0};
-    double lumi_values[] = {59.0};
+    double lumi_values[] = {4500.0};
     int lumi_size = sizeof(lumi_values)/ sizeof(double);
     
     //Category names: 0=tauh, 1=taumu, 2=taue
@@ -60,12 +60,12 @@ void makeYield_fromBDTFit_Combine_W ()
     print_label[1] = "B";
     print_label[2] = "C";
     
-    TString card_modifier_name[3];
+    std::string card_modifier_name[3];
     card_modifier_name[0] = "ZTT_tauh_test";
     card_modifier_name[1] = "ZTT_taumu_test";
     card_modifier_name[2] = "ZTT_taue_test";
     
-    TString combined_card_name[3];
+    std::string combined_card_name[3];
     combined_card_name[0] = "ZTT_tauh_Combined_Mod";
     combined_card_name[1] = "ZTT_taumu_Combined_Mod";
     combined_card_name[2] = "ZTT_taue_Combined_Mod";
@@ -1015,7 +1015,7 @@ void makeYield_fromBDTFit_Combine_W ()
                                         
                                         if(Whether_Hybrid){
                                         
-                                        command_run[k] = "combine -M HybridNew "+combined_card_name[k]+"_a.txt --cl 0.9 -t -1  --expectedFromGrid=0.5  > out_mid_"+ to_string(k+1) +".txt";
+                                        command_run[k] = "combine -M HybridNew "+combined_card_name[k]+"_a.txt --cl 0.9 -t -1  --expectedFromGrid=0.5 --rMin 0.0 --rMax 15.0  > out_mid_"+ to_string(k+1) +".txt";
                                         system(command_run[k]);
                                         
                                         std::ifstream f1("out_mid_"+ to_string(k+1) +".txt");
