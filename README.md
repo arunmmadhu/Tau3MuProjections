@@ -4,7 +4,7 @@ Run the following to get projected signal/background yields at future luminositi
 
 ~~~
 makeYield_ZTT/makeYield_fromBDTFit_Combine.C
-makeYield_HF/makeYield_fromBDTFit_Combine.C
+makeYield_W/makeYield_fromBDTFit_Combine.C
 ~~~
 
 These give the limits at different luminosities:
