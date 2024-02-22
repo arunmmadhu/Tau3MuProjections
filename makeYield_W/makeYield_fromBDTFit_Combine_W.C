@@ -134,6 +134,9 @@ void makeYield_fromBDTFit_Combine_W ()
     double phi_veto_min = 1.020 - 0.020;
     double phi_veto_max = 1.020 + 0.020;
     
+    double omega_veto_min = 0.782 - 0.020;
+    double omega_veto_max = 0.782 + 0.020;
+    
     //Filename and histograms
     TFile * file_tau[3];
     
