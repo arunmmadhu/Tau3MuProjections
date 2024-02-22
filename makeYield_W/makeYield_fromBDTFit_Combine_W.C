@@ -1015,7 +1015,7 @@ void makeYield_fromBDTFit_Combine_W ()
                                         
                                         if(Whether_Hybrid){
                                         
-                                        command_run[k] = "combine -M HybridNew "+combined_card_name[k]+"_a.txt --cl 0.9 -t -1  --expectedFromGrid=0.5 rMin 0.0 --rMax 15.0  > out_mid_"+ to_string(k+1) +".txt";
+                                        command_run[k] = "combine -M HybridNew "+combined_card_name[k]+"_a.txt --cl 0.9 -t -1  --expectedFromGrid=0.5  > out_mid_"+ to_string(k+1) +".txt";
                                         system(command_run[k]);
                                         
                                         std::ifstream f1("out_mid_"+ to_string(k+1) +".txt");
