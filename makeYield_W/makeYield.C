@@ -62,9 +62,9 @@ void makeYield ()
     
     //BDT Cuts a
     float BDT_Cut_a[3];
-    BDT_Cut_a[0] = 0.994;
-    BDT_Cut_a[1] = 0.994;
-    BDT_Cut_a[2] = 0.991;
+    BDT_Cut_a[0] = 0.995;
+    BDT_Cut_a[1] = 0.998;
+    BDT_Cut_a[2] = 0.994;
     
     float BDT_Score_Min(0.98);
     
@@ -77,15 +77,20 @@ void makeYield ()
     float signal_peak_region_max[3];
     
     float Gaussian_Sigma_From_Loose_BDT_Cut[3];
-    Gaussian_Sigma_From_Loose_BDT_Cut[0] = 0.0115631;
-    Gaussian_Sigma_From_Loose_BDT_Cut[1] = 0.016846;
-    Gaussian_Sigma_From_Loose_BDT_Cut[2] = 0.0216494;
+    Gaussian_Sigma_From_Loose_BDT_Cut[0] = 0.0115727;
+    Gaussian_Sigma_From_Loose_BDT_Cut[1] = 0.0174467;
+    Gaussian_Sigma_From_Loose_BDT_Cut[2] = 0.025071;
+    
+    float Sigma_Multiplier[3];
+    Sigma_Multiplier[0] = 3.5;
+    Sigma_Multiplier[1] = 2.3;
+    Sigma_Multiplier[2] = 1.6;
     
     for(int i=0; i<3; i++){
       hname=to_string(i+1);
       
-      signal_peak_region_min[i]=1.77686-2*Gaussian_Sigma_From_Loose_BDT_Cut[i];
-      signal_peak_region_max[i]=1.77686+2*Gaussian_Sigma_From_Loose_BDT_Cut[i];
+      signal_peak_region_min[i]=1.77686-Sigma_Multiplier[i]*Gaussian_Sigma_From_Loose_BDT_Cut[i];
+      signal_peak_region_max[i]=1.77686+Sigma_Multiplier[i]*Gaussian_Sigma_From_Loose_BDT_Cut[i];
       
       cout<<"min: "<< signal_peak_region_min[i] <<" max: "<< signal_peak_region_max[i] <<endl;
       
@@ -97,10 +102,18 @@ void makeYield ()
       
       cout<<"min: "<< signal_peak_region_min[i] <<" max: "<< signal_peak_region_max[i] <<endl;
       
+      // Luca used: min: 1.74 max: 1.82 for all 3 categories
+      
     }
     
     double MC_NORM17 = 30541./(500e+3)*(8580+11370)*0.1138/0.1063*1E-7;
     double MC_NORM18 = 59828./(492e+3)*(8580+11370)*0.1138/0.1063*1E-7;
+    
+    double phi_veto_min = 1.020 - 0.020;
+    double phi_veto_max = 1.020 + 0.020;
+    
+    double omega_veto_min = 0.782 - 0.020;
+    double omega_veto_max = 0.782 + 0.020;
     
     //Filename and histograms
     TFile * file_tau[3];
@@ -129,7 +142,16 @@ void makeYield ()
     Float_t year;
     Double_t tau_sv_ls;
     
+    Double_t cand_refit_mass12;
+    Double_t cand_refit_mass13;
+    Double_t cand_refit_mass23;
+    Int_t cand_charge12;
+    Int_t cand_charge13;
+    Int_t cand_charge23;
+    
     bool categ[3];//Categ A B or C
+    
+    bool mass_veto(false);
     
     
     for(int i=0; i<3; i++){
@@ -153,6 +175,13 @@ void makeYield ()
       tree_MC[i]->SetBranchAddress("year",&year);
       tree_MC[i]->SetBranchAddress("tau_sv_ls",&tau_sv_ls);
       
+      tree_MC[i]->SetBranchAddress("cand_refit_mass12",&cand_refit_mass12);
+      tree_MC[i]->SetBranchAddress("cand_refit_mass13",&cand_refit_mass13);
+      tree_MC[i]->SetBranchAddress("cand_refit_mass23",&cand_refit_mass23);
+      tree_MC[i]->SetBranchAddress("cand_charge12",&cand_charge12);
+      tree_MC[i]->SetBranchAddress("cand_charge13",&cand_charge13);
+      tree_MC[i]->SetBranchAddress("cand_charge23",&cand_charge23);
+      
       
       
       Long64_t nentries1 = tree_MC[i]->GetEntries();
@@ -167,12 +196,17 @@ void makeYield ()
         categ[1]=sqrt(cand_refit_tau_massE)/tripletMass >=0.007 && sqrt(cand_refit_tau_massE)/tripletMass <0.012;
         categ[2]=sqrt(cand_refit_tau_massE)/tripletMass >=0.012 && sqrt(cand_refit_tau_massE)/tripletMass <9999.;
         
-        if(tripletMass>=signal_region_min&&tripletMass<=signal_region_max && categ[i] && year==18 && tau_sv_ls>2.0 ){
+        //mass_veto = ( (cand_charge12==0)? (cand_refit_mass12>=phi_veto_max||cand_refit_mass12<=phi_veto_min) : true ) && ( (cand_charge13==0)? (cand_refit_mass13>=phi_veto_max||cand_refit_mass13<=phi_veto_min) : true ) && ( (cand_charge23==0)? (cand_refit_mass23>=phi_veto_max||cand_refit_mass23<=phi_veto_min) : true );
+        mass_veto = ( (cand_charge12==0)? (cand_refit_mass12>=phi_veto_max||cand_refit_mass12<=phi_veto_min)&&(cand_refit_mass12>=omega_veto_max||cand_refit_mass12<=omega_veto_min) : true ) && ( (cand_charge13==0)? (cand_refit_mass13>=phi_veto_max||cand_refit_mass13<=phi_veto_min)&&(cand_refit_mass13>=omega_veto_max||cand_refit_mass13<=omega_veto_min) : true ) && ( (cand_charge23==0)? (cand_refit_mass23>=phi_veto_max||cand_refit_mass23<=phi_veto_min)&&(cand_refit_mass23>=omega_veto_max||cand_refit_mass23<=omega_veto_min) : true );
+        
+        //mass_veto =1;
+        
+        if(tripletMass>=signal_region_min&&tripletMass<=signal_region_max && categ[i] && year==18 && tau_sv_ls>2.0 && mass_veto ){
                 //MC
                   if(bdt_cv>BDT_Cut_a[i]){
-                    tau_T3Mu[i]->Fill(tripletMass,mcweight*MC_NORM18);
+                    tau_T3Mu[i]->Fill(tripletMass,MC_NORM18);
                   }
-                  tau_BDT_Output_MC[i]->Fill(bdt_cv,mcweight*MC_NORM18);
+                  tau_BDT_Output_MC[i]->Fill(bdt_cv,MC_NORM18);
         }
         
       }
@@ -186,6 +220,13 @@ void makeYield ()
       tree_bkg[i]->SetBranchAddress("year",&year);
       tree_bkg[i]->SetBranchAddress("tau_sv_ls",&tau_sv_ls);
       
+      tree_bkg[i]->SetBranchAddress("cand_refit_mass12",&cand_refit_mass12);
+      tree_bkg[i]->SetBranchAddress("cand_refit_mass13",&cand_refit_mass13);
+      tree_bkg[i]->SetBranchAddress("cand_refit_mass23",&cand_refit_mass23);
+      tree_bkg[i]->SetBranchAddress("cand_charge12",&cand_charge12);
+      tree_bkg[i]->SetBranchAddress("cand_charge13",&cand_charge13);
+      tree_bkg[i]->SetBranchAddress("cand_charge23",&cand_charge23);
+      
       Long64_t nentries2 = tree_bkg[i]->GetEntries();
       for (Long64_t j=0;j<nentries2;j++) {
         tree_bkg[i]->GetEntry(j);
@@ -194,11 +235,16 @@ void makeYield ()
         //        cout<<"For Data: mcweight: "<< mcweight << " weight: "<< weight <<endl;
         //}
         
-        categ[0]=sqrt(cand_refit_tau_massE)/tripletMass >=0.000 && sqrt(cand_refit_tau_massE)/tripletMass <0.007;
-        categ[1]=sqrt(cand_refit_tau_massE)/tripletMass >=0.007 && sqrt(cand_refit_tau_massE)/tripletMass <0.012;
-        categ[2]=sqrt(cand_refit_tau_massE)/tripletMass >=0.012 && sqrt(cand_refit_tau_massE)/tripletMass <9999.;
+        categ[0]=sqrt(cand_refit_tau_massE)/tripletMass >0.000 && sqrt(cand_refit_tau_massE)/tripletMass <=0.007;
+        categ[1]=sqrt(cand_refit_tau_massE)/tripletMass >0.007 && sqrt(cand_refit_tau_massE)/tripletMass <=0.012;
+        categ[2]=sqrt(cand_refit_tau_massE)/tripletMass >0.012 && sqrt(cand_refit_tau_massE)/tripletMass <=9999.;
         
-        if(tripletMass>=signal_region_min&&tripletMass<=signal_region_max && categ[i] && year==18 && tau_sv_ls>2.0 ){
+        //mass_veto = ( (cand_charge12==0)? (cand_refit_mass12>=phi_veto_max||cand_refit_mass12<=phi_veto_min) : true ) && ( (cand_charge13==0)? (cand_refit_mass13>=phi_veto_max||cand_refit_mass13<=phi_veto_min) : true ) && ( (cand_charge23==0)? (cand_refit_mass23>=phi_veto_max||cand_refit_mass23<=phi_veto_min) : true );
+        mass_veto = ( (cand_charge12==0)? (cand_refit_mass12>=phi_veto_max||cand_refit_mass12<=phi_veto_min)&&(cand_refit_mass12>=omega_veto_max||cand_refit_mass12<=omega_veto_min) : true ) && ( (cand_charge13==0)? (cand_refit_mass13>=phi_veto_max||cand_refit_mass13<=phi_veto_min)&&(cand_refit_mass13>=omega_veto_max||cand_refit_mass13<=omega_veto_min) : true ) && ( (cand_charge23==0)? (cand_refit_mass23>=phi_veto_max||cand_refit_mass23<=phi_veto_min)&&(cand_refit_mass23>=omega_veto_max||cand_refit_mass23<=omega_veto_min) : true );
+        
+        //mass_veto =1;
+        
+        if(tripletMass>=signal_region_min&&tripletMass<=signal_region_max && categ[i] && year==18 && tau_sv_ls>2.0 && mass_veto ){
                 //Bkg
                 if( (tripletMass<=signal_peak_region_min[i] || tripletMass>=signal_peak_region_max[i]) ){//blinded
                   if(bdt_cv>BDT_Cut_a[i]){
@@ -261,7 +307,7 @@ void makeYield ()
       
       Gauss[i] = new RooGaussian("Gauss"+hname, "Gauss dist", *InvMass[i], *mean[i], *sigma[i]);
       mc[i] = new RooDataHist("mc"+hname, "mc", *InvMass[i], Import(*tau_T3Mu[i]));
-      GaussNorm[i] = new RooRealVar("GaussNorm"+hname, "GaussNorm",  0.5,0.001,1.0);
+      GaussNorm[i] = new RooRealVar("GaussNorm"+hname, "GaussNorm",  0.5,0.001,20.0);
       mc_pdf[i] = new RooAddPdf("mc_pdf"+hname, "mc_pdf", RooArgList(*Gauss[i]), RooArgList(*GaussNorm[i]));
       mc_fitresult[i] = mc_pdf[i]->fitTo(*mc[i], Range("R3"), Save());
       
@@ -281,6 +327,8 @@ void makeYield ()
       // This gives the integral from the fits.
       pdf_integral_restricted[i] = pdf[i]->createIntegral(*InvMass[i],NormSet(*InvMass[i]),Range("R4"))->getVal();
       mc_pdf_integral_restricted[i] = mc_pdf[i]->createIntegral(*InvMass[i],NormSet(*InvMass[i]),Range("R4"))->getVal();
+      
+      cout << "For category, " << cat_label[i] << ", sigma is: " << sigma[i]->getValV() << endl;
       
       // Normalizations need to be added manually. The pdfs are normalized to 1 and scaled to the data plotted. nData1 and nSignal1 are for normalization (same region as fit). "R4" is for yields.
       nData[i] = data[i]->sumEntries("1", "R1,R2");

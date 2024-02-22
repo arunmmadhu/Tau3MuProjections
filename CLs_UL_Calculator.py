@@ -37,7 +37,7 @@ def calculate_cls(s_exp, b_exp):
     
     
 def find_domain_for_value(function,s_exp,b_exp):
-    range_for_s = 3.0
+    range_for_s = 5.0
     start = max(s_exp-range_for_s,0.0)
     end=s_exp+range_for_s
     step=0.01

@@ -67,7 +67,7 @@ void makeYield ()
     float signal_region_min(1.4);
     float signal_region_max(2.1);
     
-    float signal_peak_region_min(1.73);
+    float signal_peak_region_min(1.74);
     float signal_peak_region_max(1.82);
     
     //Filename and histograms

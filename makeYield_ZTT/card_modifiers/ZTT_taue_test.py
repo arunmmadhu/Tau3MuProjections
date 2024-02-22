@@ -26,7 +26,7 @@ for linenum, line in enumerate(file):
             #imod=float(i)*(float(args.luminosity)/59.0)
             imod=float(rate_list[i_num])*(float(args.luminosity)/59.0)
             #print(imod)
-            res = "{:.4f}".format(imod)
+            res = "{:.6f}".format(imod)
             #print(res)
             line_mod=line_mod.replace(i, res)
         #print(line_mod)

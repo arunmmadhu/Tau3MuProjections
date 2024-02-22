@@ -69,6 +69,72 @@ void Initialize_Labels_ZTT(ThreeTString& cat_base, ThreeTString& cat_label, Thre
 
 }
 
+
+void Load_MC_Events_W(TTree& tree_MC, TH1D& tau_T3Mu, TH1D& tau_BDT_Output_MC, float Loose_BDT_Cut, float signal_region_min, float signal_region_max, double phi_veto_min, double phi_veto_max, int cat_no){
+    
+    Double_t tripletMass;
+    Double_t bdt_cv;
+    Double_t mcweight;
+    Double_t weight;
+    Double_t isMC;
+    Double_t cand_refit_tau_massE;
+    Float_t year;
+    Double_t tau_sv_ls;
+    
+    Double_t cand_refit_mass12;
+    Double_t cand_refit_mass13;
+    Double_t cand_refit_mass23;
+    Int_t cand_charge12;
+    Int_t cand_charge13;
+    Int_t cand_charge23;
+    
+    bool categ[3];//Categ A B or C
+    
+    bool mass_veto(false);
+    
+    tree_MC.SetBranchAddress("cand_refit_tau_mass",&tripletMass);
+    tree_MC.SetBranchAddress("cand_refit_tau_massE",&cand_refit_tau_massE);
+    tree_MC.SetBranchAddress("bdt",&bdt_cv);
+    tree_MC.SetBranchAddress("mcweight",&mcweight);
+    tree_MC.SetBranchAddress("weight",&weight);
+    tree_MC.SetBranchAddress("year",&year);
+    tree_MC.SetBranchAddress("tau_sv_ls",&tau_sv_ls);
+    
+    tree_MC.SetBranchAddress("cand_refit_mass12",&cand_refit_mass12);
+    tree_MC.SetBranchAddress("cand_refit_mass13",&cand_refit_mass13);
+    tree_MC.SetBranchAddress("cand_refit_mass23",&cand_refit_mass23);
+    tree_MC.SetBranchAddress("cand_charge12",&cand_charge12);
+    tree_MC.SetBranchAddress("cand_charge13",&cand_charge13);
+    tree_MC.SetBranchAddress("cand_charge23",&cand_charge23);
+    
+    double MC_NORM17 = 30541./(500e+3)*(8580+11370)*0.1138/0.1063*1E-7;
+    double MC_NORM18 = 59828./(492e+3)*(8580+11370)*0.1138/0.1063*1E-7;
+    
+    
+    Long64_t nentries1 = tree_MC.GetEntries();
+    for (Long64_t j=0;j<nentries1;j++) {
+      tree_MC.GetEntry(j);
+      
+      categ[0]=sqrt(cand_refit_tau_massE)/tripletMass >=0.000 && sqrt(cand_refit_tau_massE)/tripletMass <0.007;
+      categ[1]=sqrt(cand_refit_tau_massE)/tripletMass >=0.007 && sqrt(cand_refit_tau_massE)/tripletMass <0.012;
+      categ[2]=sqrt(cand_refit_tau_massE)/tripletMass >=0.012 && sqrt(cand_refit_tau_massE)/tripletMass <9999.;
+      
+      mass_veto = ( (cand_charge12==0)? (cand_refit_mass12>=phi_veto_max||cand_refit_mass12<=phi_veto_min) : true ) && ( (cand_charge13==0)? (cand_refit_mass13>=phi_veto_max||cand_refit_mass13<=phi_veto_min) : true ) && ( (cand_charge23==0)? (cand_refit_mass23>=phi_veto_max||cand_refit_mass23<=phi_veto_min) : true );
+      
+      if(tripletMass>=signal_region_min&&tripletMass<=signal_region_max && categ[cat_no] && year==18 && tau_sv_ls>2.0 && mass_veto ){
+              //MC
+                if(bdt_cv>Loose_BDT_Cut){
+                  tau_T3Mu.Fill(tripletMass,mcweight*MC_NORM18);
+                }
+                tau_BDT_Output_MC.Fill(bdt_cv,mcweight*MC_NORM18);
+      }
+      
+    }
+    
+    
+}
+
+
 void makeYield_fromBDTFit_Combine_all () //for W and ZTT, maybe HF
 {
     system("cd /afs/cern.ch/work/m/mmadhu/Analysis/combinestats/t3mcombine/HF_and_W/CMSSW_10_2_13/src; cmsenv");
@@ -115,6 +181,9 @@ void makeYield_fromBDTFit_Combine_all () //for W and ZTT, maybe HF
     float signal_region_min(1.6);
     float signal_region_max(2.0);
     
+    double phi_veto_min = 1.020 - 0.020;
+    double phi_veto_max = 1.020 + 0.020;
+    
     float signal_peak_region_min[3];
     float signal_peak_region_max[3];
     
@@ -126,11 +195,6 @@ void makeYield_fromBDTFit_Combine_all () //for W and ZTT, maybe HF
     Loose_BDT_Cut[0] = BDT_Score_Min;
     Loose_BDT_Cut[1] = BDT_Score_Min;
     Loose_BDT_Cut[2] = BDT_Score_Min;
-    
-    
-    
-    double MC_NORM17 = 30541./(500e+3)*(8580+11370)*0.1138/0.1063*1E-7;
-    double MC_NORM18 = 59828./(492e+3)*(8580+11370)*0.1138/0.1063*1E-7;
     
     //Filename and histograms
     TFile * file_tau[3];
@@ -151,15 +215,6 @@ void makeYield_fromBDTFit_Combine_all () //for W and ZTT, maybe HF
     TTree *tree_MC[3];
     TTree *tree_bkg[3];
     
-    Double_t tripletMass;
-    Double_t bdt_cv;
-    Double_t mcweight;
-    Double_t weight;
-    Double_t isMC;
-    Double_t cand_refit_tau_massE;
-    Float_t year;
-    Double_t tau_sv_ls;
-    
     bool categ[3];//Categ A B or C
     
     //Fill MC
@@ -172,34 +227,8 @@ void makeYield_fromBDTFit_Combine_all () //for W and ZTT, maybe HF
       tau_BDT_Output_MC[i] = new TH1D("tau_BDT_Output_MC","tau_BDT_Output_MC_"+hname,160,BDT_Score_Min,1.0);
       
       
+      Load_MC_Events_W(*tree_MC[i], *tau_T3Mu[i], *tau_BDT_Output_MC[i], Loose_BDT_Cut[i], signal_region_min, signal_region_min, phi_veto_min, phi_veto_max, i);
       
-      tree_MC[i]->SetBranchAddress("cand_refit_tau_mass",&tripletMass);
-      tree_MC[i]->SetBranchAddress("cand_refit_tau_massE",&cand_refit_tau_massE);
-      tree_MC[i]->SetBranchAddress("bdt",&bdt_cv);
-      tree_MC[i]->SetBranchAddress("mcweight",&mcweight);
-      tree_MC[i]->SetBranchAddress("weight",&weight);
-      tree_MC[i]->SetBranchAddress("year",&year);
-      tree_MC[i]->SetBranchAddress("tau_sv_ls",&tau_sv_ls);
-      
-      
-      
-      Long64_t nentries1 = tree_MC[i]->GetEntries();
-      for (Long64_t j=0;j<nentries1;j++) {
-        tree_MC[i]->GetEntry(j);
-        
-        categ[0]=sqrt(cand_refit_tau_massE)/tripletMass >=0.000 && sqrt(cand_refit_tau_massE)/tripletMass <0.007;
-        categ[1]=sqrt(cand_refit_tau_massE)/tripletMass >=0.007 && sqrt(cand_refit_tau_massE)/tripletMass <0.012;
-        categ[2]=sqrt(cand_refit_tau_massE)/tripletMass >=0.012 && sqrt(cand_refit_tau_massE)/tripletMass <9999.;
-        
-        if(tripletMass>=signal_region_min&&tripletMass<=signal_region_max && categ[i] && year==18 && tau_sv_ls>2.0 ){
-                //MC
-                  if(bdt_cv>Loose_BDT_Cut[i]){
-                    tau_T3Mu[i]->Fill(tripletMass,mcweight*MC_NORM18);
-                  }
-                  tau_BDT_Output_MC[i]->Fill(bdt_cv,mcweight*MC_NORM18);
-        }
-        
-      }
     }
     
     
@@ -230,14 +259,6 @@ void makeYield_fromBDTFit_Combine_all () //for W and ZTT, maybe HF
       InvMass[i]->setRange("R2",signal_peak_region_max[i],signal_region_max); //background
       InvMass[i]->setRange("R3",1.73,1.82); //signal range for fitting
       InvMass[i]->setRange("R4",signal_peak_region_min[i],signal_peak_region_max[i]); //signal range for yield
-      
-      
-      //Flat fit for data
-      poly[i] = new RooPolynomial("poly"+hname, "poly dist", *InvMass[i]);
-      data[i] = new RooDataHist("data"+hname, "data", *InvMass[i], Import(*tau_T3Mu_Dat[i]));
-      LineNorm[i] = new RooRealVar("LineNorm"+hname, "LineNorm", 2.0,0.001,15);
-      pdf[i] = new RooAddPdf("pdf"+hname, "pdf", RooArgList(*poly[i]), RooArgList(*LineNorm[i]));
-      fitresult[i] = pdf[i]->fitTo(*data[i], Range("R1,R2"), Save());
       
       
       //Gaussian fit for MC
@@ -277,7 +298,9 @@ void makeYield_fromBDTFit_Combine_all () //for W and ZTT, maybe HF
       cout<<"Actual min (based on bins): "<< signal_peak_region_min[i] <<"Actual max: "<< signal_peak_region_max[i] <<endl;
     }
     
+    return;
     
+    /*
     //Fill Bkg
     for(int i=0; i<3; i++){
       
@@ -319,6 +342,21 @@ void makeYield_fromBDTFit_Combine_all () //for W and ZTT, maybe HF
         
       }
       
+      
+    }
+    */
+    
+    
+    //Triplet Mass fit data
+    for(int i=0; i<3; i++){
+      hname=to_string(i+1);
+      
+      //Flat fit for data
+      poly[i] = new RooPolynomial("poly"+hname, "poly dist", *InvMass[i]);
+      data[i] = new RooDataHist("data"+hname, "data", *InvMass[i], Import(*tau_T3Mu_Dat[i]));
+      LineNorm[i] = new RooRealVar("LineNorm"+hname, "LineNorm", 2.0,0.001,15);
+      pdf[i] = new RooAddPdf("pdf"+hname, "pdf", RooArgList(*poly[i]), RooArgList(*LineNorm[i]));
+      fitresult[i] = pdf[i]->fitTo(*data[i], Range("R1,R2"), Save());
       
     }
     
