@@ -39,7 +39,7 @@ void makeYield_fromBDTFit_Combine_W ()
     double lumi_values[] = {4500.0};
     int lumi_size = sizeof(lumi_values)/ sizeof(double);
     
-    //Category names: 0=tauh, 1=taumu, 2=taue
+    //Category names: 0=A, 1=B, 2=C
     TString cat_name[3];
     cat_name[0] = "ztau3mutauh_default_";
     cat_name[1] = "ztau3mutaumu_default_";
@@ -439,7 +439,7 @@ void makeYield_fromBDTFit_Combine_W ()
       //Flat fit for data
       poly[i] = new RooPolynomial("poly"+hname, "poly dist", *InvMass[i]);
       data[i] = new RooDataHist("data"+hname, "data", *InvMass[i], Import(*tau_T3Mu_Dat[i]));
-      LineNorm[i] = new RooRealVar("LineNorm"+hname, "LineNorm", 2.0,0.001,15);
+      LineNorm[i] = new RooRealVar("LineNorm"+hname, "LineNorm", 2.0,0.001,200.0);
       pdf[i] = new RooAddPdf("pdf"+hname, "pdf", RooArgList(*poly[i]), RooArgList(*LineNorm[i]));
       fitresult[i] = pdf[i]->fitTo(*data[i], Range("R1,R2"), Save());
       

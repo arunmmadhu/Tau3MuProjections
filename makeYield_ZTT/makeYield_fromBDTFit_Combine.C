@@ -321,7 +321,7 @@ void makeYield_fromBDTFit_Combine ()
       //Flat fit for data
       poly[i] = new RooPolynomial("poly"+hname, "poly dist", *InvMass[i]);
       data[i] = new RooDataHist("data"+hname, "data", *InvMass[i], Import(*tau_T3Mu_Dat[i]));
-      LineNorm[i] = new RooRealVar("LineNorm"+hname, "LineNorm", 2.0,0.001,15);
+      LineNorm[i] = new RooRealVar("LineNorm"+hname, "LineNorm", 2.0,0.001,200.0);
       pdf[i] = new RooAddPdf("pdf"+hname, "pdf", RooArgList(*poly[i]), RooArgList(*LineNorm[i]));
       fitresult[i] = pdf[i]->fitTo(*data[i], Range("R1,R2"), Save());
       
