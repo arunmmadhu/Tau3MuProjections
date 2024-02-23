@@ -64,9 +64,9 @@ void makeYield_fromBDTFit_Combine ()
     card_modifier_name[2] = "ZTT_taue_test";
     
     TString combined_card_name[3];
-    combined_card_name[0] = "ZTT_tauh_Combined_Mod";
-    combined_card_name[1] = "ZTT_taumu_Combined_Mod";
-    combined_card_name[2] = "ZTT_taue_Combined_Mod";
+    combined_card_name[0] = "Cat_1_Mod";
+    combined_card_name[1] = "Cat_2_Mod";
+    combined_card_name[2] = "Cat_3_Mod";
     
     TString hname;
     
@@ -554,6 +554,10 @@ void makeYield_fromBDTFit_Combine ()
         TString command_a_and_b[3];
         TString command_run[3];
         TString command_copy[3];
+        TString command_recreate_workdir;
+        TString command_recreate_lumidir;
+        TString command_recreate_lumi_scan_dir;
+        TString command_copy_datacard[3];
         
         //double X_min = std::min(tau_BDT_Output_Data[0]->GetXaxis()->GetXmin(), tau_BDT_Output_MC[0]->GetXaxis()->GetXmin());
         //double X_max = std::max(tau_BDT_Output_Data[0]->GetXaxis()->GetXmax(), tau_BDT_Output_MC[0]->GetXaxis()->GetXmax());
@@ -616,11 +620,16 @@ void makeYield_fromBDTFit_Combine ()
         //Increase N to increase (a,b) scan granularity!
         Int_t N_a = 18; //Int_t N_b = 5;//ideal: N = 16
         double step_a[3];
-        //double step_b[3];
-    
+        double step_b[3];
+        
+        command_recreate_workdir = "rm -r workdir/; mkdir workdir/";
+        system(command_recreate_workdir);
+        
     
     for(int iter_lumi=0; iter_lumi<lumi_size; iter_lumi++){//iterating over different values of lumis
         
+        command_recreate_lumidir = "rm -r workdir/lumi_" + to_string((int)lumi_values[iter_lumi])+"; mkdir workdir/lumi_" + to_string((int)lumi_values[iter_lumi])+"";
+        system(command_recreate_lumidir);
         
         for(int i=0; i<3; i++){
           hname=to_string(i+1);
@@ -634,7 +643,10 @@ void makeYield_fromBDTFit_Combine ()
         
         for(int i=0; i<N_a; i++){
                 //for(int j=0; j<N_b; j++){
-                        
+                
+                command_recreate_lumi_scan_dir = "rm -r workdir/lumi_" + to_string((int)lumi_values[iter_lumi])+"/scan_"+to_string(i+1)+"; mkdir workdir/lumi_" + to_string((int)lumi_values[iter_lumi])+"/scan_"+to_string(i+1)+"/";
+                system(command_recreate_lumi_scan_dir);
+                
                         for(int k=0; k<3; k++){// for tauh/taumu/taue
                                 
                                 a[k] = Xa_min[k] + i * step_a[k];
@@ -695,6 +707,10 @@ void makeYield_fromBDTFit_Combine ()
                                         
                                         
                                         
+                                        command_copy_datacard[k] = "cp "+combined_card_name[k]+"_a.txt workdir/lumi_" + to_string((int)lumi_values[iter_lumi])+"/scan_"+to_string(i+1)+"/";
+                                        system(command_copy_datacard[k]);
+                                        
+                                        
                                         
                                         
                                         //Whether to use HybridNew or AsymptoticLimits
@@ -707,7 +723,7 @@ void makeYield_fromBDTFit_Combine ()
                                         
                                         if(Whether_Hybrid){
                                         
-                                        command_run[k] = "combine -M HybridNew "+combined_card_name[k]+"_a.txt --cl 0.9 -t -1  --expectedFromGrid=0.5 rMin 0.0 --rMax 15.0  > out_mid_"+ to_string(k+1) +".txt";
+                                        command_run[k] = "combine -M HybridNew "+combined_card_name[k]+"_a.txt --cl 0.9 -t -1  --expectedFromGrid=0.5 --rMin 0.0 --rMax 15.0  > out_mid_"+ to_string(k+1) +".txt";
                                         system(command_run[k]);
                                         
                                         std::ifstream f1("out_mid_"+ to_string(k+1) +".txt");

@@ -37,6 +37,6 @@ for linenum, line in enumerate(file):
 file.close()
 
 # opening the file in write mode
-fout = open("ZTT_taue_Combined_Mod_"+args.cuttype+".txt", "w")
+fout = open("Cat_3_Mod_"+args.cuttype+".txt", "w")
 fout.write(replacement)
 fout.close()

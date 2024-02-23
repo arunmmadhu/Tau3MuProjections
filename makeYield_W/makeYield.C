@@ -102,7 +102,9 @@ void makeYield ()
       
       cout<<"min: "<< signal_peak_region_min[i] <<" max: "<< signal_peak_region_max[i] <<endl;
       
-      // Luca used: min: 1.74 max: 1.82 for all 3 categories
+      // Luca used: min: 1.74 max: 1.82 for all 3 categories. ALso, luca uses the full mass window when computing signal yield
+      //signal_peak_region_min[i]=1.6;
+      //signal_peak_region_max[i]=2.0;
       
     }
     
@@ -204,9 +206,9 @@ void makeYield ()
         if(tripletMass>=signal_region_min&&tripletMass<=signal_region_max && categ[i] && year==18 && tau_sv_ls>2.0 && mass_veto ){
                 //MC
                   if(bdt_cv>BDT_Cut_a[i]){
-                    tau_T3Mu[i]->Fill(tripletMass,MC_NORM18);
+                    tau_T3Mu[i]->Fill(tripletMass,MC_NORM18*mcweight);
                   }
-                  tau_BDT_Output_MC[i]->Fill(bdt_cv,MC_NORM18);
+                  tau_BDT_Output_MC[i]->Fill(bdt_cv,MC_NORM18*mcweight);
         }
         
       }
@@ -351,6 +353,7 @@ void makeYield ()
       
     }
     
+    return;
     
     //Triplet Mass Fit Plots
     TCanvas *canvas1 = new TCanvas("canvas1", "canvas1", 1800, 600);

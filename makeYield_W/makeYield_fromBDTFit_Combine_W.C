@@ -30,9 +30,9 @@ using std::ofstream;
 
 void makeYield_fromBDTFit_Combine_W () 
 {
-    system("cd /afs/cern.ch/work/m/mmadhu/Analysis/combinestats/t3mcombine/HF_and_W/CMSSW_10_2_13/src; cmsenv");
+    //system("cd /afs/cern.ch/work/m/mmadhu/Analysis/combinestats/t3mcombine/HF_and_W/CMSSW_10_2_13/src; cmsenv");
     
-    system("cd /afs/cern.ch/work/m/mmadhu/Analysis/combinestats/t3mcombine/ZTT/CMSSW_11_3_4/src/; cmsenv");
+    //system("cd /afs/cern.ch/work/m/mmadhu/Analysis/combinestats/t3mcombine/ZTT/CMSSW_11_3_4/src/; cmsenv");
     
     //specify the luminosities here
     //double lumi_values[] = {97.7, 129.0, 377.0, 700.0, 1500.0, 2250.0, 3000.0, 3750.0, 4500.0};
@@ -66,9 +66,9 @@ void makeYield_fromBDTFit_Combine_W ()
     card_modifier_name[2] = "ZTT_taue_test";
     
     std::string combined_card_name[3];
-    combined_card_name[0] = "ZTT_tauh_Combined_Mod";
-    combined_card_name[1] = "ZTT_taumu_Combined_Mod";
-    combined_card_name[2] = "ZTT_taue_Combined_Mod";
+    combined_card_name[0] = "Cat_1_Mod";
+    combined_card_name[1] = "Cat_2_Mod";
+    combined_card_name[2] = "Cat_3_Mod";
     
     TString hname;
     
@@ -107,15 +107,20 @@ void makeYield_fromBDTFit_Combine_W ()
     
     
     float Gaussian_Sigma_From_Loose_BDT_Cut[3];
-    Gaussian_Sigma_From_Loose_BDT_Cut[0] = 0.0116046;
-    Gaussian_Sigma_From_Loose_BDT_Cut[1] = 0.0173277;
-    Gaussian_Sigma_From_Loose_BDT_Cut[2] = 0.0227212;
+    Gaussian_Sigma_From_Loose_BDT_Cut[0] = 0.0115727;
+    Gaussian_Sigma_From_Loose_BDT_Cut[1] = 0.0174467;
+    Gaussian_Sigma_From_Loose_BDT_Cut[2] = 0.025071;
+    
+    float Sigma_Multiplier[3];
+    Sigma_Multiplier[0] = 3.5;
+    Sigma_Multiplier[1] = 2.3;
+    Sigma_Multiplier[2] = 1.6;
     
     for(int i=0; i<3; i++){
       hname=to_string(i+1);
       
-      signal_peak_region_min[i]=1.77686-2.5*Gaussian_Sigma_From_Loose_BDT_Cut[i];
-      signal_peak_region_max[i]=1.77686+2.5*Gaussian_Sigma_From_Loose_BDT_Cut[i];
+      signal_peak_region_min[i]=1.77686-Sigma_Multiplier[i]*Gaussian_Sigma_From_Loose_BDT_Cut[i];
+      signal_peak_region_max[i]=1.77686+Sigma_Multiplier[i]*Gaussian_Sigma_From_Loose_BDT_Cut[i];
       
       cout<<"min: "<< signal_peak_region_min[i] <<" max: "<< signal_peak_region_max[i] <<endl;
       
@@ -126,6 +131,11 @@ void makeYield_fromBDTFit_Combine_W ()
       signal_peak_region_max[i]=signal_region_min + val_2 * ((signal_region_max-signal_region_min)/triplet_mass_bins);
       
       cout<<"min: "<< signal_peak_region_min[i] <<" max: "<< signal_peak_region_max[i] <<endl;
+      
+      // Luca used: min: 1.74 max: 1.82 for all 3 categories. ALso, luca uses the full mass window when computing signal yield
+      //signal_peak_region_min[i]=1.6;
+      //signal_peak_region_max[i]=2.0;
+      
     }
     
     double MC_NORM17 = 30541./(500e+3)*(8580+11370)*0.1138/0.1063*1E-7;
@@ -862,6 +872,10 @@ void makeYield_fromBDTFit_Combine_W ()
         TString command_a_and_b[3];
         TString command_run[3];
         TString command_copy[3];
+        TString command_recreate_workdir;
+        TString command_recreate_lumidir;
+        TString command_recreate_lumi_scan_dir;
+        TString command_copy_datacard[3];
         
         //double X_min = std::min(tau_BDT_Output_Data[0]->GetXaxis()->GetXmin(), tau_BDT_Output_MC[0]->GetXaxis()->GetXmin());
         //double X_max = std::max(tau_BDT_Output_Data[0]->GetXaxis()->GetXmax(), tau_BDT_Output_MC[0]->GetXaxis()->GetXmax());
@@ -926,9 +940,14 @@ void makeYield_fromBDTFit_Combine_W ()
         double step_a[3];
         double step_b[3];
         
+        command_recreate_workdir = "rm -r workdir/; mkdir workdir/";
+        system(command_recreate_workdir);
+        
     
     for(int iter_lumi=0; iter_lumi<lumi_size; iter_lumi++){//iterating over different values of lumis
         
+        command_recreate_lumidir = "rm -r workdir/lumi_" + to_string((int)lumi_values[iter_lumi])+"; mkdir workdir/lumi_" + to_string((int)lumi_values[iter_lumi])+"";
+        system(command_recreate_lumidir);
         
         for(int i=0; i<3; i++){
           hname=to_string(i+1);
@@ -942,7 +961,10 @@ void makeYield_fromBDTFit_Combine_W ()
         
         for(int i=0; i<N_a; i++){
                 //for(int j=0; j<N_b; j++){
-                        
+                
+                command_recreate_lumi_scan_dir = "rm -r workdir/lumi_" + to_string((int)lumi_values[iter_lumi])+"/scan_"+to_string(i+1)+"; mkdir workdir/lumi_" + to_string((int)lumi_values[iter_lumi])+"/scan_"+to_string(i+1)+"/";
+                system(command_recreate_lumi_scan_dir);
+                
                         for(int k=0; k<3; k++){// for tauh/taumu/taue
                                 
                                 a[k] = Xa_min[k] + i * step_a[k];
@@ -1002,8 +1024,8 @@ void makeYield_fromBDTFit_Combine_W ()
                                         //system(command_a_and_b[k]);
                                         
                                         
-                                        
-                                        
+                                        command_copy_datacard[k] = "cp "+combined_card_name[k]+"_a.txt workdir/lumi_" + to_string((int)lumi_values[iter_lumi])+"/scan_"+to_string(i+1)+"/";
+                                        system(command_copy_datacard[k]);
                                         
                                         //Whether to use HybridNew or AsymptoticLimits
                                         bool Whether_Hybrid;
