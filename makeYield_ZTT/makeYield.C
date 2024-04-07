@@ -29,40 +29,41 @@ using namespace RooFit;
 
 void makeYield () 
 {
-    //Category names: 0=tauh, 1=taumu, 2=taue
-    TString cat_name[3];
-    cat_name[0] = "ztau3mutauh_default_";
-    cat_name[1] = "ztau3mutaumu_default_";
-    cat_name[2] = "ztau3mutaue_default_";
+    //Category names: 0=tauh_A, 1=tauh_B, 2=taumu, 3=taue
     
-    TString cat_base[3];
-    cat_base[0] = "ztau3mutauh";
-    cat_base[1] = "ztau3mutaumu";
-    cat_base[2] = "ztau3mutaue";
+    TString cat_base[4];
+    cat_base[0] = "ztau3mutauh_A";
+    cat_base[1] = "ztau3mutauh_B";
+    cat_base[2] = "ztau3mutaumu";
+    cat_base[3] = "ztau3mutaue";
     
-    TString cat_label[3];
-    cat_label[0] = "{h}";
-    cat_label[1] = "{#mu}";
-    cat_label[2] = "{e}";
+    TString cat_label[4];
+    cat_label[0] = "{h,A}";
+    cat_label[1] = "{h,B}";
+    cat_label[2] = "{#mu}";
+    cat_label[3] = "{e}";
     
-    TString print_label[3];
-    print_label[0] = "h";
-    print_label[1] = "mu";
-    print_label[2] = "e";
+    TString print_label[4];
+    print_label[0] = "h_A";
+    print_label[1] = "h_B";
+    print_label[2] = "mu";
+    print_label[3] = "e";
     
     TString hname;
     
     //BDT Cuts b
-    float BDT_Cut_b[3];
+    float BDT_Cut_b[4];
     BDT_Cut_b[0] = 0.275;
-    BDT_Cut_b[1] = 0.325;
-    BDT_Cut_b[2] = 0.25;
+    BDT_Cut_b[1] = 0.275;
+    BDT_Cut_b[2] = 0.325;
+    BDT_Cut_b[3] = 0.25;
     
     //BDT Cuts a
-    float BDT_Cut_a[3];
+    float BDT_Cut_a[4];
     BDT_Cut_a[0] = 0.425;
-    BDT_Cut_a[1] = 0.45;
-    BDT_Cut_a[2] = 0.4;
+    BDT_Cut_a[1] = 0.425;
+    BDT_Cut_a[2] = 0.45;
+    BDT_Cut_a[3] = 0.4;
     
     float signal_region_min(1.4);
     float signal_region_max(2.1);
@@ -71,26 +72,26 @@ void makeYield ()
     float signal_peak_region_max(1.82);
     
     //Filename and histograms
-    TFile * file_tau[3];
+    TFile * file_tau[4];
     
-    TH1D  * tau_T3Mu[3];
-    TH1D  * tau_T3Mu_Dat[3];
-    TH1D  * tau_BDT_Output_Data[3];
-    TH1D  * tau_BDT_Output_MC[3];
-    TH2D  * tau_T3Mu_vs_BDT_Output_Data[3];
-    TH1D  * tau_T3Mu_vs_BDT_Output_Data_Projection[3];
+    TH1D  * tau_T3Mu[4];
+    TH1D  * tau_T3Mu_Dat[4];
+    TH1D  * tau_BDT_Output_Data[4];
+    TH1D  * tau_BDT_Output_MC[4];
+    TH2D  * tau_T3Mu_vs_BDT_Output_Data[4];
+    TH1D  * tau_T3Mu_vs_BDT_Output_Data_Projection[4];
     
-    TH2D  * tau_cut1_vs_cut2_vs_sig[3];
-    TH2D  * tau_cut1_vs_cut2_vs_limit[3];
+    TH2D  * tau_cut1_vs_cut2_vs_sig[4];
+    TH2D  * tau_cut1_vs_cut2_vs_limit[4];
     
     TFile *TreeFile = new TFile("Combine_Tree_ztau3mutau.root","READ");
-    TTree *tree[3];
+    TTree *tree[4];
     
     Float_t tripletMass;
     Float_t bdt_cv;
     Float_t weight;
     Float_t isMC;
-    for(int i=0; i<3; i++){
+    for(int i=0; i<4; i++){
       hname=to_string(i+1);
       
       tree[i] = (TTree *) TreeFile->Get(cat_base[i]);
@@ -123,7 +124,6 @@ void makeYield ()
         
       }
       
-      //tau_T3Mu_vs_BDT_Output_Data[i] = (TH2D*)file_tau[i]->Get(cat_name[i]+"BDT_2Dscan_TripletMassData");
       
       
     }
@@ -134,29 +134,29 @@ void makeYield ()
     
     
     //Triplet Mass Fits
-    RooRealVar * InvMass[3];
+    RooRealVar * InvMass[4];
     
-    RooPolynomial * poly[3];
-    RooDataHist * data[3];
-    RooRealVar * LineNorm[3];
-    RooAddPdf * pdf[3];
-    RooFitResult * fitresult[3];
+    RooPolynomial * poly[4];
+    RooDataHist * data[4];
+    RooRealVar * LineNorm[4];
+    RooAddPdf * pdf[4];
+    RooFitResult * fitresult[4];
     
-    RooRealVar * mean[3];
-    RooRealVar * sigma[3];
-    RooGaussian * Gauss[3];
-    RooDataHist * mc[3];
-    RooRealVar * GaussNorm[3];
-    RooAddPdf * mc_pdf[3];
-    RooFitResult * mc_fitresult[3];
+    RooRealVar * mean[4];
+    RooRealVar * sigma[4];
+    RooGaussian * Gauss[4];
+    RooDataHist * mc[4];
+    RooRealVar * GaussNorm[4];
+    RooAddPdf * mc_pdf[4];
+    RooFitResult * mc_fitresult[4];
     
-    RooExponential * Expo[3];
-    RooRealVar * lambda[3];
-    RooRealVar * ExpNorm[3];
-    RooAddPdf * exp_pdf[3];
-    RooFitResult * exp_fitresult[3];
+    RooExponential * Expo[4];
+    RooRealVar * lambda[4];
+    RooRealVar * ExpNorm[4];
+    RooAddPdf * exp_pdf[4];
+    RooFitResult * exp_fitresult[4];
     
-    for(int i=0; i<3; i++){
+    for(int i=0; i<4; i++){
       hname=to_string(i+1);
       
       InvMass[i] = new RooRealVar("InvMass"+hname,"InvMass, #tau_"+cat_label[i],signal_region_min,signal_region_max);
@@ -169,7 +169,7 @@ void makeYield ()
       //Flat fit for data
       poly[i] = new RooPolynomial("poly"+hname, "poly dist", *InvMass[i]);
       data[i] = new RooDataHist("data"+hname, "data", *InvMass[i], Import(*tau_T3Mu_Dat[i]));
-      LineNorm[i] = new RooRealVar("LineNorm"+hname, "LineNorm", 2.0,0.001,15);
+      LineNorm[i] = new RooRealVar("LineNorm"+hname, "LineNorm", 2.0,0.001,10000);
       pdf[i] = new RooAddPdf("pdf"+hname, "pdf", RooArgList(*poly[i]), RooArgList(*LineNorm[i]));
       fitresult[i] = pdf[i]->fitTo(*data[i], Range("R1,R2"), Save());
       
@@ -177,7 +177,7 @@ void makeYield ()
       //Testing Exponential Fit
       lambda[i] = new RooRealVar("lambda"+hname,"lambda",0.1, -1.5, 1.5);
       Expo[i] = new RooExponential("Expo"+hname, "Exponential PDF", *InvMass[i],  *lambda[i]);
-      ExpNorm[i] = new RooRealVar("ExpNorm"+hname, "ExpNorm",  2.0,0.001,15);
+      ExpNorm[i] = new RooRealVar("ExpNorm"+hname, "ExpNorm",  2.0,0.001,10000);
       exp_pdf[i] = new RooAddPdf("exp_pdf"+hname, "exp_pdf", RooArgList(*Expo[i]), RooArgList(*ExpNorm[i]));
       exp_fitresult[i] = exp_pdf[i]->fitTo(*data[i], Range("R1,R2"), Save());
       
@@ -195,14 +195,14 @@ void makeYield ()
     }
     
     
-    double pdf_integral_restricted[3];
-    double mc_pdf_integral_restricted[3];
-    double nData[3];
-    double nSignal[3];
-    double nSignal_restricted[3];
-    double scaling[3];
+    double pdf_integral_restricted[4];
+    double mc_pdf_integral_restricted[4];
+    double nData[4];
+    double nSignal[4];
+    double nSignal_restricted[4];
+    double scaling[4];
     
-    for(int i=0; i<3; i++){
+    for(int i=0; i<4; i++){
       hname=to_string(i+1);
       
       // This gives the integral from the fits.
@@ -232,12 +232,12 @@ void makeYield ()
     
     
     //Triplet Mass Fit Plots
-    TCanvas *canvas1 = new TCanvas("canvas1", "canvas1", 1800, 600);
-    canvas1->Divide(3, 1);
+    TCanvas *canvas1 = new TCanvas("canvas1", "canvas1", 2400, 600);
+    canvas1->Divide(4, 1);
     
-    RooPlot * xFrame[3];
+    RooPlot * xFrame[4];
     
-    for(int i=0; i<3; i++){
+    for(int i=0; i<4; i++){
       hname=to_string(i+1);
       
       canvas1->cd( i+1 );

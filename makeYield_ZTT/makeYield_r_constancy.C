@@ -29,26 +29,25 @@ using namespace RooFit;
 
 void makeYield_r_constancy () 
 {
-    //Category names: 0=tauh, 1=taumu, 2=taue
-    TString cat_name[3];
-    cat_name[0] = "ztau3mutauh_default_";
-    cat_name[1] = "ztau3mutaumu_default_";
-    cat_name[2] = "ztau3mutaue_default_";
+    //Category names: 0=tauh_A, 1=tauh_B, 2=taumu, 3=taue
     
-    TString cat_base[3];
-    cat_base[0] = "ztau3mutauh";
-    cat_base[1] = "ztau3mutaumu";
-    cat_base[2] = "ztau3mutaue";
+    TString cat_base[4];
+    cat_base[0] = "ztau3mutauh_A";
+    cat_base[1] = "ztau3mutauh_B";
+    cat_base[2] = "ztau3mutaumu";
+    cat_base[3] = "ztau3mutaue";
     
-    TString cat_label[3];
-    cat_label[0] = "{h}";
-    cat_label[1] = "{#mu}";
-    cat_label[2] = "{e}";
+    TString cat_label[4];
+    cat_label[0] = "{h,A}";
+    cat_label[1] = "{h,B}";
+    cat_label[2] = "{#mu}";
+    cat_label[3] = "{e}";
     
-    TString print_label[3];
-    print_label[0] = "h";
-    print_label[1] = "mu";
-    print_label[2] = "e";
+    TString print_label[4];
+    print_label[0] = "h_A";
+    print_label[1] = "h_B";
+    print_label[2] = "mu";
+    print_label[3] = "e";
     
     TString hname;
     
@@ -61,27 +60,27 @@ void makeYield_r_constancy ()
     float Loose_BDT_Cut(-0.4);
     
     //Filename and histograms
-    TFile * file_tau[3];
+    TFile * file_tau[4];
     
-    TH1D  * tau_T3Mu[3];
-    TH1D  * tau_T3Mu_Dat[3];
-    TH1D  * tau_BDT_Output_Data[3];
-    TH1D  * tau_BDT_Output_MC[3];
-    TH2D  * tau_T3Mu_vs_BDT_Output_Data[3];
-    TH1D  * tau_T3Mu_vs_BDT_Output_Data_Projection[3];
+    TH1D  * tau_T3Mu[4];
+    TH1D  * tau_T3Mu_Dat[4];
+    TH1D  * tau_BDT_Output_Data[4];
+    TH1D  * tau_BDT_Output_MC[4];
+    TH2D  * tau_T3Mu_vs_BDT_Output_Data[4];
+    TH1D  * tau_T3Mu_vs_BDT_Output_Data_Projection[4];
     
-    TH2D  * tau_cut1_vs_cut2_vs_sig[3];
-    TH2D  * tau_cut1_vs_cut2_vs_limit[3];
-    TH1D  * tau_loose_cut_vs_ratio[3];
-    TH1D  * tau_loose_cut_vs_ratio_num[3];
-    TH1D  * tau_loose_cut_vs_ratio_den[3];
+    TH2D  * tau_cut1_vs_cut2_vs_sig[4];
+    TH2D  * tau_cut1_vs_cut2_vs_limit[4];
+    TH1D  * tau_loose_cut_vs_ratio[4];
+    TH1D  * tau_loose_cut_vs_ratio_num[4];
+    TH1D  * tau_loose_cut_vs_ratio_den[4];
     
     
     
     
     
     /*
-    for(int i=0; i<3; i++){
+    for(int i=0; i<4; i++){
       hname=to_string(i+1);
       
       file_tau[i] = TFile::Open("LOCAL_COMBINED_"+cat_name[i]+"LumiScaled_Lim.root");
@@ -97,14 +96,14 @@ void makeYield_r_constancy ()
     */
     
     TFile *TreeFile = new TFile("Combine_Tree_ztau3mutau.root","READ");
-    TTree *tree[3];
+    TTree *tree[4];
     
     Float_t tripletMass;
     Float_t bdt_cv;
     Float_t weight;
     Float_t isMC;
     Float_t ifCommonCV;
-    for(int i=0; i<3; i++){
+    for(int i=0; i<4; i++){
       hname=to_string(i+1);
       
       tree[i] = (TTree *) TreeFile->Get(cat_base[i]);
@@ -147,7 +146,7 @@ void makeYield_r_constancy ()
       
     }
     
-    for(int i=0; i<3; i++){
+    for(int i=0; i<4; i++){
             tau_T3Mu[i]->Sumw2();
             tau_T3Mu_Dat[i]->Sumw2();
             tau_BDT_Output_Data[i]->Sumw2();
@@ -166,19 +165,19 @@ void makeYield_r_constancy ()
     /*
     //For fitting BDT Output: Using crystal ball
     //General
-    RooRealVar * BDTOutput_x[3];
-    RooRealVar * cbmean[3];
-    RooRealVar * cbsigma[3];
-    RooRealVar * n[3];
-    RooRealVar * alpha[3];
+    RooRealVar * BDTOutput_x[4];
+    RooRealVar * cbmean[4];
+    RooRealVar * cbsigma[4];
+    RooRealVar * n[4];
+    RooRealVar * alpha[4];
     
-    RooCBShape * cball[3];
-    RooDataHist * bdt_data[3];
-    RooRealVar * BDTNorm[3];
-    RooAddPdf * BDT_distribution[3];
-    RooFitResult * fitresult_bdt[3];
+    RooCBShape * cball[4];
+    RooDataHist * bdt_data[4];
+    RooRealVar * BDTNorm[4];
+    RooAddPdf * BDT_distribution[4];
+    RooFitResult * fitresult_bdt[4];
     
-    for(int i=0; i<3; i++){
+    for(int i=0; i<4; i++){
       hname=to_string(i+1);
       
       BDTOutput_x[i] = new RooRealVar("BDTOutput_x"+hname,"BDT Output, #tau_"+cat_label[i],-0.9,0.9);
@@ -204,19 +203,19 @@ void makeYield_r_constancy ()
     
     //For fitting BDT Output in Data: Using Bifurgauss
     //General
-    RooRealVar * BDTOutput_x[3];
-    RooRealVar * bgausmean[3];
-    RooRealVar * bgaussigma_a[3];
-    RooRealVar * bgaussigma_b[3];
+    RooRealVar * BDTOutput_x[4];
+    RooRealVar * bgausmean[4];
+    RooRealVar * bgaussigma_a[4];
+    RooRealVar * bgaussigma_b[4];
     
     
-    RooBifurGauss * bgaus_dist[3];
-    RooDataHist * bdt_data[3];
-    RooRealVar * BDTNorm[3];
-    RooAddPdf * BDT_distribution[3];
-    RooFitResult * fitresult_bdt[3];
+    RooBifurGauss * bgaus_dist[4];
+    RooDataHist * bdt_data[4];
+    RooRealVar * BDTNorm[4];
+    RooAddPdf * BDT_distribution[4];
+    RooFitResult * fitresult_bdt[4];
     
-    for(int i=0; i<3; i++){
+    for(int i=0; i<4; i++){
       hname=to_string(i+1);
       
       BDTOutput_x[i] = new RooRealVar("BDTOutput_x"+hname,"BDT Output, #tau_"+cat_label[i],-0.9,0.9);
@@ -237,16 +236,17 @@ void makeYield_r_constancy ()
     
     /*
     //BDT Data Fit Plots
-    TCanvas *canvas2 = new TCanvas("canvas2", "canvas2", 1800, 600);
-    canvas2->Divide(3, 1);
+    TCanvas *canvas2 = new TCanvas("canvas2", "canvas2", 2400, 600);
+    canvas2->Divide(4, 1);
     
-    RooPlot * xFrame_bdt[3];
-    float BDT_Data_Max[3];
+    RooPlot * xFrame_bdt[4];
+    float BDT_Data_Max[4];
     BDT_Data_Max[0] = 500.0;
-    BDT_Data_Max[1] = 3000.0;
-    BDT_Data_Max[2] = 350.0;
+    BDT_Data_Max[1] = 500.0;
+    BDT_Data_Max[2] = 3000.0;
+    BDT_Data_Max[3] = 350.0;
     
-    for(int i=0; i<3; i++){
+    for(int i=0; i<4; i++){
       hname=to_string(i+1);
       
       canvas2->cd( i+1 );
@@ -272,18 +272,18 @@ void makeYield_r_constancy ()
     
     //For fitting BDT Output in MC: Using Bifurgauss
     //General
-    RooRealVar * bgausmeanMC[3];
-    RooRealVar * bgaussigmaMC_a[3];
-    RooRealVar * bgaussigmaMC_b[3];
+    RooRealVar * bgausmeanMC[4];
+    RooRealVar * bgaussigmaMC_a[4];
+    RooRealVar * bgaussigmaMC_b[4];
     
     
-    RooBifurGauss * bgaus_distMC[3];
-    RooDataHist * bdt_MC[3];
-    RooRealVar * BDTNormMC[3];
-    RooAddPdf * BDT_distributionMC[3];
-    RooFitResult * fitresult_bdtMC[3];
+    RooBifurGauss * bgaus_distMC[4];
+    RooDataHist * bdt_MC[4];
+    RooRealVar * BDTNormMC[4];
+    RooAddPdf * BDT_distributionMC[4];
+    RooFitResult * fitresult_bdtMC[4];
     
-    for(int i=0; i<3; i++){
+    for(int i=0; i<4; i++){
       hname=to_string(i+1);
       
       bgausmeanMC[i] = new RooRealVar("bgausmeanMC"+hname, "bgausmeanMC" , 0.5, 0.0,0.9) ;
@@ -303,16 +303,17 @@ void makeYield_r_constancy ()
     
     /*
     //MC BDT Fit Plots
-    TCanvas *canvas3 = new TCanvas("canvas3", "canvas3", 1800, 600);
-    canvas3->Divide(3, 1);
+    TCanvas *canvas3 = new TCanvas("canvas3", "canvas3", 2400, 600);
+    canvas3->Divide(4, 1);
     
-    RooPlot * xFrame_bdtMC[3];
-    //float BDT_MC_Max[3];
+    RooPlot * xFrame_bdtMC[4];
+    //float BDT_MC_Max[4];
     //BDT_MC_Max[0] = 100.0;
-    //BDT_MC_Max[1] = 400.0;
-    //BDT_MC_Max[2] = 50.0;
+    //BDT_MC_Max[1] = 100.0;
+    //BDT_MC_Max[2] = 400.0;
+    //BDT_MC_Max[3] = 50.0;
     
-    for(int i=0; i<3; i++){
+    for(int i=0; i<4; i++){
       hname=to_string(i+1);
       
       canvas3->cd( i+1 );
@@ -346,29 +347,29 @@ void makeYield_r_constancy ()
     
     
     //Triplet Mass Fits
-    RooRealVar * InvMass[3];
+    RooRealVar * InvMass[4];
     
-    RooPolynomial * poly[3];
-    RooDataHist * data[3];
-    RooRealVar * LineNorm[3];
-    RooAddPdf * pdf[3];
-    RooFitResult * fitresult[3];
+    RooPolynomial * poly[4];
+    RooDataHist * data[4];
+    RooRealVar * LineNorm[4];
+    RooAddPdf * pdf[4];
+    RooFitResult * fitresult[4];
     
-    RooRealVar * mean[3];
-    RooRealVar * sigma[3];
-    RooGaussian * Gauss[3];
-    RooDataHist * mc[3];
-    RooRealVar * GaussNorm[3];
-    RooAddPdf * mc_pdf[3];
-    RooFitResult * mc_fitresult[3];
+    RooRealVar * mean[4];
+    RooRealVar * sigma[4];
+    RooGaussian * Gauss[4];
+    RooDataHist * mc[4];
+    RooRealVar * GaussNorm[4];
+    RooAddPdf * mc_pdf[4];
+    RooFitResult * mc_fitresult[4];
     
-    RooExponential * Expo[3];
-    RooRealVar * lambda[3];
-    RooRealVar * ExpNorm[3];
-    RooAddPdf * exp_pdf[3];
-    RooFitResult * exp_fitresult[3];
+    RooExponential * Expo[4];
+    RooRealVar * lambda[4];
+    RooRealVar * ExpNorm[4];
+    RooAddPdf * exp_pdf[4];
+    RooFitResult * exp_fitresult[4];
     
-    for(int i=0; i<3; i++){
+    for(int i=0; i<4; i++){
       hname=to_string(i+1);
       
       InvMass[i] = new RooRealVar("InvMass"+hname,"InvMass, #tau_"+cat_label[i],signal_region_min,signal_region_max);
@@ -451,14 +452,14 @@ void makeYield_r_constancy ()
     */
     
     
-    double pdf_integral_restricted[3];
-    double mc_pdf_integral_restricted[3];
-    double nData[3];
-    double nSignal[3];
-    double nSignal_restricted[3];
-    double scaling[3];
+    double pdf_integral_restricted[4];
+    double mc_pdf_integral_restricted[4];
+    double nData[4];
+    double nSignal[4];
+    double nSignal_restricted[4];
+    double scaling[4];
     
-    for(int i=0; i<3; i++){
+    for(int i=0; i<4; i++){
       hname=to_string(i+1);
       
       // This gives the integral from the fits.
@@ -491,12 +492,12 @@ void makeYield_r_constancy ()
     
     /*
     //Triplet Mass Fit Plots
-    TCanvas *canvas1 = new TCanvas("canvas1", "canvas1", 1800, 600);
-    canvas1->Divide(3, 1);
+    TCanvas *canvas1 = new TCanvas("canvas1", "canvas1", 2400, 600);
+    canvas1->Divide(4, 1);
     
-    RooPlot * xFrame[3];
+    RooPlot * xFrame[4];
     
-    for(int i=0; i<3; i++){
+    for(int i=0; i<4; i++){
       hname=to_string(i+1);
       
       canvas1->cd( i+1 );
@@ -540,14 +541,15 @@ void makeYield_r_constancy ()
     
     //From BDT Output:
     BDTOutput_x[0]->setRange("R_Small",0.309056,100); BDTOutput_x[0]->setRange("R_Large",Loose_BDT_Cut,100);
-    BDTOutput_x[1]->setRange("R_Small",0.329983,100); BDTOutput_x[1]->setRange("R_Large",Loose_BDT_Cut,100);
-    BDTOutput_x[2]->setRange("R_Small",0.333186,100); BDTOutput_x[2]->setRange("R_Large",Loose_BDT_Cut,100);
+    BDTOutput_x[1]->setRange("R_Small",0.309056,100); BDTOutput_x[1]->setRange("R_Large",Loose_BDT_Cut,100);
+    BDTOutput_x[2]->setRange("R_Small",0.329983,100); BDTOutput_x[2]->setRange("R_Large",Loose_BDT_Cut,100);
+    BDTOutput_x[3]->setRange("R_Small",0.333186,100); BDTOutput_x[3]->setRange("R_Large",Loose_BDT_Cut,100);
     
-    double TightBDTCutFraction[3];
+    double TightBDTCutFraction[4];
     
     RooAddPdf BDT_distributionTest = *BDT_distribution[0];
     
-    for(int i=0; i<3; i++){
+    for(int i=0; i<4; i++){
       hname=to_string(i+1);
       
       TightBDTCutFraction[i] = BDT_distribution[i]->createIntegral(*BDTOutput_x[i],NormSet(*BDTOutput_x[i]),Range("R_Small"))->getVal() / BDT_distribution[i]->createIntegral(*BDTOutput_x[i],NormSet(*BDTOutput_x[i]),Range("R_Large"))->getVal();
@@ -558,11 +560,11 @@ void makeYield_r_constancy ()
     
     
         //Calculate significance
-        double a[3],b[3];
-        double N_s_1[3], N_s_2[3];
-        double N_b_1[3], N_b_2[3];
-        double S1[3], S2[3], S[3];
-        std::vector<double> S1_list[3], S2_list[3], S_list[3], a_list[3], b_list[3], N_s_1_yield_list[3], N_s_2_yield_list[3], N_b_1_yield_list[3], N_b_2_yield_list[3];
+        double a[4],b[4];
+        double N_s_1[4], N_s_2[4];
+        double N_b_1[4], N_b_2[4];
+        double S1[4], S2[4], S[4];
+        std::vector<double> S1_list[4], S2_list[4], S_list[4], a_list[4], b_list[4], N_s_1_yield_list[4], N_s_2_yield_list[4], N_b_1_yield_list[4], N_b_2_yield_list[4];
         
         //double X_min = std::min(tau_BDT_Output_Data[0]->GetXaxis()->GetXmin(), tau_BDT_Output_MC[0]->GetXaxis()->GetXmin());
         //double X_max = std::max(tau_BDT_Output_Data[0]->GetXaxis()->GetXmax(), tau_BDT_Output_MC[0]->GetXaxis()->GetXmax());
@@ -575,7 +577,7 @@ void makeYield_r_constancy ()
         //Increase N to increase (a,b) scan granularity!
         Int_t N = 30; double step = (X_max - X_min)/N;
         
-        for(int i=0; i<3; i++){
+        for(int i=0; i<4; i++){
           hname=to_string(i+1);
           
           //tau_cut1_vs_cut2_vs_sig[i] = new TH2D("tau_cut1_vs_cut2_vs_sig","tau_cut1_vs_cut2_vs_sig_"+hname,N,X_min,X_max,N,X_min,X_max,"a","b");
@@ -586,7 +588,7 @@ void makeYield_r_constancy ()
         for(int i=0; i<N; i++){
                 for(int j=0; j<N; j++){
                         
-                        for(int k=0; k<3; k++){
+                        for(int k=0; k<4; k++){
                                 
                                 a[k] = X_min + i * step;
                                 b[k] = X_min + j * step;
@@ -664,15 +666,15 @@ void makeYield_r_constancy ()
         
     //Taking absolute maximum of the combined significance
     
-    double S_max[3];
-    int S_maxIndex[3];
-    float a_max[3];
-    float b_max[3];
-    double * a_array[3];
-    double * sig_a_array[3];
+    double S_max[4];
+    int S_maxIndex[4];
+    float a_max[4];
+    float b_max[4];
+    double * a_array[4];
+    double * sig_a_array[4];
     
     
-    for(int i=0; i<3; i++){
+    for(int i=0; i<4; i++){
       hname=to_string(i+1);
       if(S_list[i].size()>0){
               S_max[i] = *max_element(S_list[i].begin(), S_list[i].end());
@@ -693,12 +695,12 @@ void makeYield_r_constancy ()
     
     
     /*
-    TCanvas *canvas4 = new TCanvas("canvas4", "canvas4", 1800, 600);
-    canvas4->Divide(3, 1);
+    TCanvas *canvas4 = new TCanvas("canvas4", "canvas4", 2400, 600);
+    canvas4->Divide(4, 1);
     
-    TGraph * Sig_Plot[3];
+    TGraph * Sig_Plot[4];
     
-    for(int i=0; i<3; i++){
+    for(int i=0; i<4; i++){
       hname=to_string(i+1);
       
       canvas4->cd( i+1 );
@@ -709,10 +711,10 @@ void makeYield_r_constancy ()
     }
     */
     /*
-    TCanvas *canvas5 = new TCanvas("canvas5", "canvas5", 1800, 600);
-    canvas5->Divide(3, 1);
+    TCanvas *canvas5 = new TCanvas("canvas5", "canvas5", 2400, 600);
+    canvas5->Divide(4, 1);
     
-    for(int i=0; i<3; i++){
+    for(int i=0; i<4; i++){
       hname=to_string(i+1);
       
       canvas5->cd( i+1 );
@@ -735,11 +737,11 @@ void makeYield_r_constancy ()
     double Loose_BDT_val(0.0);//x - val
     double Ratio_val(0.0);//y - val
     double binError(0.0);
-    std::vector<double> Loose_BDT_list[3], Ratio_list[3];
+    std::vector<double> Loose_BDT_list[4], Ratio_list[4];
     
     
     TH1F *myh = new TH1F("myh","T3M Distribution", 40, signal_region_min, signal_region_max);// used to temporarily store histograms
-    for(int i=0; i<3; i++){
+    for(int i=0; i<4; i++){
             hname=to_string(i+1);
             tau_loose_cut_vs_ratio[i] = new TH1D("tau_loose_cut_vs_ratio","tau_loose_cut_vs_ratio_"+hname,Loose_BDT_N,Loose_BDT_min,Loose_BDT_max);
             tau_loose_cut_vs_ratio[i]->Sumw2();
@@ -754,7 +756,7 @@ void makeYield_r_constancy ()
     
     for(int i=0; i<Loose_BDT_N; i++){
             Loose_BDT_val = Loose_BDT_min + i * Loose_BDT_step + Loose_BDT_step/2.0;
-            for(int k=0; k<3; k++){
+            for(int k=0; k<4; k++){
                     
                     //tree[k]->Draw("tripletMass>>myh", const_cast<char*>(("tripletMass >= "+std::to_string(signal_region_min)+" && tripletMass <= "+std::to_string(signal_region_max)+" && isMC==0 && (tripletMass<="+std::to_string(signal_peak_region_min)+" || tripletMass>="+std::to_string(signal_peak_region_max)+") && bdt_cv>"+std::to_string(Loose_BDT_val)).c_str()),"goff");// This is useless. Used for testing validity of LooseBDT Cuts.
                     
@@ -797,10 +799,10 @@ void makeYield_r_constancy ()
             }
     }
     
-    TCanvas *canvas6 = new TCanvas("canvas6", "canvas6", 1800, 600);
-    canvas6->Divide(3, 1);
+    TCanvas *canvas6 = new TCanvas("canvas6", "canvas6", 2400, 600);
+    canvas6->Divide(4, 1);
     
-    for(int i=0; i<3; i++){
+    for(int i=0; i<4; i++){
       hname=to_string(i+1);
       
       canvas6->cd( i+1 );
