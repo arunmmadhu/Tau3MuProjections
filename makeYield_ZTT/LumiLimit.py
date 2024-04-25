@@ -17,10 +17,10 @@ ZTT_lim_low_2 = []
 
 ZTT_lim = [ZTT_lim_low_2,ZTT_lim_low,ZTT_lim_mid,ZTT_lim_up,ZTT_lim_up_2]
 
-lumi = [97.7, 129.0, 377.0, 700.0, 1500.0, 2250.0, 3000.0, 3750.0, 4500.0]
+lumi = [59.0, 97.7, 129.0, 377.0, 700.0, 1500.0, 2250.0, 3000.0, 3750.0, 4500.0]
 
 card_modifier_name = ["ZTT_tauh_test","ZTT_taumu_test","ZTT_taue_test"]
-combined_card_name = ["ZTT_tauh_Combined_Mod","ZTT_taumu_Combined_Mod","ZTT_taue_Combined_Mod"]
+combined_card_name = ["Cat_1_Mod","Cat_2_Mod","Cat_3_Mod"]
 
 # opening the file in read mode; output from makeYield
 file_fam = open("ZTT_Lumi_Limit.txt", "r")
@@ -41,7 +41,8 @@ file_fam.close()
 
 lum_comb = [lum_tau,lum_mu,lum_e]
 
-for lu_no in range(len(lum_tau)-3):
+for lu_no in range(len(lum_tau)):
+#for lu_no in [2]: #for extreme luminosities
     lu = lum_comb[0][lu_no][0]
     print(lu)
     
@@ -59,26 +60,61 @@ for lu_no in range(len(lum_tau)-3):
         #command_run = "combine -M AsymptoticLimits "+combined_card_name[k]+".txt --cl 0.9 -t -1  > out"+ str(k+1) +".txt";
         #print(command_run)
         
-        Whether_Hybrid = Whether_Hybrid and (float(lum_comb[k][lu_no][1])<35.0 and float(lum_comb[k][lu_no][2])<1.0)
-        
-    Whether_Hybrid=True    
-    print("Whether_Hybrid: "+ str(Whether_Hybrid))
+        #Whether_Hybrid = Whether_Hybrid and (float(lum_comb[k][lu_no][1])<35.0 and float(lum_comb[k][lu_no][2])<1.0)
         
     command_h_mu_e = "combineCards.py "+combined_card_name[0]+"_a.txt "+combined_card_name[1]+"_a.txt "+combined_card_name[2]+"_a.txt > ZTT_Combined.txt"
     #command_h_mu_e = "cp " + combined_card_name[0]+".txt ZTT_Combined.txt"
     os.system(command_h_mu_e)
     
+    Whether_Hybrid=False
+    Whether_Asymptotic=False
+    Whether_Simple_Bayesian=False
+    print("Whether_Hybrid: "+ str(Whether_Hybrid))
+    
     
     if(Whether_Hybrid):
-            command_run = "combine -M HybridNew ZTT_Combined.txt --cl 0.9 -t -1 --rMin 0.0 --rMax 15.0 --expectedFromGrid=0.025  > out1.txt"
+            
+            rvals = []
+            
+            command_run = "combine -M AsymptoticLimits ZTT_Combined.txt --cl 0.9 -t -1  > out_asym.txt"
             os.system(command_run)
-            command_run = "combine -M HybridNew ZTT_Combined.txt --cl 0.9 -t -1 --rMin 0.0 --rMax 15.0 --expectedFromGrid=0.16  > out2.txt"
+            with open("out_asym.txt", 'r') as f1:
+                for line in f1:
+                    if '2.5%' in line:
+                        linsp = line.split()
+                        rvals.append(float(linsp[-1]))
+                    if '16.0%' in line:
+                        linsp = line.split()
+                        rvals.append(float(linsp[-1]))
+                    if '50.0%' in line:
+                        linsp = line.split()
+                        rvals.append(float(linsp[-1]))
+                    if '84.0%' in line:
+                        linsp = line.split()
+                        rvals.append(float(linsp[-1]))
+                    if '97.5%' in line:
+                        linsp = line.split()
+                        rvals.append(float(linsp[-1]))
+            rvals_min = [r_i * 0.55 for r_i in rvals]
+            rvals_max = [r_i * 1.45 for r_i in rvals]
+            print("rvals: ")
+            print(rvals)
+            
+            
+            print("Running Sigma -2")
+            command_run = "combine -M HybridNew ZTT_Combined.txt --cl 0.9 -t -1 --rMin "+"{:.3f}".format(rvals_min[0])+" --rMax "+"{:.3f}".format(rvals_min[0])+" --rRelAcc=0.01 --expectedFromGrid=0.025  > out1.txt"
             os.system(command_run)
-            command_run = "combine -M HybridNew ZTT_Combined.txt --cl 0.9 -t -1 --rMin 0.0 --rMax 15.0 --expectedFromGrid=0.5  > out3.txt"
+            print("Running Sigma -1")
+            command_run = "combine -M HybridNew ZTT_Combined.txt --cl 0.9 -t -1 --rMin "+"{:.3f}".format(rvals_min[1])+" --rMax "+"{:.3f}".format(rvals_min[1])+" --rRelAcc=0.01 --expectedFromGrid=0.16  > out2.txt"
             os.system(command_run)
-            command_run = "combine -M HybridNew ZTT_Combined.txt --cl 0.9 -t -1 --rMin 0.0 --rMax 15.0 --expectedFromGrid=0.84  > out4.txt"
+            print("Running Sigma Median")
+            command_run = "combine -M HybridNew ZTT_Combined.txt --cl 0.9 -t -1 --rMin "+"{:.3f}".format(rvals_min[2])+" --rMax "+"{:.3f}".format(rvals_min[2])+" --rRelAcc=0.01 --expectedFromGrid=0.5  > out3.txt"
             os.system(command_run)
-            command_run = "combine -M HybridNew ZTT_Combined.txt --cl 0.9 -t -1 --rMin 0.0 --rMax 15.0 --expectedFromGrid=0.975  > out5.txt"
+            print("Running Sigma +1")
+            command_run = "combine -M HybridNew ZTT_Combined.txt --cl 0.9 -t -1 --rMin "+"{:.3f}".format(rvals_min[3])+" --rMax "+"{:.3f}".format(rvals_min[3])+" --rRelAcc=0.01 --expectedFromGrid=0.84  > out4.txt"
+            os.system(command_run)
+            print("Running Sigma +2")
+            command_run = "combine -M HybridNew ZTT_Combined.txt --cl 0.9 -t -1 --rMin "+"{:.3f}".format(rvals_min[4])+" --rMax "+"{:.3f}".format(rvals_min[4])+" --rRelAcc=0.01 --expectedFromGrid=0.975  > out5.txt"
             os.system(command_run)
             
             for i_std in range(5):
@@ -87,9 +123,9 @@ for lu_no in range(len(lum_tau)-3):
                                     if 'Limit: r <' in line:
                                             linsp = line.split()
                                             ZTT_lim[i_std].append(float(linsp[3]))
-            print(ZTT_lim_mid)
+            print(ZTT_lim)
                                     
-    else:
+    if(Whether_Asymptotic):
             command_run = "combine -M AsymptoticLimits ZTT_Combined.txt --cl 0.9 -t -1  > out1.txt"
             os.system(command_run)
             with open("out1.txt", 'r') as f1:
@@ -109,7 +145,30 @@ for lu_no in range(len(lum_tau)-3):
                     if '97.5%' in line:
                         linsp = line.split()
                         ZTT_lim[4].append(float(linsp[-1]))
-            print(ZTT_lim_mid)
+            print(ZTT_lim)
+            
+            
+    if(Whether_Simple_Bayesian):
+            command_run = "combine -M AsymptoticLimits ZTT_Combined.txt --cl 0.9 -t -1  > out1.txt"
+            os.system(command_run)
+            with open("out1.txt", 'r') as f1:
+                for line in f1:
+                    if '2.5%' in line:
+                        linsp = line.split()
+                        ZTT_lim[0].append(float(linsp[-1]))
+                    if '16.0%' in line:
+                        linsp = line.split()
+                        ZTT_lim[1].append(float(linsp[-1]))
+                    if '50.0%' in line:
+                        linsp = line.split()
+                        ZTT_lim[2].append(float(linsp[-1]))
+                    if '84.0%' in line:
+                        linsp = line.split()
+                        ZTT_lim[3].append(float(linsp[-1]))
+                    if '97.5%' in line:
+                        linsp = line.split()
+                        ZTT_lim[4].append(float(linsp[-1]))
+            print(ZTT_lim)
     
     
 ZTT_lim = [ZTT_lim_mid,ZTT_lim_low_2,ZTT_lim_low,ZTT_lim_up,ZTT_lim_up_2]

@@ -35,8 +35,8 @@ void makeYield_fromBDTFit_Combine_W ()
     //system("cd /afs/cern.ch/work/m/mmadhu/Analysis/combinestats/t3mcombine/ZTT/CMSSW_11_3_4/src/; cmsenv");
     
     //specify the luminosities here
-    //double lumi_values[] = {97.7, 129.0, 377.0, 700.0, 1500.0, 2250.0, 3000.0, 3750.0, 4500.0};
-    double lumi_values[] = {4500.0};
+    double lumi_values[] = {59.0, 97.7, 129.0, 377.0, 700.0, 1500.0, 2250.0, 3000.0, 3750.0, 4500.0};
+    //double lumi_values[] = {4500.0};
     int lumi_size = sizeof(lumi_values)/ sizeof(double);
     
     //Category names: 0=A, 1=B, 2=C
@@ -556,6 +556,13 @@ void makeYield_fromBDTFit_Combine_W ()
         TString command_copy_datacard[3];
         
         
+        
+        float rMax[3];
+        rMax[0] = 1.0;
+        rMax[1] = 2.0;
+        rMax[2] = 3.5;
+        
+        
         double Xa_min[3];
         double Xa_max[3];
         
@@ -639,7 +646,7 @@ void makeYield_fromBDTFit_Combine_W ()
                                         //HybridNew
                                         if(Whether_Hybrid){
                                         
-                                        command_run[k] = "combine -M HybridNew "+combined_card_name[k]+"_a.txt --cl 0.9 -t -1  --expectedFromGrid=0.5 --rMin 0.0 --rMax 15.0  > out_mid_"+ to_string(k+1) +".txt";
+                                        command_run[k] = "combine -M HybridNew "+combined_card_name[k]+"_a.txt --cl 0.9 -t -1  --expectedFromGrid=0.5 --rMin 0.0 --rMax " +to_string(rMax[k])+  " --rAbsAcc=0.0025 > out_mid_"+ to_string(k+1) +".txt";
                                         system(command_run[k]);
                                         
                                         std::ifstream f1("out_mid_"+ to_string(k+1) +".txt");

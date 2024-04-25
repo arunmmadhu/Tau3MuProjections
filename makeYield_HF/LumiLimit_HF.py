@@ -4,8 +4,6 @@
 import os
 import numpy as np
 
-lumi = [97.7, 129.0, 377.0, 700.0, 1500.0, 2250.0, 3000.0, 3750.0, 4500.0]
-
 HF_lim = []
 W_lim = []
 HFW_lim = []
@@ -18,7 +16,7 @@ ZTT_lim_low = []
 ZTT_lim_low_2 = []
 ZTT_lim = [ZTT_lim_low_2,ZTT_lim_low,ZTT_lim_mid,ZTT_lim_up,ZTT_lim_up_2]
 
-lumi = [97.7, 129.0, 377.0, 700.0, 1500.0, 2250.0, 3000.0, 3750.0, 4500.0]
+lumi = [59.0,97.7, 129.0, 377.0, 700.0, 1500.0, 2250.0, 3000.0, 3750.0, 4500.0]
 
 
 
@@ -29,19 +27,24 @@ for lu_no in range(len(lumi)):
     command_a = "python card_modifiers/HF_test.py --luminosity " + str(lu);
     os.system(command_a)
         
-    Whether_Hybrid=True
+    Whether_Hybrid=False
     
     
     if(Whether_Hybrid):
-            command_run = "combine -M HybridNew HF_Combined_Mod.txt --cl 0.9 -t -1 --rMin 0.0 --rMax 15.0 --expectedFromGrid=0.025  > out1.txt"
+            print("Running Sigma -2")
+            command_run = "combine -M HybridNew HF_Combined_Mod.txt --cl 0.9 -t -1 --rMin 0.01 --rMax 0.3 --rAbsAcc=0.002 --expectedFromGrid=0.025  > out1.txt"
             os.system(command_run)
-            command_run = "combine -M HybridNew HF_Combined_Mod.txt --cl 0.9 -t -1 --rMin 0.0 --rMax 15.0 --expectedFromGrid=0.16  > out2.txt"
+            print("Running Sigma -1")
+            command_run = "combine -M HybridNew HF_Combined_Mod.txt --cl 0.9 -t -1 --rMin 0.01 --rMax 0.4 --rAbsAcc=0.002 --expectedFromGrid=0.16  > out2.txt"
             os.system(command_run)
-            command_run = "combine -M HybridNew HF_Combined_Mod.txt --cl 0.9 -t -1 --rMin 0.0 --rMax 15.0 --expectedFromGrid=0.5  > out3.txt"
+            print("Running Sigma Median")
+            command_run = "combine -M HybridNew HF_Combined_Mod.txt --cl 0.9 -t -1 --rMin 0.01 --rMax 1.0 --rAbsAcc=0.004 --expectedFromGrid=0.5  > out3.txt"
             os.system(command_run)
-            command_run = "combine -M HybridNew HF_Combined_Mod.txt --cl 0.9 -t -1 --rMin 0.0 --rMax 15.0 --expectedFromGrid=0.84  > out4.txt"
+            print("Running Sigma +1")
+            command_run = "combine -M HybridNew HF_Combined_Mod.txt --cl 0.9 -t -1 --rMin 0.01 --rMax 1.0 --rAbsAcc=0.005 --expectedFromGrid=0.84  > out4.txt"
             os.system(command_run)
-            command_run = "combine -M HybridNew HF_Combined_Mod.txt --cl 0.9 -t -1 --rMin 0.0 --rMax 15.0 --expectedFromGrid=0.975  > out5.txt"
+            print("Running Sigma +2")
+            command_run = "combine -M HybridNew HF_Combined_Mod.txt --cl 0.9 -t -1 --rMin 0.01 --rMax 1.0 --rAbsAcc=0.005 --expectedFromGrid=0.975  > out5.txt"
             os.system(command_run)
             
             for i_std in range(5):
@@ -49,6 +52,8 @@ for lu_no in range(len(lumi)):
                             if 'Limit: r <' in line:
                                     linsp = line.split()
                                     ZTT_lim[i_std].append(float(linsp[3]))
+                                    
+            print(ZTT_lim)
                                     
     else:
             command_run = "combine -M AsymptoticLimits HF_Combined_Mod.txt --cl 0.9 -t -1  > out1.txt"
@@ -70,7 +75,7 @@ for lu_no in range(len(lumi)):
                     if '97.5%' in line:
                         linsp = line.split()
                         ZTT_lim[4].append(float(linsp[-1]))
-            print(ZTT_lim_mid)
+            print(ZTT_lim)
     
 ZTT_lim = [ZTT_lim_mid,ZTT_lim_low_2,ZTT_lim_low,ZTT_lim_up,ZTT_lim_up_2]
 print(ZTT_lim)
