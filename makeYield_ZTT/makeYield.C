@@ -60,10 +60,22 @@ void makeYield ()
     
     //BDT Cuts a
     float BDT_Cut_a[4];
-    BDT_Cut_a[0] = 0.425;
-    BDT_Cut_a[1] = 0.425;
-    BDT_Cut_a[2] = 0.45;
-    BDT_Cut_a[3] = 0.4;
+    
+    //Cuts from limits
+    /*
+    BDT_Cut_a[0] = 0.375;
+    BDT_Cut_a[1] = 0.16;
+    BDT_Cut_a[2] = 0.365;
+    BDT_Cut_a[3] = 0.21;
+    */
+    
+    //Cuts from significance
+    
+    BDT_Cut_a[0] = 0.3775;
+    BDT_Cut_a[1] = 0.18;
+    BDT_Cut_a[2] = 0.425;
+    BDT_Cut_a[3] = 0.175;
+    
     
     float signal_region_min(1.4);
     float signal_region_max(2.1);
@@ -110,8 +122,8 @@ void makeYield ()
       for (Long64_t j=0;j<nentries;j++) {
         tree[i]->GetEntry(j);
         
-        //if(tripletMass>=signal_region_min && tripletMass<=signal_region_max && bdt_cv>=BDT_Cut_a[i]){
-        if(tripletMass>=signal_region_min && tripletMass<=signal_region_max && bdt_cv >= BDT_Cut_b[i] && bdt_cv < BDT_Cut_a[i]){
+        if(tripletMass>=signal_region_min && tripletMass<=signal_region_max && bdt_cv>=BDT_Cut_a[i]){
+        //if(tripletMass>=signal_region_min && tripletMass<=signal_region_max && bdt_cv >= BDT_Cut_b[i] && bdt_cv < BDT_Cut_a[i]){
                 if(isMC>0){
                   tau_T3Mu[i]->Fill(tripletMass,weight);
                   tau_BDT_Output_MC[i]->Fill(bdt_cv,weight);
@@ -169,7 +181,7 @@ void makeYield ()
       //Flat fit for data
       poly[i] = new RooPolynomial("poly"+hname, "poly dist", *InvMass[i]);
       data[i] = new RooDataHist("data"+hname, "data", *InvMass[i], Import(*tau_T3Mu_Dat[i]));
-      LineNorm[i] = new RooRealVar("LineNorm"+hname, "LineNorm", 2.0,0.001,10000);
+      LineNorm[i] = new RooRealVar("LineNorm"+hname, "LineNorm", 2.0,0.001,20000);
       pdf[i] = new RooAddPdf("pdf"+hname, "pdf", RooArgList(*poly[i]), RooArgList(*LineNorm[i]));
       fitresult[i] = pdf[i]->fitTo(*data[i], Range("R1,R2"), Save());
       
