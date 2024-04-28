@@ -1,5 +1,18 @@
 # Projections
 
+Run the following before using any code in this repository:
+
+~~~
+cmsrel CMSSW_10_2_13
+cd CMSSW_10_2_13/src
+cmsenv
+~~~
+
+Run the following in the makeYield_ZTT directory in ROOT (for Limit/Significance scan):
+~~~
+.x makeYield_fromBDTFit_Combine_2018.C
+~~~
+
 Run the following to get projected signal/background yields at future luminosities:
 
 ~~~
