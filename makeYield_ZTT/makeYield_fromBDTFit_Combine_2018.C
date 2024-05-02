@@ -30,7 +30,8 @@ using std::ofstream;
 
 void makeYield_fromBDTFit_Combine_2018 () 
 {
-    system("cd /afs/cern.ch/work/m/mmadhu/Analysis/combinestats/t3mcombine/HF_and_W/CMSSW_10_2_13/src; cmsenv; cd -");
+    //system("cd /afs/cern.ch/work/m/mmadhu/Analysis/combinestats/t3mcombine/HF_and_W/CMSSW_10_2_13/src; cmsenv; cd -");
+    system("cd /afs/cern.ch/work/m/mmadhu/Analysis/combinestats/t3mcombine/ZTT/CMSSW_11_3_4/src/; cmsenv; cd -");
     
     //specify the luminosities here
     //double lumi_values[] = {59.0, 97.7, 129.0, 377.0, 700.0, 1500.0, 2250.0, 3000.0, 3750.0, 4500.0};
@@ -87,16 +88,25 @@ void makeYield_fromBDTFit_Combine_2018 ()
     float Loose_BDT_Cut(-0.4);
     
     float Gaussian_Sigma_From_Loose_BDT_Cut[4];
-    Gaussian_Sigma_From_Loose_BDT_Cut[0] = 0.0165883;
-    Gaussian_Sigma_From_Loose_BDT_Cut[1] = 0.0165883;
-    Gaussian_Sigma_From_Loose_BDT_Cut[2] = 0.0169745;
-    Gaussian_Sigma_From_Loose_BDT_Cut[3] = 0.0170951;
+    Gaussian_Sigma_From_Loose_BDT_Cut[0] = 0.0170238;
+    Gaussian_Sigma_From_Loose_BDT_Cut[1] = 0.0167713;
+    Gaussian_Sigma_From_Loose_BDT_Cut[2] = 0.0172921;
+    Gaussian_Sigma_From_Loose_BDT_Cut[3] = 0.0172922;
+    
+    //sigma_scale from training
+    
+    float sigma_scale[4];
+    
+    sigma_scale[0] = 2.0;
+    sigma_scale[1] = 2.0;
+    sigma_scale[2] = 2.0;
+    sigma_scale[3] = 2.8;
     
     for(int i=0; i<4; i++){
       hname=to_string(i+1);
       
-      signal_peak_region_min[i]=1.77686-2.3*Gaussian_Sigma_From_Loose_BDT_Cut[i];
-      signal_peak_region_max[i]=1.77686+2.3*Gaussian_Sigma_From_Loose_BDT_Cut[i];
+      signal_peak_region_min[i]=1.77686-sigma_scale[i]*Gaussian_Sigma_From_Loose_BDT_Cut[i];
+      signal_peak_region_max[i]=1.77686+sigma_scale[i]*Gaussian_Sigma_From_Loose_BDT_Cut[i];
       
       cout<<"min: "<< signal_peak_region_min[i] <<" max: "<< signal_peak_region_max[i] <<endl;
       
@@ -136,8 +146,8 @@ void makeYield_fromBDTFit_Combine_2018 ()
       
       tau_T3Mu[i] = new TH1D("tau_T3Mu","tau_T3Mu_"+hname,40,signal_region_min,signal_region_max);
       tau_T3Mu_Dat[i] = new TH1D("tau_T3Mu_Dat","tau_T3Mu_Dat_"+hname,40,signal_region_min,signal_region_max);
-      tau_BDT_Output_MC[i] = new TH1D("tau_BDT_Output_MC","tau_BDT_Output_MC_"+hname,100,BDT_Score_Min,0.9);
-      tau_BDT_Output_Data[i] = new TH1D("tau_BDT_Output_Data","tau_BDT_Output_Data_"+hname,100,BDT_Score_Min,0.9);
+      tau_BDT_Output_MC[i] = new TH1D("tau_BDT_Output_MC","tau_BDT_Output_MC_"+hname,100,BDT_Score_Min,1.0);
+      tau_BDT_Output_Data[i] = new TH1D("tau_BDT_Output_Data","tau_BDT_Output_Data_"+hname,100,BDT_Score_Min,1.0);
       
       tree[i]->SetBranchAddress("tripletMass",&tripletMass);
       tree[i]->SetBranchAddress("bdt_cv",&bdt_cv);
@@ -150,16 +160,20 @@ void makeYield_fromBDTFit_Combine_2018 ()
         
         if(tripletMass>=signal_region_min&&tripletMass<=signal_region_max){
                 if(isMC>0){
-                  if(bdt_cv>Loose_BDT_Cut){
+                  if(bdt_cv>Loose_BDT_Cut ){
                     tau_T3Mu[i]->Fill(tripletMass,weight);
                   }
-                  tau_BDT_Output_MC[i]->Fill(bdt_cv,weight);
+                  if( (tripletMass>=signal_peak_region_min[i] && tripletMass<=signal_peak_region_max[i]) ){//making sure that only the signal in the signal peak region goes to the BDT output
+                    tau_BDT_Output_MC[i]->Fill(bdt_cv,weight);
+                  }
                 }
-                if(isMC==0 && (tripletMass<=signal_peak_region_min[i] || tripletMass>=signal_peak_region_max[i]) ){//blinded
-                  if(bdt_cv>Loose_BDT_Cut){
+                if(isMC==0){
+                  if(bdt_cv>Loose_BDT_Cut && (tripletMass<=signal_peak_region_min[i] || tripletMass>=signal_peak_region_max[i]) ){//blinded
                     tau_T3Mu_Dat[i]->Fill(tripletMass);
                   }
-                  tau_BDT_Output_Data[i]->Fill(bdt_cv);
+                  if( (tripletMass<=signal_peak_region_min[i] || tripletMass>=signal_peak_region_max[i]) ){//making sure that only the bkg in the sideband goes to the BDT output
+                    tau_BDT_Output_Data[i]->Fill(bdt_cv);
+                  }
                 }
         }
         
@@ -191,7 +205,7 @@ void makeYield_fromBDTFit_Combine_2018 ()
     for(int i=0; i<4; i++){
       hname=to_string(i+1);
       
-      BDTOutput_x[i] = new RooRealVar("BDTOutput_x"+hname,"BDT Output, #tau_"+cat_label[i],BDT_Score_Min,0.9);
+      BDTOutput_x[i] = new RooRealVar("BDTOutput_x","BDT Output, #tau_"+cat_label[i],BDT_Score_Min,0.9);
       BDTOutput_x[i]->setRange("BDT_Range",BDT_Score_Min,0.9);
       bgausmean[i] = new RooRealVar("bgausmean"+hname, "bgausmean" , -0.5, BDT_Score_Min,0.0) ;
       bgaussigma_a[i] = new RooRealVar("bgaussigma_a"+hname, "bgaussigma_a" , 0.2, 0.000001, 1.0) ;
@@ -383,9 +397,6 @@ void makeYield_fromBDTFit_Combine_2018 ()
     }
     
     
-    
-    
-    
     //Triplet Mass Fit Plots
     /*
     TCanvas *canvas1 = new TCanvas("canvas1", "canvas1", 2400, 600);
@@ -408,7 +419,6 @@ void makeYield_fromBDTFit_Combine_2018 ()
       xFrame[i]->Draw();
     }
     */
-    
     
     
     
@@ -446,6 +456,8 @@ void makeYield_fromBDTFit_Combine_2018 ()
         TString command_a[4];
         TString command_b[4];
         TString command_a_and_b[4];
+        TString command_UL_Calc[4];
+        TString command_Bayesian[4];
         TString command_run[4];
         TString command_copy[4];
         TString command_recreate_workdir;
@@ -456,10 +468,10 @@ void makeYield_fromBDTFit_Combine_2018 ()
         
         
         float rMax[4];
-        rMax[0] = 5.0;
-        rMax[1] = 5.0;
-        rMax[2] = 10.0;
-        rMax[3] = 15.0;
+        rMax[0] = 15.0;
+        rMax[1] = 40.0;
+        rMax[2] = 20.0;
+        rMax[3] = 30.0;
         
         
         
@@ -535,7 +547,7 @@ void makeYield_fromBDTFit_Combine_2018 ()
                 command_recreate_lumi_scan_dir = "rm -r workdir/lumi_" + to_string((int)lumi_values[iter_lumi])+"/scan_"+to_string(i+1)+"; mkdir workdir/lumi_" + to_string((int)lumi_values[iter_lumi])+"/scan_"+to_string(i+1)+"/";
                 system(command_recreate_lumi_scan_dir);
                 
-                        for(int k=0; k<4; k++){// for tauh/taumu/taue or A/B/C
+                        for(int k=0; k<4; k++){// for tauh A B/taumu/taue or A/B/C
                                 
                                 a[k] = Xa_min[k] + i * step_a[k];// bdt cut
                                 
@@ -545,10 +557,39 @@ void makeYield_fromBDTFit_Combine_2018 ()
                                 //Calculate signal and background yields from BDT output plots
                                 
                                 BDTOutput_x[k]->setRange("R_a",a[k],100.0);
-                                N_s_1[k] = bdt_MC[k]->sumEntries("1", "R_a") * lumi_values[iter_lumi]/59.0;
+                                //N_s_1[k] = bdt_MC[k]->sumEntries("1", "R_a") * lumi_values[iter_lumi]/59.0;
                                 //N_b_1[k] = (pdf_integral_restricted[k]/(1-pdf_integral_restricted[k]))  *  nData[k]  *   (BDT_distribution[k]->createIntegral(*BDTOutput_x[k],NormSet(*BDTOutput_x[k]),Range("R_a"))->getVal() / BDT_distribution[k]->createIntegral(*BDTOutput_x[k],NormSet(*BDTOutput_x[k]),Range("R_Large"))->getVal()) * lumi_values[iter_lumi]/59.0;
-                                N_b_1[k] = bdt_data[k]->sumEntries("1", "R_a") * (pdf_integral_restricted[k]/(1-pdf_integral_restricted[k])) * lumi_values[iter_lumi]/59.0;
+                                //N_b_1[k] = bdt_data[k]->sumEntries("1", "R_a") * (pdf_integral_restricted[k]/(1-pdf_integral_restricted[k])) * lumi_values[iter_lumi]/59.0;
                                 double bkg_est = (pdf_integral_restricted[k]/(1-pdf_integral_restricted[k]))  *  nData[k]  *   (BDT_distribution[k]->createIntegral(*BDTOutput_x[k],NormSet(*BDTOutput_x[k]),Range("R_a"))->getVal() / BDT_distribution[k]->createIntegral(*BDTOutput_x[k],NormSet(*BDTOutput_x[k]),Range("R_Large"))->getVal()) * lumi_values[iter_lumi]/59.0;
+                                
+                                N_s_1[k] = 0.0;
+                                N_b_1[k] = 0.0;
+                                
+                                //Getting signal and bkg from the ttree rather than the histograms (histograms are still not fully correct, even though they aren't coming from a fit)
+                                //tree[k]->SetBranchAddress("tripletMass",&tripletMass);
+                                //tree[k]->SetBranchAddress("bdt_cv",&bdt_cv);
+                                //tree[k]->SetBranchAddress("weight",&weight);
+                                //tree[k]->SetBranchAddress("isMC",&isMC);
+                                Long64_t nentries = tree[k]->GetEntries();
+                                for (Long64_t j=0;j<nentries;j++) {
+                                        tree[k]->GetEntry(j);
+                                        
+                                        if(tripletMass>=signal_region_min&&tripletMass<=signal_region_max){
+                                                if(isMC>0){
+                                                  if(bdt_cv>a[k] && (tripletMass>=signal_peak_region_min[k] && tripletMass<=signal_peak_region_max[k]) ){
+                                                    N_s_1[k]+=weight;
+                                                  }
+                                                }
+                                                if(isMC==0){
+                                                  if(bdt_cv>a[k] && (tripletMass<=signal_peak_region_min[k] || tripletMass>=signal_peak_region_max[k]) ){//blinded
+                                                    N_b_1[k]+=1.0;
+                                                  }
+                                                }
+                                        }
+                                        
+                                }
+                                
+                                N_b_1[k] = N_b_1[k]*(pdf_integral_restricted[k]/(1-pdf_integral_restricted[k]));
                                 
                                 cout<<"signal: "<<N_s_1[k]<<" bkg: "<< N_b_1[k] <<" bkg estimate: "<<bkg_est<<endl;
                                 
@@ -564,8 +605,8 @@ void makeYield_fromBDTFit_Combine_2018 ()
                                         system(command_copy_datacard[k]);
                                         
                                         
-                                        //Whether to use HybridNew or AsymptoticLimits for calculating limits
-                                        bool Whether_Hybrid(true);
+                                        //Whether to use HybridNew or BayesianSimple for calculating limits
+                                        bool Whether_Hybrid(false);
                                         
                                         
                                         
@@ -573,7 +614,8 @@ void makeYield_fromBDTFit_Combine_2018 ()
                                         //HybridNew
                                         if(Whether_Hybrid){
                                         
-                                        command_run[k] = "combine -M HybridNew "+combined_card_name[k]+"_a.txt --cl 0.9 -t -1  --expectedFromGrid=0.5 --rMin 0.0 --rMax " +to_string(rMax[k])+  " --rAbsAcc=0.0025 > out_mid_"+ to_string(k+1) +".txt";
+                                        command_run[k] = "combine -M HybridNew "+combined_card_name[k]+"_a.txt --cl 0.9 -t -1  --expectedFromGrid=0.5 --rMin 0.0 --rMax " +to_string(rMax[k])+  " --rAbsAcc=0.001 > out_mid_"+ to_string(k+1) +".txt";
+                                        //command_run[k] = "combine -M HybridNew "+combined_card_name[k]+"_a.txt --cl 0.9 -t -1  --expectedFromGrid=0.5 --rMin 0.0 --rMax " +to_string(rMax[k])+  " --rRelAcc=0.01 > out_mid_"+ to_string(k+1) +".txt";
                                         system(command_run[k]);
                                         
                                         std::ifstream f1("out_mid_"+ to_string(k+1) +".txt");
@@ -583,7 +625,7 @@ void makeYield_fromBDTFit_Combine_2018 ()
                                             std::vector<std::string> linsp;
                                             std::istringstream iss(line);
                                             for (std::string s; iss >> s;) linsp.push_back(s);
-                                            cout<<"limit: "<<linsp[3]<<endl;
+                                            cout<<"Limit HybridNew: "<<linsp[3]<<endl;
                                             S[k] = std::stod(linsp[3]);
                                           }
                                         }
@@ -591,27 +633,57 @@ void makeYield_fromBDTFit_Combine_2018 ()
                                         }
                                         
                                         
-                                        //AsymptoticLimits
+                                        //BayesianSimple
                                         else{
                                         
-                                        command_run[k] = "combine -M AsymptoticLimits "+combined_card_name[k]+"_a.txt --cl 0.9 -t -1  > out"+ to_string(k+1) +".txt";
-                                        system(command_run[k]);
+                                            command_Bayesian[k] = "combine -M BayesianSimple "+combined_card_name[k]+"_a.txt --cl 0.9 -t 100  > Test_Bayesian_"+ to_string(k+1) +".txt";
+                                            system(command_Bayesian[k]);
+                                            
+                                            std::ifstream bayes("Test_Bayesian_"+ to_string(k+1) +".txt");
+                                            std::string line2;
+                                            while (std::getline(bayes, line2)) {
+                                                    if (line2.find("median expected limit") != std::string::npos) {
+                                                    //if (line2.find("90% CL") != std::string::npos) {
+                                                            std::vector<std::string> linsp;
+                                                            std::istringstream iss(line2);
+                                                            for (std::string s; iss >> s;) linsp.push_back(s);
+                                                            //cout<<"Limit Bayesian: "<<linsp[3]<<endl;
+                                                            cout<<"Limit Bayesian: "<<linsp[5]<<endl;
+                                                            S[k] = std::stod(linsp[5]);
+                                                    }
+                                            }
                                         
-                                        std::ifstream f1("out"+ to_string(k+1) +".txt");
-                                        std::string line;
-                                        while (std::getline(f1, line)) {
-                                          if (line.find("50.0%") != std::string::npos) {
+                                        }
+                                        
+                                        
+                                        
+                                        command_UL_Calc[k] = "python3 ../CLs_UL_Calculator.py " + std::to_string(N_s_1[k]) + " " + std::to_string(N_b_1[k]) + " > out_UL_Calc_"+ to_string(k+1) +".txt";
+                                        system(command_UL_Calc[k]);
+                                        std::ifstream UL_Cal("out_UL_Calc_"+ to_string(k+1) +".txt");
+                                        std::string line1;
+                                        while (std::getline(UL_Cal, line1)) {
+                                          if (line1.find("upper limit") != std::string::npos) {
                                             std::vector<std::string> linsp;
-                                            std::istringstream iss(line);
+                                            std::istringstream iss(line1);
                                             for (std::string s; iss >> s;) linsp.push_back(s);
-                                            S[k] = std::stod(linsp.back());
+                                            cout<<"Limit UL_Calc: "<<linsp.back()<<endl;
+                                            //S[k] = std::stod(linsp.back());
+                                          }
+                                          if (line1.find("best value of CLs") != std::string::npos) {
+                                            std::vector<std::string> linsp;
+                                            std::istringstream iss(line1);
+                                            for (std::string s; iss >> s;) linsp.push_back(s);
+                                            //cout<<"Value of CLs: "<<linsp.back()<<endl;
                                           }
                                         }
                                         
-                                        }
+                                        
+                                        
                                         
                                         //Significance
                                         Sig[k] = sqrt( (2 * (N_s_1[k] + N_b_1[k]) * log(1 + (N_s_1[k]/N_b_1[k])) ) - 2 * N_s_1[k] );
+                                        
+                                        
                                         
                                         if(!isnan(S[k])){
                                         
@@ -703,9 +775,9 @@ void makeYield_fromBDTFit_Combine_2018 ()
     
     
     //Store lumis, sig/bkg yield in a text file. If this doesn't work, run line #33 first
-    /*
+    
     ofstream myfile;
-    myfile.open("ZTT_Lumi_Limit.txt", ios::out | ios::trunc);
+    myfile.open("ZTT_Lumi_Limit_2018.txt", ios::out | ios::trunc);
     
     
     for(int iter_lumi=0; iter_lumi<lumi_size; iter_lumi++){
@@ -720,7 +792,7 @@ void makeYield_fromBDTFit_Combine_2018 ()
             }
     }
     myfile.close();
-    */
+    
     
     
     // Plot of limit and significance as a function of bdt_cut using TGraph
@@ -769,6 +841,7 @@ void makeYield_fromBDTFit_Combine_2018 ()
     
     TCanvas *canvas4 = new TCanvas("canvas4", "canvas4", 2400, 600);
     canvas4->Divide(4, 1);
+    
     for(int i=0; i<4; i++){
       hname=to_string(i+1);
       
@@ -777,18 +850,22 @@ void makeYield_fromBDTFit_Combine_2018 ()
       }
       
       canvas4->cd( i+1 );
+      canvas4->cd( i+1 )->SetLeftMargin(0.15);
+      
       bdt_cut_vs_limit[0][i]->SetTitle("Limit Scan, #tau_"+cat_label[i]+";BDT Cut Value;Limit");
       bdt_cut_vs_limit[0][i]->SetStats(0);
       bdt_cut_vs_limit[0][i]->SetMinimum(S_min[i]*0.8);
       bdt_cut_vs_limit[0][i]->SetMaximum(*max_element(S_list[0][i].begin(), S_list[0][i].end())*1.2);
-      bdt_cut_vs_limit[0][i]->Draw();
+      bdt_cut_vs_limit[0][i]->SetMarkerStyle(29);
+      bdt_cut_vs_limit[0][i]->Draw("P");
     }
-    
+    canvas4->Update();
     
     
     
     TCanvas *canvas5 = new TCanvas("canvas5", "canvas5", 2400, 600);
     canvas5->Divide(4, 1);
+    
     for(int i=0; i<4; i++){
       hname=to_string(i+1);
       
@@ -797,14 +874,16 @@ void makeYield_fromBDTFit_Combine_2018 ()
       }
       
       canvas5->cd( i+1 );
+      canvas5->cd( i+1 )->SetLeftMargin(0.15);
+      
       bdt_cut_vs_sig[0][i]->SetTitle("Significance Scan, #tau_"+cat_label[i]+";BDT Cut Value;Significance");
       bdt_cut_vs_sig[0][i]->SetStats(0);
       bdt_cut_vs_sig[0][i]->SetMinimum(*min_element(S_list_sig[0][i].begin(), S_list_sig[0][i].end())*0.8);
       bdt_cut_vs_sig[0][i]->SetMaximum(S_max[i]*1.2);
-      bdt_cut_vs_sig[0][i]->Draw();
+      bdt_cut_vs_sig[0][i]->SetMarkerStyle(29);
+      bdt_cut_vs_sig[0][i]->Draw("P");
     }
-    
-    
+    canvas5->Update();
     
     
     

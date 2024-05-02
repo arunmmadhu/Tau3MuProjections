@@ -1,5 +1,8 @@
 import math
 import argparse
+from scipy.stats import poisson
+
+poisson_ppf_val = 0.5
 
 def integers_less_than(input_number):
     
@@ -30,14 +33,14 @@ def calculate_poisson_sum(numbers, lambda_val):
     
 def calculate_cls(s_exp, b_exp):
     # Check if input is valid
-    CL_s_p_b = calculate_poisson_sum(integers_less_than(b_exp), s_exp+b_exp)
-    CL_b = calculate_poisson_sum(integers_less_than(b_exp), b_exp)
+    CL_s_p_b = calculate_poisson_sum(integers_less_than(poisson.ppf(poisson_ppf_val, b_exp)), s_exp+b_exp)
+    CL_b = calculate_poisson_sum(integers_less_than(poisson.ppf(poisson_ppf_val, b_exp)), b_exp)
     CL_s = CL_s_p_b / CL_b
     return CL_s
     
     
 def find_domain_for_value(function,s_exp,b_exp):
-    range_for_s = 5.0
+    range_for_s = 20.0
     start = max(s_exp-range_for_s,0.0)
     end=s_exp+range_for_s
     step=0.01

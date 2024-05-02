@@ -29,6 +29,8 @@ using namespace RooFit;
 
 void makeYield () 
 {
+    system("cd /afs/cern.ch/work/m/mmadhu/Analysis/combinestats/t3mcombine/ZTT/CMSSW_11_3_4/src/; cmsenv; cd -");
+    
     //Category names: 0=tauh_A, 1=tauh_B, 2=taumu, 3=taue
     
     TString cat_base[4];
@@ -51,37 +53,66 @@ void makeYield ()
     
     TString hname;
     
-    //BDT Cuts b
-    float BDT_Cut_b[4];
-    BDT_Cut_b[0] = 0.275;
-    BDT_Cut_b[1] = 0.275;
-    BDT_Cut_b[2] = 0.325;
-    BDT_Cut_b[3] = 0.25;
-    
     //BDT Cuts a
     float BDT_Cut_a[4];
     
     //Cuts from limits
-    /*
-    BDT_Cut_a[0] = 0.375;
-    BDT_Cut_a[1] = 0.16;
-    BDT_Cut_a[2] = 0.365;
-    BDT_Cut_a[3] = 0.21;
-    */
     
-    //Cuts from significance
-    
-    BDT_Cut_a[0] = 0.3775;
-    BDT_Cut_a[1] = 0.18;
-    BDT_Cut_a[2] = 0.425;
+    BDT_Cut_a[0] = 0.345;
+    BDT_Cut_a[1] = 0.12;
+    BDT_Cut_a[2] = 0.35;
     BDT_Cut_a[3] = 0.175;
     
     
-    float signal_region_min(1.4);
-    float signal_region_max(2.1);
+    //Cuts from significance
     
-    float signal_peak_region_min(1.74);
-    float signal_peak_region_max(1.82);
+    BDT_Cut_a[0] = 0.375;
+    BDT_Cut_a[1] = 0.18;
+    BDT_Cut_a[2] = 0.44;
+    BDT_Cut_a[3] = 0.1925;
+    
+    
+    float signal_region_min(1.6);
+    float signal_region_max(2.0);
+    
+    float signal_peak_region_min[4];
+    float signal_peak_region_max[4];
+    
+    float BDT_Score_Min(-0.9);
+    
+    int triplet_mass_bins(40);
+    
+    float Gaussian_Sigma_From_Loose_BDT_Cut[4];
+    Gaussian_Sigma_From_Loose_BDT_Cut[0] = 0.0170238;
+    Gaussian_Sigma_From_Loose_BDT_Cut[1] = 0.0167713;
+    Gaussian_Sigma_From_Loose_BDT_Cut[2] = 0.0172921;
+    Gaussian_Sigma_From_Loose_BDT_Cut[3] = 0.0172922;
+    
+    //sigma_scale from training
+    
+    float sigma_scale[4];
+    
+    sigma_scale[0] = 2.0;
+    sigma_scale[1] = 2.0;
+    sigma_scale[2] = 2.0;
+    sigma_scale[3] = 2.8;
+    
+    for(int i=0; i<4; i++){
+      hname=to_string(i+1);
+      
+      signal_peak_region_min[i]=1.77686-sigma_scale[i]*Gaussian_Sigma_From_Loose_BDT_Cut[i];
+      signal_peak_region_max[i]=1.77686+sigma_scale[i]*Gaussian_Sigma_From_Loose_BDT_Cut[i];
+      
+      cout<<"min: "<< signal_peak_region_min[i] <<" max: "<< signal_peak_region_max[i] <<endl;
+      
+      int val_1 = (int)(((signal_peak_region_min[i]-signal_region_min)/((signal_region_max-signal_region_min)/triplet_mass_bins)) + .5);
+      int val_2 = (int)(((signal_peak_region_max[i]-signal_region_min)/((signal_region_max-signal_region_min)/triplet_mass_bins)) + .5);
+      
+      signal_peak_region_min[i]=signal_region_min + val_1 * ((signal_region_max-signal_region_min)/triplet_mass_bins);
+      signal_peak_region_max[i]=signal_region_min + val_2 * ((signal_region_max-signal_region_min)/triplet_mass_bins);
+      
+      cout<<"min: "<< signal_peak_region_min[i] <<" max: "<< signal_peak_region_max[i] <<endl;
+    }
     
     //Filename and histograms
     TFile * file_tau[4];
@@ -108,10 +139,10 @@ void makeYield ()
       
       tree[i] = (TTree *) TreeFile->Get(cat_base[i]);
       
-      tau_T3Mu[i] = new TH1D("tau_T3Mu","tau_T3Mu_"+hname,70,signal_region_min,signal_region_max);
-      tau_T3Mu_Dat[i] = new TH1D("tau_T3Mu_Dat","tau_T3Mu_Dat_"+hname,70,signal_region_min,signal_region_max);
-      tau_BDT_Output_MC[i] = new TH1D("tau_BDT_Output_MC","tau_BDT_Output_MC_"+hname,100,-0.9,0.9);
-      tau_BDT_Output_Data[i] = new TH1D("tau_BDT_Output_Data","tau_BDT_Output_Data_"+hname,100,-0.9,0.9);
+      tau_T3Mu[i] = new TH1D("tau_T3Mu","tau_T3Mu_"+hname,40,signal_region_min,signal_region_max);
+      tau_T3Mu_Dat[i] = new TH1D("tau_T3Mu_Dat","tau_T3Mu_Dat_"+hname,40,signal_region_min,signal_region_max);
+      tau_BDT_Output_MC[i] = new TH1D("tau_BDT_Output_MC","tau_BDT_Output_MC_"+hname,100,BDT_Score_Min,1.0);
+      tau_BDT_Output_Data[i] = new TH1D("tau_BDT_Output_Data","tau_BDT_Output_Data_"+hname,100,BDT_Score_Min,1.0);
       
       tree[i]->SetBranchAddress("tripletMass",&tripletMass);
       tree[i]->SetBranchAddress("bdt_cv",&bdt_cv);
@@ -128,7 +159,7 @@ void makeYield ()
                   tau_T3Mu[i]->Fill(tripletMass,weight);
                   tau_BDT_Output_MC[i]->Fill(bdt_cv,weight);
                 }
-                if(isMC==0 && (tripletMass<=signal_peak_region_min || tripletMass>=signal_peak_region_max) ){//blinded
+                if(isMC==0 && (tripletMass<=signal_peak_region_min[i] || tripletMass>=signal_peak_region_max[i]) ){//blinded
                   tau_T3Mu_Dat[i]->Fill(tripletMass);
                   tau_BDT_Output_Data[i]->Fill(bdt_cv);
                 }
@@ -172,10 +203,10 @@ void makeYield ()
       hname=to_string(i+1);
       
       InvMass[i] = new RooRealVar("InvMass"+hname,"InvMass, #tau_"+cat_label[i],signal_region_min,signal_region_max);
-      InvMass[i]->setRange("R1",signal_region_min,signal_peak_region_min); //background   
-      InvMass[i]->setRange("R2",signal_peak_region_max,signal_region_max); //background
-      InvMass[i]->setRange("R3",1.70,1.85); //signal range for fitting
-      InvMass[i]->setRange("R4",signal_peak_region_min,signal_peak_region_max); //signal range for yield
+      InvMass[i]->setRange("R1",signal_region_min,signal_peak_region_min[i]); //background   
+      InvMass[i]->setRange("R2",signal_peak_region_max[i],signal_region_max); //background
+      InvMass[i]->setRange("R3",1.73,1.82); //signal range for fitting
+      InvMass[i]->setRange("R4",signal_peak_region_min[i],signal_peak_region_max[i]); //signal range for yield
       
       
       //Flat fit for data
@@ -241,6 +272,7 @@ void makeYield ()
       cout << "  " << endl;
       
     }
+    
     
     
     //Triplet Mass Fit Plots
