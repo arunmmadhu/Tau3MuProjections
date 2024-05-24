@@ -23,7 +23,7 @@ card_modifier_name = ["ZTT_tauha_test","ZTT_tauhb_test","ZTT_taumu_test","ZTT_ta
 combined_card_name = ["Cat_1a_Mod","Cat_1b_Mod","Cat_2_Mod","Cat_3_Mod"]
 
 # opening the file in read mode; output from makeYield
-file_fam = open("ZTT_Lumi_Limit.txt", "r")
+file_fam = open("ZTT_Lumi_Limit_2018_final.txt", "r")
 # using the for loop
 lum_taua = []
 lum_taub = []

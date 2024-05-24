@@ -58,18 +58,23 @@ void makeYield ()
     
     //Cuts from limits
     
-    BDT_Cut_a[0] = 0.345;
-    BDT_Cut_a[1] = 0.12;
+    BDT_Cut_a[0] = 0.36;
+    BDT_Cut_a[1] = 0.14;
     BDT_Cut_a[2] = 0.35;
-    BDT_Cut_a[3] = 0.175;
+    BDT_Cut_a[3] = 0.18;
     
     
     //Cuts from significance
     
-    BDT_Cut_a[0] = 0.375;
-    BDT_Cut_a[1] = 0.18;
+    BDT_Cut_a[0] = 0.3825;
+    BDT_Cut_a[1] = 0.26;
     BDT_Cut_a[2] = 0.44;
-    BDT_Cut_a[3] = 0.1925;
+    BDT_Cut_a[3] = 0.27;
+    
+    
+    
+    
+    TString output_name("triplet_sig.png");
     
     
     float signal_region_min(1.6);
@@ -95,7 +100,7 @@ void makeYield ()
     sigma_scale[0] = 2.0;
     sigma_scale[1] = 2.0;
     sigma_scale[2] = 2.0;
-    sigma_scale[3] = 2.8;
+    sigma_scale[3] = 2.0;
     
     for(int i=0; i<4; i++){
       hname=to_string(i+1);
@@ -297,7 +302,8 @@ void makeYield ()
       xFrame[i]->Draw();
     }
     
-    
+    canvas1->Update();
+    canvas1->SaveAs(output_name);
     
     
 }

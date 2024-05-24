@@ -88,10 +88,10 @@ void makeYield_fromBDTFit_Combine_2018 ()
     float Loose_BDT_Cut(-0.4);
     
     float Gaussian_Sigma_From_Loose_BDT_Cut[4];
-    Gaussian_Sigma_From_Loose_BDT_Cut[0] = 0.0170238;
-    Gaussian_Sigma_From_Loose_BDT_Cut[1] = 0.0167713;
-    Gaussian_Sigma_From_Loose_BDT_Cut[2] = 0.0172921;
-    Gaussian_Sigma_From_Loose_BDT_Cut[3] = 0.0172922;
+    Gaussian_Sigma_From_Loose_BDT_Cut[0] = 0.0170635;
+    Gaussian_Sigma_From_Loose_BDT_Cut[1] = 0.0167422;
+    Gaussian_Sigma_From_Loose_BDT_Cut[2] = 0.0172944;
+    Gaussian_Sigma_From_Loose_BDT_Cut[3] = 0.0173076;
     
     //sigma_scale from training
     
@@ -100,7 +100,7 @@ void makeYield_fromBDTFit_Combine_2018 ()
     sigma_scale[0] = 2.0;
     sigma_scale[1] = 2.0;
     sigma_scale[2] = 2.0;
-    sigma_scale[3] = 2.8;
+    sigma_scale[3] = 2.0;
     
     for(int i=0; i<4; i++){
       hname=to_string(i+1);
@@ -492,14 +492,14 @@ void makeYield_fromBDTFit_Combine_2018 ()
         
         //For limits/significance using data
         
-        Xa_min[0] = 0.15;
+        Xa_min[0] = 0.0;
         Xa_min[1] = -0.1;
         Xa_min[2] = 0.2;
         Xa_min[3] = 0.0;
-        Xa_max[0] = 0.45;
-        Xa_max[1] = 0.3;
-        Xa_max[2] = 0.5;
-        Xa_max[3] = 0.35;
+        Xa_max[0] = 0.6;
+        Xa_max[1] = 0.5;
+        Xa_max[2] = 0.55;
+        Xa_max[3] = 0.5;
         
         
         //For significance using estimated yields
@@ -607,6 +607,7 @@ void makeYield_fromBDTFit_Combine_2018 ()
                                         
                                         //Whether to use HybridNew or BayesianSimple for calculating limits
                                         bool Whether_Hybrid(false);
+                                        bool Whether_Bayesian(true);
                                         
                                         
                                         
@@ -634,7 +635,7 @@ void makeYield_fromBDTFit_Combine_2018 ()
                                         
                                         
                                         //BayesianSimple
-                                        else{
+                                        if(Whether_Bayesian){
                                         
                                             command_Bayesian[k] = "combine -M BayesianSimple "+combined_card_name[k]+"_a.txt --cl 0.9 -t 100  > Test_Bayesian_"+ to_string(k+1) +".txt";
                                             system(command_Bayesian[k]);
@@ -860,6 +861,7 @@ void makeYield_fromBDTFit_Combine_2018 ()
       bdt_cut_vs_limit[0][i]->Draw("P");
     }
     canvas4->Update();
+    canvas4->SaveAs("limit_scan_simplebayes_actual.png");
     
     
     
@@ -884,6 +886,7 @@ void makeYield_fromBDTFit_Combine_2018 ()
       bdt_cut_vs_sig[0][i]->Draw("P");
     }
     canvas5->Update();
+    canvas5->SaveAs("significance_scan_actual.png");
     
     
     
