@@ -12,7 +12,7 @@ observation       -1
 bin                                     categoryall       categoryall
 process                                 signal              background
 process                                 0                   1
-rate                                   3.7187        5882.9662
+rate                                   3.7187        5882.8287
 --------------------------------------------------------------------------------
 lumi              lnN                       1.025               -
 

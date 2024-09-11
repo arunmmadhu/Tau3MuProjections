@@ -12,7 +12,7 @@ observation       -1
 bin                                     categorytaumu       categorytaumu
 process                                 signal              background
 process                                 0                   1
-rate                                   0.2901        0.5934
+rate                                   0.2901        0.6141
 --------------------------------------------------------------------------------
 lumi              lnN                       1.025               -
 
