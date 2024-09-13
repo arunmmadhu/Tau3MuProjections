@@ -1,0 +1,82 @@
+Combination of A17=./16Mar2022/central/datacards/CMS_T3MSignal_13TeV_W_A17bdt0.991.txt  B17=./16Mar2022/central/datacards/CMS_T3MSignal_13TeV_W_B17bdt0.994.txt  C17=./16Mar2022/central/datacards/CMS_T3MSignal_13TeV_W_C17bdt0.992.txt  A18=./16Mar2022/central/datacards/CMS_T3MSignal_13TeV_W_A18bdt0.995.txt  B18=./16Mar2022/central/datacards/CMS_T3MSignal_13TeV_W_B18bdt0.998.txt  C18=./16Mar2022/central/datacards/CMS_T3MSignal_13TeV_W_C18bdt0.994.txt
+imax 6 number of bins
+jmax 1 number of processes minus 1
+kmax 38 number of nuisance parameters
+----------------------------------------------------------------------------------------------------------------------------------
+shapes background  A17         ../../workspaces/W/2017/CMS_T3M_13TeV_W_A17bdt0.991.root t3m_shapes:bkg
+shapes data_obs    A17         ../../workspaces/W/2017/CMS_T3M_13TeV_W_A17bdt0.991.root t3m_shapes:data_obs
+shapes signal      A17         ../../workspaces/W/2017/CMS_T3M_13TeV_W_A17bdt0.991.root t3m_shapes:sig
+shapes background  A18         ../../workspaces/W/2018/CMS_T3M_13TeV_W_A18bdt0.995.root t3m_shapes:bkg
+shapes data_obs    A18         ../../workspaces/W/2018/CMS_T3M_13TeV_W_A18bdt0.995.root t3m_shapes:data_obs
+shapes signal      A18         ../../workspaces/W/2018/CMS_T3M_13TeV_W_A18bdt0.995.root t3m_shapes:sig
+shapes background  B17         ../../workspaces/W/2017/CMS_T3M_13TeV_W_B17bdt0.994.root t3m_shapes:bkg
+shapes data_obs    B17         ../../workspaces/W/2017/CMS_T3M_13TeV_W_B17bdt0.994.root t3m_shapes:data_obs
+shapes signal      B17         ../../workspaces/W/2017/CMS_T3M_13TeV_W_B17bdt0.994.root t3m_shapes:sig
+shapes background  B18         ../../workspaces/W/2018/CMS_T3M_13TeV_W_B18bdt0.998.root t3m_shapes:bkg
+shapes data_obs    B18         ../../workspaces/W/2018/CMS_T3M_13TeV_W_B18bdt0.998.root t3m_shapes:data_obs
+shapes signal      B18         ../../workspaces/W/2018/CMS_T3M_13TeV_W_B18bdt0.998.root t3m_shapes:sig
+shapes background  C17         ../../workspaces/W/2017/CMS_T3M_13TeV_W_C17bdt0.992.root t3m_shapes:bkg
+shapes data_obs    C17         ../../workspaces/W/2017/CMS_T3M_13TeV_W_C17bdt0.992.root t3m_shapes:data_obs
+shapes signal      C17         ../../workspaces/W/2017/CMS_T3M_13TeV_W_C17bdt0.992.root t3m_shapes:sig
+shapes background  C18         ../../workspaces/W/2018/CMS_T3M_13TeV_W_C18bdt0.994.root t3m_shapes:bkg
+shapes data_obs    C18         ../../workspaces/W/2018/CMS_T3M_13TeV_W_C18bdt0.994.root t3m_shapes:data_obs
+shapes signal      C18         ../../workspaces/W/2018/CMS_T3M_13TeV_W_C18bdt0.994.root t3m_shapes:sig
+----------------------------------------------------------------------------------------------------------------------------------
+bin          A17     B17     C17     A18     B18     C18   
+observation  -1      -1      -1      -1      -1      -1    
+----------------------------------------------------------------------------------------------------------------------------------
+bin                                    A17         A17         B17         B17         C17         C17         A18         A18         B18         B18         C18         C18       
+process                                signal      background  signal      background  signal      background  signal      background  signal      background  signal      background
+process                                0           1           0           1           0           1           0           1           0           1           0           1         
+rate                                   1.5609      12.4247     1.9229      24.6076     0.6375      8.4926      2.7991      17.0496     1.7626      10.3242     1.158       18.4953   
+----------------------------------------------------------------------------------------------------------------------------------
+HLT_Mu_A17              lnN            1.019       -           -           -           -           -           -           -           -           -           -           -         
+HLT_Mu_A18              lnN            -           -           -           -           -           -           1.01        -           -           -           -           -         
+HLT_Mu_B17              lnN            -           -           1.021       -           -           -           -           -           -           -           -           -         
+HLT_Mu_B18              lnN            -           -           -           -           -           -           -           -           1.01        -           -           -         
+HLT_Mu_C17              lnN            -           -           -           -           1.022       -           -           -           -           -           -           -         
+HLT_Mu_C18              lnN            -           -           -           -           -           -           -           -           -           -           1.01        -         
+HLT_TkMu_A17            lnN            1.11        -           -           -           -           -           -           -           -           -           -           -         
+HLT_TkMu_A18            lnN            -           -           -           -           -           -           1.08        -           -           -           -           -         
+HLT_TkMu_B17            lnN            -           -           1.1         -           -           -           -           -           -           -           -           -         
+HLT_TkMu_B18            lnN            -           -           -           -           -           -           -           -           1.08        -           -           -         
+HLT_TkMu_C17            lnN            -           -           -           -           1.15        -           -           -           -           -           -           -         
+HLT_TkMu_C18            lnN            -           -           -           -           -           -           -           -           -           -           1.09        -         
+HLT_iso17               lnN            1.12        -           1.12        -           1.12        -           -           -           -           -           -           -         
+HLT_iso18               lnN            -           -           -           -           -           -           1.07        -           1.07        -           1.07        -         
+Lumi17                  lnN            1.023       -           1.023       -           1.023       -           -           -           -           -           -           -         
+Lumi18                  lnN            -           -           -           -           -           -           1.025       -           1.025       -           1.025       -         
+WNLO                    lnN            1.04        -           1.04        -           1.04        -           1.04        -           1.04        -           1.04        -         
+br_Wmunu                lnN            1.014       -           1.014       -           1.014       -           1.014       -           1.014       -           1.014       -         
+br_Wtaunu               lnN            1.018       -           1.018       -           1.018       -           1.018       -           1.018       -           1.018       -         
+mc_stat_A17bdt0.991     lnN            1.0093      -           -           -           -           -           -           -           -           -           -           -         
+mc_stat_A18bdt0.995     lnN            -           -           -           -           -           -           1.0096      -           -           -           -           -         
+mc_stat_B17bdt0.994     lnN            -           -           1.0084      -           -           -           -           -           -           -           -           -         
+mc_stat_B18bdt0.998     lnN            -           -           -           -           -           -           -           -           1.0121      -           -           -         
+mc_stat_C17bdt0.992     lnN            -           -           -           -           1.0145      -           -           -           -           -           -           -         
+mc_stat_C18bdt0.994     lnN            -           -           -           -           -           -           -           -           -           -           1.015       -         
+muonID_A17              lnN            1.013       -           -           -           -           -           -           -           -           -           -           -         
+muonID_A18              lnN            -           -           -           -           -           -           1.039       -           -           -           -           -         
+muonID_B17              lnN            -           -           1.014       -           -           -           -           -           -           -           -           -         
+muonID_B18              lnN            -           -           -           -           -           -           -           -           1.047       -           -           -         
+muonID_C17              lnN            -           -           -           -           1.015       -           -           -           -           -           -           -         
+muonID_C18              lnN            -           -           -           -           -           -           -           -           -           -           1.052       -         
+xs_W                    lnN            1.037       -           1.037       -           1.037       -           1.037       -           1.037       -           1.037       -         
+sigma_A17bdt0.991  param  0.0115 0.0002
+sigma_B18bdt0.998  param  0.0180 0.0011
+sigma_C18bdt0.994  param  0.0265 0.0005
+sigma_B17bdt0.994  param  0.0186 0.0011
+sigma_A18bdt0.995  param  0.0114 0.0002
+sigma_C17bdt0.992  param  0.0273 0.0005
+a0_A18bdt0.995  flatParam
+a0_B18bdt0.998  flatParam
+a0_C17bdt0.992  flatParam
+a0_B17bdt0.994  flatParam
+a0_A17bdt0.991  flatParam
+a0_C18bdt0.994  flatParam
+bkgNorm_B17bdt0.994  rateParam B17 background 1.  
+bkgNorm_C18bdt0.994  rateParam C18 background 1.  
+bkgNorm_B18bdt0.998  rateParam B18 background 1.  
+bkgNorm_A18bdt0.995  rateParam A18 background 1.  
+bkgNorm_A17bdt0.991  rateParam A17 background 1.  
+bkgNorm_C17bdt0.992  rateParam C17 background 1.  

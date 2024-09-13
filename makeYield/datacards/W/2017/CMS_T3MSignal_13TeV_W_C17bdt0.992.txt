@@ -1,0 +1,31 @@
+
+imax 1 number of bins
+jmax * number of processes minus 1
+kmax * number of nuisance parameters
+--------------------------------------------------------------------------------
+shapes background    Wtau3mu_C17bdt0.992       ../../../workspaces/W/2017/CMS_T3M_13TeV_W_C17bdt0.992.root t3m_shapes:bkg
+shapes signal        Wtau3mu_C17bdt0.992       ../../../workspaces/W/2017/CMS_T3M_13TeV_W_C17bdt0.992.root t3m_shapes:sig
+shapes data_obs      Wtau3mu_C17bdt0.992       ../../../workspaces/W/2017/CMS_T3M_13TeV_W_C17bdt0.992.root t3m_shapes:data_obs
+--------------------------------------------------------------------------------
+bin               Wtau3mu_C17bdt0.992
+observation       -1
+--------------------------------------------------------------------------------
+bin                                     Wtau3mu_C17bdt0.992       Wtau3mu_C17bdt0.992
+process                                 signal              background
+process                                 0                   1
+rate                                    0.6375        8.4926
+--------------------------------------------------------------------------------
+xs_W          lnN                       1.037               -
+br_Wtaunu          lnN                       1.018               -
+br_Wmunu          lnN                       1.014               -
+WNLO          lnN                       1.04               -
+Lumi17          lnN                       1.023               -
+muonID_C17          lnN                       1.015               -
+HLT_Mu_C17          lnN                       1.022               -
+HLT_iso17          lnN                       1.12               -
+HLT_TkMu_C17          lnN                       1.15               -
+mc_stat_C17bdt0.992 lnN                       1.0145        -   
+--------------------------------------------------------------------------------
+bkgNorm_C17bdt0.992 rateParam                 Wtau3mu_C17bdt0.992        background      1.
+sigma_C17bdt0.992 param 0.0273 0.0005
+a0_C17bdt0.992      flatParam   -6.5258
