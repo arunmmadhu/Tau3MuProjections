@@ -1,0 +1,31 @@
+
+imax 1 number of bins
+jmax * number of processes minus 1
+kmax * number of nuisance parameters
+--------------------------------------------------------------------------------
+shapes bkg          Wtau3mu_C17       ../workspaces/CMS_T3M_13TeV_W_C17.root t3m_shapes:bkg
+shapes sig          Wtau3mu_C17       ../workspaces/CMS_T3M_13TeV_W_C17.root t3m_shapes:sig
+shapes data_obs     Wtau3mu_C17       ../workspaces/CMS_T3M_13TeV_W_C17.root t3m_shapes:data_obs
+--------------------------------------------------------------------------------
+bin               Wtau3mu_C17
+observation       -1
+--------------------------------------------------------------------------------
+bin                                     Wtau3mu_C17       Wtau3mu_C17
+process                                 sig                 bkg
+process                                 0                   1
+rate                                    0.5740        8.4926
+--------------------------------------------------------------------------------
+xs_W          lnN                       1.037               -
+br_Wtaunu          lnN                       1.018               -
+br_Wmunu          lnN                       1.014               -
+WNLO          lnN                       1.04               -
+Lumi17          lnN                       1.023               -
+muonID_C17          lnN                       1.015               -
+HLT_Mu_C17          lnN                       1.022               -
+HLT_iso17          lnN                       1.12               -
+HLT_TkMu_C17          lnN                       1.15               -
+mc_stat_C17 lnN                       1.0151        -   
+bkgNorm_C17 rateParam                 Wtau3mu_C17        bkg      1.
+--------------------------------------------------------------------------------
+sigma_C17 param 0.0273 0.0005
+a0_C17 flatParam

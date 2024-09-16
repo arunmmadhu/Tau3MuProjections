@@ -39,22 +39,22 @@ def executeDataCards_onCondor(lumi,categories):
                     if(Whether_Hybrid):
                             
                             #print("Running Sigma -2")
-                            #command_run = "combineTool.py -M HybridNew --LHCmode LHC-limits  -n %s -d %s --rMin 0 --rMax 50 --cl 0.90 -t 10 --expectedFromGrid 0.025 --job-mode condor --sub-opts='+JobFlavour=\"workday\"'  --task-name HybridTest%s " % (str(lu),categories[cat]+"/datacards_modified/dc_"+str(lu)+".txt",str(lu))
+                            #command_run = "combineTool.py -M HybridNew --LHCmode LHC-limits  -n %s -d %s --rMin 0 --rMax 50 --cl 0.90 -t 10 --expectedFromGrid 0.025 --job-mode condor --sub-opts='+JobFlavour=\"workday\"'  --task-name HybridTest%s " % (str(lu)+categories[cat],categories[cat]+"/datacards_modified/dc_"+str(lu)+".txt",str(lu)+categories[cat])
                             command_run = "combineTool.py -M AsymptoticLimits  -n %s -d %s --cl 0.90  --job-mode condor --sub-opts='+JobFlavour=\"workday\"'  --task-name HybridTest%s " % (str(lu)+categories[cat],categories[cat]+"/datacards_modified/dc_"+str(lu)+".txt",str(lu)+categories[cat])
                             os.system(command_run)
                             
                             """
                             print("Running Sigma -1")
-                            command_run = "combineTool.py -M HybridNew --LHCmode LHC-limits  -n %s -d %s --rMin 0 --rMax 50 --cl 0.90 -t 10 --expectedFromGrid 0.16 --job-mode condor --sub-opts='+JobFlavour=\"workday\"'  --task-name HybridTest%s " % (str(lu),categories[cat]+"/datacards_modified/dc_"+str(lu)+".txt",str(lu))
+                            command_run = "combineTool.py -M HybridNew --LHCmode LHC-limits  -n %s -d %s --rMin 0 --rMax 50 --cl 0.90 -t 10 --expectedFromGrid 0.16 --job-mode condor --sub-opts='+JobFlavour=\"workday\"'  --task-name HybridTest%s " % (str(lu)+categories[cat],categories[cat]+"/datacards_modified/dc_"+str(lu)+".txt",str(lu)+categories[cat])
                             os.system(command_run)
                             print("Running Sigma Median")
-                            command_run = "combineTool.py -M HybridNew --LHCmode LHC-limits  -n %s -d %s --rMin 0 --rMax 50 --cl 0.90 -t 10 --expectedFromGrid 0.5 --job-mode condor --sub-opts='+JobFlavour=\"workday\"'  --task-name HybridTest%s " % (str(lu),categories[cat]+"/datacards_modified/dc_"+str(lu)+".txt",str(lu))
+                            command_run = "combineTool.py -M HybridNew --LHCmode LHC-limits  -n %s -d %s --rMin 0 --rMax 50 --cl 0.90 -t 10 --expectedFromGrid 0.5 --job-mode condor --sub-opts='+JobFlavour=\"workday\"'  --task-name HybridTest%s " % (str(lu)+categories[cat],categories[cat]+"/datacards_modified/dc_"+str(lu)+".txt",str(lu)+categories[cat])
                             os.system(command_run)
                             print("Running Sigma +1")
-                            command_run = "combineTool.py -M HybridNew --LHCmode LHC-limits  -n %s -d %s --rMin 0 --rMax 50 --cl 0.90 -t 10 --expectedFromGrid 0.84 --job-mode condor --sub-opts='+JobFlavour=\"workday\"'  --task-name HybridTest%s " % (str(lu),categories[cat]+"/datacards_modified/dc_"+str(lu)+".txt",str(lu))
+                            command_run = "combineTool.py -M HybridNew --LHCmode LHC-limits  -n %s -d %s --rMin 0 --rMax 50 --cl 0.90 -t 10 --expectedFromGrid 0.84 --job-mode condor --sub-opts='+JobFlavour=\"workday\"'  --task-name HybridTest%s " % (str(lu)+categories[cat],categories[cat]+"/datacards_modified/dc_"+str(lu)+".txt",str(lu)+categories[cat])
                             os.system(command_run)
                             print("Running Sigma +2")
-                            command_run = "combineTool.py -M HybridNew --LHCmode LHC-limits  -n %s -d %s --rMin 0 --rMax 50 --cl 0.90 -t 10 --expectedFromGrid 0.975 --job-mode condor --sub-opts='+JobFlavour=\"workday\"'  --task-name HybridTest%s " % (str(lu),categories[cat]+"/datacards_modified/dc_"+str(lu)+".txt",str(lu))
+                            command_run = "combineTool.py -M HybridNew --LHCmode LHC-limits  -n %s -d %s --rMin 0 --rMax 50 --cl 0.90 -t 10 --expectedFromGrid 0.975 --job-mode condor --sub-opts='+JobFlavour=\"workday\"'  --task-name HybridTest%s " % (str(lu)+categories[cat],categories[cat]+"/datacards_modified/dc_"+str(lu)+".txt",str(lu)+categories[cat])
                             os.system(command_run)
                             """
             
@@ -85,6 +85,8 @@ def plotUpperLimits(lumi,categories):
                     label[cat] = 'Heavy Flavor'
             if categories[cat]=='ZTT':
                     label[cat] = 'ZTT'
+            if categories[cat]=='W':
+                    label[cat] = 'W'
     
     yellow=[None] * Cat_No
     green=[None] * Cat_No
@@ -99,20 +101,20 @@ def plotUpperLimits(lumi,categories):
             """
             text_limits=open("TextLimits.txt","w")
             for i in range(N):
-                file_name1 = "higgsCombine"+str(lumi[i])+".HybridNew.mH120.123456.quant0.025.root"
+                file_name1 = "higgsCombine"+str(lumi[i])+categories[cat]+".HybridNew.mH120.123456.quant0.025.root"
                 limit1 = getLimits(file_name1)
-                file_name2 = "higgsCombine"+str(lumi[i])+".HybridNew.mH120.123456.quant0.160.root"
+                file_name2 = "higgsCombine"+str(lumi[i])+categories[cat]+".HybridNew.mH120.123456.quant0.160.root"
                 limit2 = getLimits(file_name2)
-                file_name3 = "higgsCombine"+str(lumi[i])+".HybridNew.mH120.123456.quant0.500.root"
+                file_name3 = "higgsCombine"+str(lumi[i])+categories[cat]+".HybridNew.mH120.123456.quant0.500.root"
                 limit3 = getLimits(file_name3)
-                file_name4 = "higgsCombine"+str(lumi[i])+".HybridNew.mH120.123456.quant0.840.root"
+                file_name4 = "higgsCombine"+str(lumi[i])+categories[cat]+".HybridNew.mH120.123456.quant0.840.root"
                 limit4 = getLimits(file_name4)
-                file_name5 = "higgsCombine"+str(lumi[i])+".HybridNew.mH120.123456.quant0.975.root"
+                file_name5 = "higgsCombine"+str(lumi[i])+categories[cat]+".HybridNew.mH120.123456.quant0.975.root"
                 limit5 = getLimits(file_name5)
                 
                 yellow.SetPoint( 2*N-1-i, lumi[i], limit1[2]) # - 2 sigma
                 green[cat].SetPoint(  2*N-1-i, lumi[i], limit2[2]) # - 1 sigma
-                median[cat].SetPoint(    i,    lumi[i], limit3[2]) #    median[cat]
+                median[cat].SetPoint(    i,    lumi[i], limit3[2]) #    median
                 green[cat].SetPoint(     i,    lumi[i], limit4[2]) # + 1 sigma
                 yellow[cat].SetPoint(    i,    lumi[i], limit5[2]) # + 2 sigma
                 
@@ -126,7 +128,7 @@ def plotUpperLimits(lumi,categories):
                 
                 yellow[cat].SetPoint( 2*N-1-i, lumi[i], limit1[0]) # - 2 sigma
                 green[cat].SetPoint(  2*N-1-i, lumi[i], limit1[1]) # - 1 sigma
-                median[cat].SetPoint(    i,    lumi[i], limit1[2]) #    median[cat]
+                median[cat].SetPoint(    i,    lumi[i], limit1[2]) #    median
                 green[cat].SetPoint(     i,    lumi[i], limit1[3]) # + 1 sigma
                 yellow[cat].SetPoint(    i,    lumi[i], limit1[4]) # + 2 sigma
                 
@@ -242,7 +244,8 @@ def plotUpperLimits(lumi,categories):
 def main():
     
     #categories = ['ZTT']
-    categories = ['HF']
+    categories = ['W']
+    #categories = ['HF']
     
     #executeDataCards_onCondor(lumi,categories)
     plotUpperLimits(lumi,categories)
