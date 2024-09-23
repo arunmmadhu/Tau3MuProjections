@@ -12,6 +12,15 @@ import tdrstyle
 from CMSStyle import CMS_lumi
 import os
 
+
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument('-c', '--category', required=True               , help='W, HF, ZTT',  dest='category'          , default='W') 
+parser.add_argument('-r', '--runType' , default='plot'              , help='Option run or plot', dest='runType'    )
+args = parser.parse_args()
+
+
+
 ROOT.gROOT.SetBatch(ROOT.kTRUE)
 
 # CMS style
@@ -21,8 +30,10 @@ CMS_lumi.cmsTextSize = 0.65
 CMS_lumi.outOfFrame = True
 tdrstyle.setTDRStyle()
 
-#lumi = [59.0,97.7, 129.0, 377.0, 700.0, 1500.0, 2250.0, 3000.0, 3750.0, 4500.0]
-lumi = [59.0,97.7, 129.0]
+
+lumi = [97.7,129.0,150,377.0,500.0,700.0,1000.0, 1200.0, 1500.0, 1700.0, 2000.0, 2250.0, 2500.0, 2750.0, 3000.0 ]
+#$lumi = [59.0,97.7, 129.0, 377.0, 700.0, 1500.0, 2250.0, 3000.0, 3750.0, 4500.0]
+#lumi = [59.0,97.7, 129.0]
 
 def executeDataCards_onCondor(lumi,categories):
         
@@ -39,8 +50,8 @@ def executeDataCards_onCondor(lumi,categories):
                     if(Whether_Hybrid):
                             
                             #print("Running Sigma -2")
-                            #command_run = "combineTool.py -M HybridNew --LHCmode LHC-limits  -n %s -d %s --rMin 0 --rMax 50 --cl 0.90 -t 10 --expectedFromGrid 0.025 --job-mode condor --sub-opts='+JobFlavour=\"workday\"'  --task-name HybridTest%s " % (str(lu)+categories[cat],categories[cat]+"/datacards_modified/dc_"+str(lu)+".txt",str(lu)+categories[cat])
-                            command_run = "combineTool.py -M AsymptoticLimits  -n %s -d %s --cl 0.90  --job-mode condor --sub-opts='+JobFlavour=\"workday\"'  --task-name HybridTest%s " % (str(lu)+categories[cat],categories[cat]+"/datacards_modified/dc_"+str(lu)+".txt",str(lu)+categories[cat])
+                            command_run = "combineTool.py -M HybridNew --LHCmode LHC-limits  -n %s -d %s --rMin 0 --rMax 50 --cl 0.90 -t 10 --expectedFromGrid 0.5 --job-mode condor --sub-opts='+JobFlavour=\"workday\"'  --task-name HybridTest%s " % (str(lu)+categories[cat],categories[cat]+"/datacards_modified/dc_"+str(lu)+".txt",str(lu)+categories[cat])
+                            #command_run = "combineTool.py -M AsymptoticLimits  -n %s -d %s --cl 0.90  --job-mode condor --sub-opts='+JobFlavour=\"workday\"'  --task-name HybridTest%s " % (str(lu)+categories[cat],categories[cat]+"/datacards_modified/dc_"+str(lu)+".txt",str(lu)+categories[cat])
                             os.system(command_run)
                             
                             """
@@ -153,6 +164,7 @@ def plotUpperLimits(lumi,categories):
     c.SetFrameLineWidth(2);
     c.SetTickx();
     c.SetTicky();
+    c.SetLogy();
     c.cd()
 
     frame = c.DrawFrame(1.4,0.001, 4.1, 1.2)
@@ -174,7 +186,7 @@ def plotUpperLimits(lumi,categories):
     #frame.SetMinimum(median[cat].GetHistogram().GetMinimum()*0.8)
     #frame.SetMaximum(median[cat].GetHistogram().GetMinimum()+(5.0/3.0)*(median[cat].GetHistogram().GetMaximum()-median[cat].GetHistogram().GetMinimum()))
     
-    frame.SetMinimum(0.0)
+    frame.SetMinimum(0.01)
     frame.SetMaximum(5.0)
     
     frame.GetXaxis().SetLimits(min(lumi) ,max(lumi)*1.2)
@@ -242,13 +254,17 @@ def plotUpperLimits(lumi,categories):
 
 # MAIN
 def main():
-    
+
+
+        
     #categories = ['ZTT']
     categories = ['W']
-    #categories = ['HF']
-    
-    #executeDataCards_onCondor(lumi,categories)
-    plotUpperLimits(lumi,categories)
+#    categories = ['HF']
+
+    if(args.runType == 'run'):
+            executeDataCards_onCondor(lumi,categories)
+    if(args.runType == 'plot'):
+            plotUpperLimits(lumi,categories)
 
 if __name__ == '__main__':
     main()
