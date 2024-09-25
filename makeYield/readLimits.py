@@ -264,7 +264,7 @@ def main():
 #    categories = ['W']
 #    categories = ['HF']
 
-
+        
     categories=[args.category]
     
     if(args.runType == 'run'):
