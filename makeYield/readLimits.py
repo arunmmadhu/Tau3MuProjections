@@ -265,7 +265,7 @@ def main():
 #    categories = ['HF']
     
     Whether_Hybrid=False
-    if(args.Method == 'A'):
+    if(args.Method == 'H'):
             Whether_Hybrid=True
     
     categories=[args.category]
