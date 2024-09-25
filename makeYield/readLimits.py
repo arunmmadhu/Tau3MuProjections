@@ -50,8 +50,8 @@ def executeDataCards_onCondor(lumi,categories):
                     if(Whether_Hybrid):
                             
                             #print("Running Sigma -2")
-                            command_run = "combineTool.py -M HybridNew --LHCmode LHC-limits  -n %s -d %s --rMin 0 --rMax 50 --cl 0.90 -t 10 --expectedFromGrid 0.5 --job-mode condor --sub-opts='+JobFlavour=\"workday\"'  --task-name HybridTest%s " % (str(lu)+categories[cat],categories[cat]+"/datacards_modified/dc_"+str(lu)+".txt",str(lu)+categories[cat])
-                            #command_run = "combineTool.py -M AsymptoticLimits  -n %s -d %s --cl 0.90  --job-mode condor --sub-opts='+JobFlavour=\"workday\"'  --task-name HybridTest%s " % (str(lu)+categories[cat],categories[cat]+"/datacards_modified/dc_"+str(lu)+".txt",str(lu)+categories[cat])
+                            #command_run = "combineTool.py -M HybridNew --LHCmode LHC-limits  -n %s -d %s --rMin 0 --rMax 50 --cl 0.90 -t 10 --expectedFromGrid 0.5 --job-mode condor --sub-opts='+JobFlavour=\"workday\"'  --task-name HybridTest%s " % (str(lu)+categories[cat],categories[cat]+"/datacards_modified/dc_"+str(lu)+".txt",str(lu)+categories[cat])
+                            command_run = "combineTool.py -M AsymptoticLimits  -n %s -d %s --cl 0.90  --job-mode condor --sub-opts='+JobFlavour=\"workday\"'  --task-name HybridTest%s " % (str(lu)+categories[cat],categories[cat]+"/datacards_modified/dc_"+str(lu)+".txt",str(lu)+categories[cat])
                             os.system(command_run)
                             
                             """
@@ -245,7 +245,10 @@ def plotUpperLimits(lumi,categories):
     latex.DrawLatex(0.15, 0.85, Text)
     latex.Draw('same') 
     print " "
-    c.SaveAs("Limit_scan.png")
+    if len(categories) < 2:
+            c.SaveAs("Limit_scan_"+categories[0]+".png")
+    else:
+            c.SaveAs("Limit_scan.png")
     c.Close()
     
 
@@ -257,10 +260,13 @@ def main():
 
 
         
-    #categories = ['ZTT']
-    categories = ['W']
+#    categories = ['ZTT']
+#    categories = ['W']
 #    categories = ['HF']
 
+
+    categories=[args.category]
+    
     if(args.runType == 'run'):
             executeDataCards_onCondor(lumi,categories)
     if(args.runType == 'plot'):
