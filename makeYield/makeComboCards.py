@@ -7,7 +7,7 @@ import subprocess
 
 
 #dirs = ['../ZTT/datacards_modified', '../W/datacards_modified', '../HF/datacards_modified']  # rm ZTT for now
-dirs = ['../W/datacards_modified', '../HF/datacards_modified']
+dirs = ['W/datacards_modified', 'HF/datacards_modified']
 
 
 pattern = re.compile(r'dc_(\d+)\.txt')
@@ -31,8 +31,8 @@ for directory in dirs:
 for number, files in files_dict.items():
     if len(files) == len(dirs):  # Make sure all directories have this number
 #        file1 = files['../ZTT/datacards_modified'] rm ZTT for now 
-        file2 = files['../W/datacards_modified']
-        file3 = files['../HF/datacards_modified']
+        file2 = files['W/datacards_modified']
+        file3 = files['HF/datacards_modified']
         output_file = "dc_%s.txt" % str(number)
         
 
@@ -41,7 +41,7 @@ for number, files in files_dict.items():
         
         print("Running command: %s" % (command) )
         os.system(command)
-        os.system('mv dc_*txt datacards_modified')
+        os.system('mv dc_*txt Combo/datacards_modified')
     else:
         print("Skipping number %s, not all directories have the file." % str(number))
 
