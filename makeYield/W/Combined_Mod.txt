@@ -1,34 +1,34 @@
-Combination of W/2018/unblind/datacards/CMS_T3MSignal_13TeV_W_2018.txt  W/2017/unblind/datacards/CMS_T3MSignal_13TeV_W_2017.txt
+Combination of W/2018/blind/datacards/CMS_T3MSignal_13TeV_W_2018.txt  W/2017/blind/datacards/CMS_T3MSignal_13TeV_W_2017.txt
 imax 6 number of bins
 jmax 1 number of processes minus 1
 kmax 38 number of nuisance parameters
 ----------------------------------------------------------------------------------------------------------------------------------
-shapes bkg       ch1_ch1   W/2018/unblind/datacards/../workspaces/CMS_T3M_13TeV_W_A18.root t3m_shapes:bkg
-shapes data_obs  ch1_ch1   W/2018/unblind/datacards/../workspaces/CMS_T3M_13TeV_W_A18.root t3m_shapes:data_obs
-shapes sig       ch1_ch1   W/2018/unblind/datacards/../workspaces/CMS_T3M_13TeV_W_A18.root t3m_shapes:sig
-shapes bkg       ch1_ch2   W/2018/unblind/datacards/../workspaces/CMS_T3M_13TeV_W_B18.root t3m_shapes:bkg
-shapes data_obs  ch1_ch2   W/2018/unblind/datacards/../workspaces/CMS_T3M_13TeV_W_B18.root t3m_shapes:data_obs
-shapes sig       ch1_ch2   W/2018/unblind/datacards/../workspaces/CMS_T3M_13TeV_W_B18.root t3m_shapes:sig
-shapes bkg       ch1_ch3   W/2018/unblind/datacards/../workspaces/CMS_T3M_13TeV_W_C18.root t3m_shapes:bkg
-shapes data_obs  ch1_ch3   W/2018/unblind/datacards/../workspaces/CMS_T3M_13TeV_W_C18.root t3m_shapes:data_obs
-shapes sig       ch1_ch3   W/2018/unblind/datacards/../workspaces/CMS_T3M_13TeV_W_C18.root t3m_shapes:sig
-shapes bkg       ch2_ch1   W/2017/unblind/datacards/../workspaces/CMS_T3M_13TeV_W_A17.root t3m_shapes:bkg
-shapes data_obs  ch2_ch1   W/2017/unblind/datacards/../workspaces/CMS_T3M_13TeV_W_A17.root t3m_shapes:data_obs
-shapes sig       ch2_ch1   W/2017/unblind/datacards/../workspaces/CMS_T3M_13TeV_W_A17.root t3m_shapes:sig
-shapes bkg       ch2_ch2   W/2017/unblind/datacards/../workspaces/CMS_T3M_13TeV_W_B17.root t3m_shapes:bkg
-shapes data_obs  ch2_ch2   W/2017/unblind/datacards/../workspaces/CMS_T3M_13TeV_W_B17.root t3m_shapes:data_obs
-shapes sig       ch2_ch2   W/2017/unblind/datacards/../workspaces/CMS_T3M_13TeV_W_B17.root t3m_shapes:sig
-shapes bkg       ch2_ch3   W/2017/unblind/datacards/../workspaces/CMS_T3M_13TeV_W_C17.root t3m_shapes:bkg
-shapes data_obs  ch2_ch3   W/2017/unblind/datacards/../workspaces/CMS_T3M_13TeV_W_C17.root t3m_shapes:data_obs
-shapes sig       ch2_ch3   W/2017/unblind/datacards/../workspaces/CMS_T3M_13TeV_W_C17.root t3m_shapes:sig
+shapes bkg       ch1_ch1   W/2018/blind/workspaces/CMS_T3M_13TeV_W_A18.root t3m_shapes:bkg
+shapes data_obs  ch1_ch1   W/2018/blind/workspaces/CMS_T3M_13TeV_W_A18.root t3m_shapes:data_obs
+shapes sig       ch1_ch1   W/2018/blind/workspaces/CMS_T3M_13TeV_W_A18.root t3m_shapes:sig
+shapes bkg       ch1_ch2   W/2018/blind/workspaces/CMS_T3M_13TeV_W_B18.root t3m_shapes:bkg
+shapes data_obs  ch1_ch2   W/2018/blind/workspaces/CMS_T3M_13TeV_W_B18.root t3m_shapes:data_obs
+shapes sig       ch1_ch2   W/2018/blind/workspaces/CMS_T3M_13TeV_W_B18.root t3m_shapes:sig
+shapes bkg       ch1_ch3   W/2018/blind/workspaces/CMS_T3M_13TeV_W_C18.root t3m_shapes:bkg
+shapes data_obs  ch1_ch3   W/2018/blind/workspaces/CMS_T3M_13TeV_W_C18.root t3m_shapes:data_obs
+shapes sig       ch1_ch3   W/2018/blind/workspaces/CMS_T3M_13TeV_W_C18.root t3m_shapes:sig
+shapes bkg       ch2_ch1   W/2017/blind/workspaces/CMS_T3M_13TeV_W_A17.root t3m_shapes:bkg
+shapes data_obs  ch2_ch1   W/2017/blind/workspaces/CMS_T3M_13TeV_W_A17.root t3m_shapes:data_obs
+shapes sig       ch2_ch1   W/2017/blind/workspaces/CMS_T3M_13TeV_W_A17.root t3m_shapes:sig
+shapes bkg       ch2_ch2   W/2017/blind/workspaces/CMS_T3M_13TeV_W_B17.root t3m_shapes:bkg
+shapes data_obs  ch2_ch2   W/2017/blind/workspaces/CMS_T3M_13TeV_W_B17.root t3m_shapes:data_obs
+shapes sig       ch2_ch2   W/2017/blind/workspaces/CMS_T3M_13TeV_W_B17.root t3m_shapes:sig
+shapes bkg       ch2_ch3   W/2017/blind/workspaces/CMS_T3M_13TeV_W_C17.root t3m_shapes:bkg
+shapes data_obs  ch2_ch3   W/2017/blind/workspaces/CMS_T3M_13TeV_W_C17.root t3m_shapes:data_obs
+shapes sig       ch2_ch3   W/2017/blind/workspaces/CMS_T3M_13TeV_W_C17.root t3m_shapes:sig
 ----------------------------------------------------------------------------------------------------------------------------------
 bin          ch1_ch1  ch1_ch2  ch1_ch3  ch2_ch1  ch2_ch2  ch2_ch3
-observation  24       5        18       14       21       11     
+observation  -1       -1       -1       -1       -1       -1     
 ----------------------------------------------------------------------------------------------------------------------------------
 bin                             ch1_ch1  ch1_ch1  ch1_ch2  ch1_ch2  ch1_ch3  ch1_ch3  ch2_ch1  ch2_ch1  ch2_ch2  ch2_ch2  ch2_ch3  ch2_ch3
 process                         sig      bkg      sig      bkg      sig      bkg      sig      bkg      sig      bkg      sig      bkg    
 process                         0        1        0        1        0        1        0        1        0        1        0        1      
-rate                            85.0604    510.7423  53.2766   338.1519  35.1541   605.7826  45.7105   406.9503  56.4864   715.4866  18.8004    278.1609 
+rate                            79.7441    478.8209  49.9468   317.0174  32.9570   567.9212  42.8536   381.5159  52.9560   670.7687  17.6254    260.7758 
 ----------------------------------------------------------------------------------------------------------------------------------
 HLT_Mu_A17              lnN     -        -        -        -        -        -        1.019    -        -        -        -        -      
 HLT_Mu_A18              lnN     1.01     -        -        -        -        -        -        -        -        -        -        -      
