@@ -15,7 +15,7 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('-c', '--category', required=True               , help='W, HF, ZTT',  dest='category'          , default='W') 
 parser.add_argument('-r', '--runType' , default='plot'              , help='Option run or plot', dest='runType'   )
-parser.add_argument('-m', '--Method' , default='A'              , help='Option A=Asymptotic, H=HybridNew', dest='Method' )
+parser.add_argument('-m', '--Method' , default='A'                  , help='Option A=Asymptotic, H=HybridNew', dest='Method' )
 args = parser.parse_args()
 
 
@@ -31,9 +31,27 @@ tdrstyle.setTDRStyle()
 
 
 #lumi = [97.7,129.0,150,377.0,500.0,700.0,1000.0, 1200.0, 1500.0, 1700.0, 2000.0, 2250.0, 2500.0, 2750.0, 3000.0 ]
-#$lumi = [59.0,97.7, 129.0, 377.0, 700.0, 1500.0, 2250.0, 3000.0, 3750.0, 4500.0]
+#lumi = [59.0,97.7, 129.0, 377.0, 700.0, 1500.0, 2250.0, 3000.0, 3750.0, 4500.0]
 #lumi = [59.0,97.7, 129.0]
-lumi = np.round(np.arange(500,2000,20), 0)
+
+
+if(args.category=="W"):
+        lumi = np.round(np.arange(100,3050,100), 0)
+        lumi = np.insert(lumi, 0 , 97.7)
+
+if(args.category=="HF"):
+        lumi = np.round(np.arange(100,3050,100), 0)
+        lumi = np.insert(lumi, 0 , 97.7)
+
+if(args.category=="ZTT"):
+        lumi = np.round(np.arange(100,3050,100), 0)
+        lumi = np.insert(lumi, 0 , 59.8)
+
+if(args.category=="Combo"):
+        lumi = np.round(np.arange(100,3050,100), 0)
+
+
+
 
 def executeDataCards_onCondor(lumi,categories,Whether_Hybrid):
         
@@ -44,30 +62,33 @@ def executeDataCards_onCondor(lumi,categories,Whether_Hybrid):
                 for lu_no in range(len(lumi)):
                         
                     lu = lumi[lu_no]
-                    print(lu)
+                    print('Luminosity: ', lu)
                         
                     if(Whether_Hybrid):
                             
                             print("Median")
                             command_run = "combineTool.py -M HybridNew --LHCmode LHC-limits  -n %s -d %s --rMin 0 --rMax 50 --cl 0.90 -t 10 --expectedFromGrid 0.5 --job-mode condor --sub-opts='+JobFlavour=\"workday\"'  --task-name HybridTest%s " % (str(lu)+categories[cat],categories[cat]+"/datacards_modified/dc_"+str(lu)+".txt",str(lu)+categories[cat])
+                            print("Run:   ", command_run)
                             os.system(command_run)
                             
-                            print("Running Sigma -2")
-                            command_run = "combineTool.py -M HybridNew --LHCmode LHC-limits  -n %s -d %s --rMin 0 --rMax 50 --cl 0.90 -t 10 --expectedFromGrid 0.025 --job-mode condor --sub-opts='+JobFlavour=\"workday\"'  --task-name HybridTest%s " % (str(lu)+categories[cat],categories[cat]+"/datacards_modified/dc_"+str(lu)+".txt",str(lu)+categories[cat])
-                            os.system(command_run)
-                            print("Running Sigma -1")
-                            command_run = "combineTool.py -M HybridNew --LHCmode LHC-limits  -n %s -d %s --rMin 0 --rMax 50 --cl 0.90 -t 10 --expectedFromGrid 0.16 --job-mode condor --sub-opts='+JobFlavour=\"workday\"'  --task-name HybridTest%s " % (str(lu)+categories[cat],categories[cat]+"/datacards_modified/dc_"+str(lu)+".txt",str(lu)+categories[cat])
-                            os.system(command_run)
-                            print("Running Sigma +1")
-                            command_run = "combineTool.py -M HybridNew --LHCmode LHC-limits  -n %s -d %s --rMin 0 --rMax 50 --cl 0.90 -t 10 --expectedFromGrid 0.84 --job-mode condor --sub-opts='+JobFlavour=\"workday\"'  --task-name HybridTest%s " % (str(lu)+categories[cat],categories[cat]+"/datacards_modified/dc_"+str(lu)+".txt",str(lu)+categories[cat])
-                            os.system(command_run)
-                            print("Running Sigma +2")
-                            command_run = "combineTool.py -M HybridNew --LHCmode LHC-limits  -n %s -d %s --rMin 0 --rMax 50 --cl 0.90 -t 10 --expectedFromGrid 0.975 --job-mode condor --sub-opts='+JobFlavour=\"workday\"'  --task-name HybridTest%s " % (str(lu)+categories[cat],categories[cat]+"/datacards_modified/dc_"+str(lu)+".txt",str(lu)+categories[cat])
-                            os.system(command_run)
+#                            print("Running Sigma -2")
+#                            command_run = "combineTool.py -M HybridNew --LHCmode LHC-limits  -n %s -d %s --rMin 0 --rMax 50 --cl 0.90 -t 10 --expectedFromGrid 0.025 --job-mode condor --sub-opts='+JobFlavour=\"workday\"'  --task-name HybridTest%s " % (str(lu)+categories[cat],categories[cat]+"/datacards_modified/dc_"+str(lu)+".txt",str(lu)+categories[cat])
+#                            os.system(command_run)
+#                            print("Running Sigma -1")
+#                            command_run = "combineTool.py -M HybridNew --LHCmode LHC-limits  -n %s -d %s --rMin 0 --rMax 50 --cl 0.90 -t 10 --expectedFromGrid 0.16 --job-mode condor --sub-opts='+JobFlavour=\"workday\"'  --task-name HybridTest%s " % (str(lu)+categories[cat],categories[cat]+"/datacards_modified/dc_"+str(lu)+".txt",str(lu)+categories[cat])
+#                            os.system(command_run)
+#                            print("Running Sigma +1")
+#                            command_run = "combineTool.py -M HybridNew --LHCmode LHC-limits  -n %s -d %s --rMin 0 --rMax 50 --cl 0.90 -t 10 --expectedFromGrid 0.84 --job-mode condor --sub-opts='+JobFlavour=\"workday\"'  --task-name HybridTest%s " % (str(lu)+categories[cat],categories[cat]+"/datacards_modified/dc_"+str(lu)+".txt",str(lu)+categories[cat])
+#                            os.system(command_run)
+#                            print("Running Sigma +2")
+#                            command_run = "combineTool.py -M HybridNew --LHCmode LHC-limits  -n %s -d %s --rMin 0 --rMax 50 --cl 0.90 -t 10 --expectedFromGrid 0.975 --job-mode condor --sub-opts='+JobFlavour=\"workday\"'  --task-name HybridTest%s " % (str(lu)+categories[cat],categories[cat]+"/datacards_modified/dc_"+str(lu)+".txt",str(lu)+categories[cat])
+#                            os.system(command_run)
                             
                     else:
                             
-                            command_run = "combineTool.py -M AsymptoticLimits  -n %s -d %s --cl 0.90  --job-mode condor --sub-opts='+JobFlavour=\"workday\"'  --task-name HybridTest%s " % (str(lu)+categories[cat],categories[cat]+"/datacards_modified/dc_"+str(lu)+".txt",str(lu)+categories[cat])
+                            command_run = "combineTool.py -M AsymptoticLimits --run blind  --cl 0.90 -n %s -d %s  --job-mode condor --sub-opts='+JobFlavour=\"workday\"'  --task-name HybridTest%s " % (str(lu)+categories[cat],categories[cat]+"/datacards_modified/dc_"+str(lu)+".txt",str(lu)+categories[cat])
+
+                            print("Run:   ", command_run)
                             os.system(command_run)
             
 
@@ -248,6 +269,7 @@ def plotUpperLimits(lumi,categories,Whether_Hybrid):
     print " "
     if len(categories) < 2:
             c.SaveAs("Limit_scan_"+categories[0]+".png")
+            c.SaveAs("Limit_scan_"+categories[0]+".pdf")
     else:
             c.SaveAs("Limit_scan.png")
     c.Close()

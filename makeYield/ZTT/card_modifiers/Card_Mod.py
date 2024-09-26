@@ -2,7 +2,7 @@ import argparse
 
 parser = argparse.ArgumentParser(description='For scaling events by lumi')
 
-parser.add_argument('--luminosity', action='store', default=97.7, help="Lumi scale\n DEFAULT: 97.7")
+parser.add_argument('--luminosity', action='store', default=59.8, help="Lumi scale\n DEFAULT: 59.8") #### Here is only 2018 stat, so Lumi = 59.8
 
 args = parser.parse_args()
 

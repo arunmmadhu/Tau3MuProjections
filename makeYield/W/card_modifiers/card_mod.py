@@ -13,7 +13,6 @@ replacement = ""
 for linenum, line in enumerate(file):
     #print(linenum)
     if(linenum==30):
-        #print(line)
         line_mod=line
         x1 = line.split()
         x1 = x1[1:]
