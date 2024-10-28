@@ -12,7 +12,7 @@ replacement = ""
 # using the for loop
 for linenum, line in enumerate(file):
     #print(linenum)
-    if(linenum==11):
+    if(linenum==24):
         #print(line)
         line_mod=line
         x1 = line.split()

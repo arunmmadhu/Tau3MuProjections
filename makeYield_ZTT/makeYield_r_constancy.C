@@ -51,11 +51,11 @@ void makeYield_r_constancy ()
     
     TString hname;
     
-    float signal_region_min(1.4);
-    float signal_region_max(2.1);
+    float signal_region_min(1.6);
+    float signal_region_max(2.0);
     
-    float signal_peak_region_min(1.73);
-    float signal_peak_region_max(1.82);
+    float signal_peak_region_min(1.74);
+    float signal_peak_region_max(1.81);
     
     float Loose_BDT_Cut(-0.4);
     
