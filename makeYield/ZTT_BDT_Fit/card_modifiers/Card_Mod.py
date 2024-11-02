@@ -55,7 +55,6 @@ for linenum, line in enumerate(file):
         line_mod=line_mod.replace(x1[1], res1)
         line_mod=line_mod.replace(x1[2], res2)
                 
-        print(line_mod)
         replacement = replacement + line_mod
     
     elif(linenum==linenum_actual_2):
@@ -63,9 +62,8 @@ for linenum, line in enumerate(file):
         line_mod=line
         x1 = line.split()
         res1 = "{:.0f}".format(float(sb))
-        line_mod=line_mod.replace(' '+x1[1]+' ', ' '+res1+' ')
+        line_mod=line_mod.replace(' '+x1[2]+' ', ' '+res1+' ')
                 
-        print(line_mod)
         replacement = replacement + line_mod
     
     else:

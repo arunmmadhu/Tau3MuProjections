@@ -184,7 +184,7 @@ class makeCards:
         
         
         #To create datacards
-        def MakeLumiScanCards(self,lumi,categ):
+        def MakeLumiScanCards(self,lumi,categ,analyzed_lumi):
                 
                 command_recreate_categ_dir = "rm -r lumi_limit_scans/{0}; mkdir lumi_limit_scans/{0}".format(categ)
                 os.system(command_recreate_categ_dir)
@@ -214,35 +214,179 @@ class makeCards:
                 
                 exp_fact = (signal_range_hi-signal_range_lo)/(fit_range_hi-fit_range_lo-(signal_range_hi-signal_range_lo))
                 
-                num_points = 20
-                bdt_points = np.round(np.linspace(0.0,1.0,num_points), 2)
+                for point in bdt_points:  # For loop for bdt cuts in range [X_min;X_max]
                 
-                
-                for lu_no in range(len(lumi)):
-                    lu = lumi[lu_no]
-                    print(lu)
+                    self.bdt_cv.setRange("Integral_Range", point, 100.0)
                     
-                    command_recreate_lumidir = "rm -r lumi_limit_scans/{0}/lumi_{1}; mkdir lumi_limit_scans/{0}/lumi_{1}".format(categ, int(lu))
+                    command_recreate_lumidir = "rm -r lumi_limit_scans/{0}/BDT_point_{1}; mkdir lumi_limit_scans/{0}/BDT_point_{1}".format(categ, str(point))
                     os.system(command_recreate_lumidir)
                     
-                    for point in bdt_points:  # For loop for bdt cuts in range [X_min;X_max]
+                    for lu_no in range(len(lumi)):
                         
-                        self.bdt_cv.setRange("Integral_Range", point, 100.0)
+                        lu = lumi[lu_no]
+                        print(lu)
                         
-                        print "test 1"
+                        sig_est = self.BDTNorm_MC.getVal() * (self.BDT_distribution_MC.createIntegral(ROOT.RooArgSet(self.bdt_cv), ROOT.RooArgSet(self.bdt_cv), "Integral_Range").getVal() ) * lu/analyzed_lumi
+                        bkg_est = exp_fact * self.BDTNorm.getVal() * (self.BDT_distribution.createIntegral(ROOT.RooArgSet(self.bdt_cv), ROOT.RooArgSet(self.bdt_cv), "Integral_Range").getVal() ) * lu/analyzed_lumi
+                        sb_est = self.BDTNorm.getVal() * (self.BDT_distribution.createIntegral(ROOT.RooArgSet(self.bdt_cv), ROOT.RooArgSet(self.bdt_cv), "Integral_Range").getVal() ) * lu/analyzed_lumi
                         
-                        sig_est = signalnorm * self.BDTNorm_MC.getVal() * (self.BDT_distribution_MC.createIntegral(ROOT.RooArgSet(self.bdt_cv), ROOT.RooArgSet(self.bdt_cv), "Integral_Range").getVal() )
-                        bkg_est = exp_fact * self.BDTNorm.getVal() * (self.BDT_distribution.createIntegral(ROOT.RooArgSet(self.bdt_cv), ROOT.RooArgSet(self.bdt_cv), "Integral_Range").getVal() )
-                        sb_est = exp_fact * self.BDTNorm.getVal() * (self.BDT_distribution.createIntegral(ROOT.RooArgSet(self.bdt_cv), ROOT.RooArgSet(self.bdt_cv), "Integral_Range").getVal() )
-                        
-                        print "test 2"
+                        print "bdt point: ", point," sig_est: ", sig_est, " bkg_est: ", bkg_est, " sb_est: ", sb_est
                         
                         command_mod_card = "python card_modifiers/Card_Mod.py --categ " + str(categ) + " --sig_exp " + str(sig_est) + " --bkg_exp " + str(bkg_est) + " --sb_exp " + str(sb_est) 
                         os.system(command_mod_card)
                         
-                        command_copy_dc = "cp modified_dc_{0}.txt lumi_limit_scans/{0}/lumi_{1}/dc_{2}.txt".format(categ, int(lu), str(lu))
+                        command_copy_dc = "cp modified_dc_{0}.txt lumi_limit_scans/{0}/BDT_point_{1}/dc_{2}.txt".format(categ, str(point), str(lu))
                         os.system(command_copy_dc)
         
+        
+
+
+
+
+def executeDataCards_onCondor(lumi,categories,Whether_Hybrid,bdt_points):
+        
+        Cat_No = len(categories)
+        
+        for cat in range(Cat_No):
+        
+                for point in bdt_points:  # For loop for bdt cuts in range [X_min;X_max]
+                        for lu_no in range(len(lumi)):
+                                
+                            lu = lumi[lu_no]
+                            print('Luminosity: ', lu)
+                                
+                            if(Whether_Hybrid):
+                                    
+                                    command_run = "combineTool.py -M HybridNew --LHCmode LHC-limits  -n %s -d %s --rMin 0 --rMax 50 --cl 0.90 -t 10 --expectedFromGrid 0.5 --job-mode condor --sub-opts='+JobFlavour=\"workday\"'  --task-name HybridTest%s " % (str(lu)+'_'+categories[cat]+'_'+str(point),"lumi_limit_scans/{0}/BDT_point_{1}/dc_{2}.txt".format(categories[cat], str(point), str(lu)),str(lu)+'_'+categories[cat]+'_'+str(point))
+                                    print("Run:   ", command_run)
+                                    os.system(command_run)
+                                    
+                            else:
+                                    
+                                    command_run = "combineTool.py -M AsymptoticLimits --run blind  --cl 0.90 -n %s -d %s  --job-mode condor --sub-opts='+JobFlavour=\"workday\"'  --task-name AsymTest%s " % (str(lu)+'_'+categories[cat]+'_'+str(point),"lumi_limit_scans/{0}/BDT_point_{1}/dc_{2}.txt".format(categories[cat], str(point), str(lu)),str(lu)+'_'+categories[cat]+'_'+str(point))
+        
+                                    print("Run:   ", command_run)
+                                    os.system(command_run)
+
+# GET limits from root file
+def getLimits(file_name):
+ 
+    file = TFile(file_name)
+    tree = file.Get("limit")
+ 
+    limits = [ ]
+    for quantile in tree:
+        limits.append(tree.limit)
+        print ">>>   %.2f" % limits[-1]
+ 
+    return limits[:6]
+    
+# PLOT upper limits
+def ReadAndCopyMinimumBDTCard(lumi,categories,Whether_Hybrid,bdt_points):
+ 
+    N = len(lumi)
+    Cat_No = len(categories)
+    
+    label=[None] * Cat_No
+    
+    for cat in range(Cat_No):
+    
+            categ = categories[cat]
+            
+            cmd1 = "mkdir {0}".format(categ)
+            os.system(cmd1)
+            
+            cmd2 = "rm -rf {0}/datacards_modified/; mkdir {0}/datacards_modified/;".format(categ)
+            os.system(cmd2)
+            
+            if(categ == 'taue'):
+                    analyzed_lumi = 59.83
+            if(categ == 'taumu'):
+                    analyzed_lumi = 59.83
+            if(categ == 'tauhA'):
+                    analyzed_lumi = 59.83
+            if(categ == 'tauhB'):
+                    analyzed_lumi = 59.83
+            if(categ == 'all'):
+                    analyzed_lumi = 59.83
+            
+            text_limits=open("TextLimits_"+categ+".txt","w")
+            
+            if(Whether_Hybrid):
+                    limits_read = []
+                    for point in bdt_points:  # For loop for bdt cuts in range [X_min;X_max]
+                            limits_read_row = []
+                            for i in range(N):
+                                file_name = "higgsCombine"+str(lumi[i])+'_'+categories[cat]+'_'+str(point)+".HybridNew.mH120.123456.quant0.500.root"
+                                limit = getLimits(file_name)
+                                
+                                #  Check why some limits only have 1 value
+                                if len(limit)<5:
+                                        limit = [1000000.0,1000000.0,1000000.0,1000000.0,1000000.0]
+                                
+                                print " cat: ",categories[cat]," lumi: ",lumi[i]," bdt point: ",point," Limit: ",limit[2]
+                                limits_read_row.append(limit[2])
+                                
+                            limits_read.append(limits_read_row)
+                    
+                    # Getting the BDT cut at minimum limit
+                    transposed_matrix = list(zip(*limits_read))
+                    min_values = [min(column) for column in transposed_matrix]
+                    print "limits_read values: ",limits_read
+                    print "min values: ",min_values
+                    min_indices = []
+                    for col_index, min_val in enumerate(min_values):
+                            # Find the row in the original matrix where the minimum value is located in this column
+                            for row_index, row in enumerate(limits_read):
+                                if row[col_index] == min_val:
+                                    min_indices.append((row_index, col_index))
+                                    break  # Stop searching once the minimum is found
+                    for bdt_index, lumi_index in min_indices:
+                            #print(f"Minimum value found at row {row_index}, column {col_index}")
+                            text_limits.write("bdt %.2f   lumi %.2f     median exp %.2f\n"%(bdt_points[bdt_index],lumi[lumi_index],limits_read[bdt_index][lumi_index]))
+                            
+                            command_copy_dc = "cp  lumi_limit_scans/{0}/BDT_point_{1}/dc_{2}.txt {0}/datacards_modified/dc_{2}.txt".format(categ, str(bdt_points[bdt_index]), str(lumi[lumi_index]))
+                            print "Copy command: ",command_copy_dc
+                            os.system(command_copy_dc)
+                    
+                    #print(min_indices)
+            
+            else:
+                    limits_read = []
+                    for point in bdt_points:  # For loop for bdt cuts in range [X_min;X_max]
+                            limits_read_row = []
+                            for i in range(N):
+                                file_name1 = "higgsCombine"+str(lumi[i])+'_'+categories[cat]+'_'+str(point)+".AsymptoticLimits.mH120.root"
+                                limit = getLimits(file_name1)
+                                
+                                #  Check why some limits only have 1 value
+                                if len(limit)<5:
+                                        limit = [1000000.0,1000000.0,1000000.0,1000000.0,1000000.0]
+                                
+                                print " cat: ",categories[cat]," lumi: ",lumi[i]," bdt point: ",point," Limit: ",limit[2]
+                                limits_read_row.append(limit[2])
+                                
+                            limits_read.append(limits_read_row)
+                    
+                    # Getting the BDT cut at minimum limit
+                    transposed_matrix = list(zip(*limits_read))
+                    min_values = [min(column) for column in transposed_matrix]
+                    min_indices = []
+                    for col_index, min_val in enumerate(min_values):
+                            # Find the row in the original matrix where the minimum value is located in this column
+                            for row_index, row in enumerate(limits_read):
+                                if row[col_index] == min_val:
+                                    min_indices.append((row_index, col_index))
+                                    break  # Stop searching once the minimum is found
+                    for bdt_index, lumi_index in min_indices:
+                            #print(f"Minimum value found at row {row_index}, column {col_index}")
+                            text_limits.write("bdt %.2f   lumi %.2f     median exp %.2f\n"%(bdt_points[bdt_index],lumi[lumi_index],limits_read[bdt_index][lumi_index]))
+                            
+                            command_copy_dc = "cp  lumi_limit_scans/{0}/BDT_point_{1}/dc_{2}.txt {0}/datacards_modified/dc_{2}.txt".format(categ, str(bdt_points[bdt_index]), str(lumi[lumi_index]))
+                            print "Copy command: ",command_copy_dc
+                            os.system(command_copy_dc)
+                    
+                    #print(min_indices)
 
 if __name__ == "__main__":
     
@@ -250,24 +394,47 @@ if __name__ == "__main__":
         ROOT.gROOT.SetBatch(True)
         
         datafile = "Combine_Tree_ztau3mutau.root"
-        category = 'taumu'
+        #categ = 'taumu'
+        #categories = ['taumu']
+        categories = ['taue','taumu','tauhA','tauhB','all']
         
+
         
-        BDTFit_Cat = makeCards()
-        BDTFit_Cat.FitBDT(datafile,category)
-        #print "is valid BDT_distribution_MC: ",isinstance(BDTFit_Cat.BDT_distribution_MC, ROOT.RooAddPdf), BDTFit_Cat.BDT_distribution_MC
-        
-        lumi = np.round(np.arange(100,3050,100), 0)
+        lumi = np.round(np.arange(100,4500,500), 0)
+        #lumi = np.round(np.arange(100,200,100), 0)
         lumi = np.insert(lumi, 0 , 59.8)
         
         cmd1 = 'mkdir lumi_limit_scans;'
         os.system(cmd1)
         
-        cmd2 = 'mkdir datacards_modified;'
-        os.system(cmd2)
+        #cmd2 = 'mkdir datacards_modified;'
+        #os.system(cmd2)
         
-        BDTFit_Cat.MakeLumiScanCards(lumi,category)
+        num_points = 20
+        bdt_points = np.round(np.linspace(0.0,1.0,num_points), 2)
         
+        Cat_No = len(categories)
+        for cat in range(Cat_No):
+                categ = categories[cat]
+                
+                analyzed_lumi = 1.0
+                if(categ == 'taue'):
+                        analyzed_lumi = 59.83
+                if(categ == 'taumu'):
+                        analyzed_lumi = 59.83
+                if(categ == 'tauhA'):
+                        analyzed_lumi = 59.83
+                if(categ == 'tauhB'):
+                        analyzed_lumi = 59.83
+                if(categ == 'all'):
+                        analyzed_lumi = 59.83
+                
+                #BDTFit_Cat = makeCards()
+                #BDTFit_Cat.FitBDT(datafile,categ)
+                #BDTFit_Cat.MakeLumiScanCards(lumi,categ,analyzed_lumi)
+                
+        #executeDataCards_onCondor(lumi,categories,False,bdt_points)
+        ReadAndCopyMinimumBDTCard(lumi,categories,False,bdt_points)
 
         
         
