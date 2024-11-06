@@ -98,9 +98,9 @@ class makeCards:
                 
                 self.bdt_cv.setRange("BDT_Fit_Range", BDT_Score_Min, 1.0);
                 
-                self.a = RooRealVar("a", "a", 1.0, -10.0, 10.0)
+                self.a = RooRealVar("a", "a", 1.0, 0.0, 10.0)
                 self.b = RooRealVar("b", "b", 1.0, -10.0, 10.0)
-                self.c = RooRealVar("c", "c", 1.0, -100.0, 10.0)
+                self.c = RooRealVar("c", "c", 1.0, -10.0, 10.0)
                 
                 #quadratic = RooFormulaVar("quadratic", "a + b*self.bdt_cv + c*self.bdt_cv*self.bdt_cv", RooArgList(a, b, c, self.bdt_cv))
                 #expModel = RooGenericPdf("expModel", "exp(quadratic)", RooArgList(quadratic)) #Exponential of the quadratic polynomial
@@ -108,7 +108,7 @@ class makeCards:
                 self.quadratic = RooFormulaVar("quadratic", "a + b*bdt_cv + c*bdt_cv*bdt_cv", RooArgList(self.a, self.b, self.c, self.bdt_cv))
                 self.expModel = RooGenericPdf("expModel", "exp(quadratic)", RooArgList(self.quadratic)) #Exponential of the quadratic polynomial
                 
-                self.BDTNorm = RooRealVar("BDTNorm", "BDTNorm", 500.0, 0.1, 50000)
+                self.BDTNorm = RooRealVar("BDTNorm", "BDTNorm", 500.0, 0.1, 5000000)
                 self.BDT_distribution = RooAddPdf("BDT_distribution", "BDT_distribution",RooArgList(self.expModel), RooArgList(self.BDTNorm))
                 #BDT_distribution = RooAddPdf("BDT_distribution", "BDT_distribution",RooArgList(quadratic), RooArgList(BDTNorm))
                 
@@ -119,8 +119,6 @@ class makeCards:
                 
                 
                 # For fitting BDT Output in Signal
-                
-                BDT_Score_Min=-0.4
                 
                 MCSelector = RooFormulaVar('MCSelector', 'MCSelector', phivetoes+omegavetoes+' isMC !=0 & (isMC == 211 | isMC == 210231 | isMC == 210232 | isMC == 210233 ) & (tripletMass>=%s & tripletMass<=%s) ' %(fit_range_lo,fit_range_hi) , RooArgList(variables))
                 
@@ -393,7 +391,7 @@ if __name__ == "__main__":
         ROOT.gROOT.SetBatch(True)
         
         datafile = "Combine_Tree_ztau3mutau.root"
-        #categories = ['taumu']
+        #categories = ['all']
         categories = ['taue','taumu','tauhA','tauhB','all']
         #categories = ['combined']
         
@@ -445,8 +443,8 @@ if __name__ == "__main__":
                         BDTFit_Cat.MakeLumiScanCards(lumi,categ,analyzed_lumi)
                 
                 
-        #executeDataCards_onCondor(lumi,categories,False,bdt_points)
-        ReadAndCopyMinimumBDTCard(lumi,categories,False,bdt_points)
+        executeDataCards_onCondor(lumi,categories,False,bdt_points)
+        #ReadAndCopyMinimumBDTCard(lumi,categories,False,bdt_points)
 
         
         

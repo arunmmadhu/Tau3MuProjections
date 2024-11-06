@@ -44,7 +44,7 @@ if(args.category=="HF"):
         lumi = np.insert(lumi, 0 , 97.7)
 
 if(args.category=="ZTT"):
-        lumi = np.round(np.arange(100,3050,100), 0)
+        lumi = np.round(np.arange(100,4500,500), 0)
         lumi = np.insert(lumi, 0 , 59.8)
 
 if(args.category=="Combo"):
@@ -63,33 +63,48 @@ def executeDataCards_onCondor(lumi,categories,Whether_Hybrid):
                         
                     lu = lumi[lu_no]
                     print('Luminosity: ', lu)
-                        
-                    if(Whether_Hybrid):
-                            
-                            print("Median")
-                            command_run = "combineTool.py -M HybridNew --LHCmode LHC-limits  -n %s -d %s --rMin 0 --rMax 50 --cl 0.90 -t 10 --expectedFromGrid 0.5 --job-mode condor --sub-opts='+JobFlavour=\"workday\"'  --task-name HybridTest%s " % (str(lu)+categories[cat],categories[cat]+"/datacards_modified/dc_"+str(lu)+".txt",str(lu)+categories[cat])
-                            print("Run:   ", command_run)
-                            os.system(command_run)
-                            
-#                            print("Running Sigma -2")
-#                            command_run = "combineTool.py -M HybridNew --LHCmode LHC-limits  -n %s -d %s --rMin 0 --rMax 50 --cl 0.90 -t 10 --expectedFromGrid 0.025 --job-mode condor --sub-opts='+JobFlavour=\"workday\"'  --task-name HybridTest%s " % (str(lu)+categories[cat],categories[cat]+"/datacards_modified/dc_"+str(lu)+".txt",str(lu)+categories[cat])
-#                            os.system(command_run)
-#                            print("Running Sigma -1")
-#                            command_run = "combineTool.py -M HybridNew --LHCmode LHC-limits  -n %s -d %s --rMin 0 --rMax 50 --cl 0.90 -t 10 --expectedFromGrid 0.16 --job-mode condor --sub-opts='+JobFlavour=\"workday\"'  --task-name HybridTest%s " % (str(lu)+categories[cat],categories[cat]+"/datacards_modified/dc_"+str(lu)+".txt",str(lu)+categories[cat])
-#                            os.system(command_run)
-#                            print("Running Sigma +1")
-#                            command_run = "combineTool.py -M HybridNew --LHCmode LHC-limits  -n %s -d %s --rMin 0 --rMax 50 --cl 0.90 -t 10 --expectedFromGrid 0.84 --job-mode condor --sub-opts='+JobFlavour=\"workday\"'  --task-name HybridTest%s " % (str(lu)+categories[cat],categories[cat]+"/datacards_modified/dc_"+str(lu)+".txt",str(lu)+categories[cat])
-#                            os.system(command_run)
-#                            print("Running Sigma +2")
-#                            command_run = "combineTool.py -M HybridNew --LHCmode LHC-limits  -n %s -d %s --rMin 0 --rMax 50 --cl 0.90 -t 10 --expectedFromGrid 0.975 --job-mode condor --sub-opts='+JobFlavour=\"workday\"'  --task-name HybridTest%s " % (str(lu)+categories[cat],categories[cat]+"/datacards_modified/dc_"+str(lu)+".txt",str(lu)+categories[cat])
-#                            os.system(command_run)
-                            
-                    else:
-                            
-                            command_run = "combineTool.py -M AsymptoticLimits --run blind  --cl 0.90 -n %s -d %s  --job-mode condor --sub-opts='+JobFlavour=\"workday\"'  --task-name HybridTest%s " % (str(lu)+categories[cat],categories[cat]+"/datacards_modified/dc_"+str(lu)+".txt",str(lu)+categories[cat])
-
-                            print("Run:   ", command_run)
-                            os.system(command_run)
+                    
+                    subcat = []
+                    
+                    if(args.category=="W"):
+                            subcat = ["W"]
+                    if(args.category=="HF"):
+                            subcat = ["HF"]
+                    if(args.category=="ZTT"):
+                            subcat = ['taue','taumu','tauhA','tauhB','all']
+                    if(args.category=="Combo"):
+                            subcat = ["Combo"]
+                    
+                    Cat_No_sub = len(subcat)
+                    
+                    for cat_sub in range(Cat_No_sub):
+                    
+                            if(Whether_Hybrid):
+                                    
+                                    print("Median")
+                                    command_run = "combineTool.py -M HybridNew --LHCmode LHC-limits  -n %s -d %s --rMin 0 --rMax 50 --cl 0.90 -t 10 --expectedFromGrid 0.5 --job-mode condor --sub-opts='+JobFlavour=\"workday\"'  --task-name HybridTest%s " % (str(lu)+"_"+categories[cat]+"_"+subcat[cat_sub],categories[cat]+"/"+subcat[cat_sub]+"/datacards_modified/dc_"+str(lu)+".txt",str(lu)+"_"+categories[cat]+"_"+subcat[cat_sub])
+                                    print("Run:   ", command_run)
+                                    os.system(command_run)
+                                    
+        #                            print("Running Sigma -2")
+        #                            command_run = "combineTool.py -M HybridNew --LHCmode LHC-limits  -n %s -d %s --rMin 0 --rMax 50 --cl 0.90 -t 10 --expectedFromGrid 0.025 --job-mode condor --sub-opts='+JobFlavour=\"workday\"'  --task-name HybridTest%s " % (str(lu)+categories[cat],categories[cat]+"/datacards_modified/dc_"+str(lu)+".txt",str(lu)+categories[cat])
+        #                            os.system(command_run)
+        #                            print("Running Sigma -1")
+        #                            command_run = "combineTool.py -M HybridNew --LHCmode LHC-limits  -n %s -d %s --rMin 0 --rMax 50 --cl 0.90 -t 10 --expectedFromGrid 0.16 --job-mode condor --sub-opts='+JobFlavour=\"workday\"'  --task-name HybridTest%s " % (str(lu)+categories[cat],categories[cat]+"/datacards_modified/dc_"+str(lu)+".txt",str(lu)+categories[cat])
+        #                            os.system(command_run)
+        #                            print("Running Sigma +1")
+        #                            command_run = "combineTool.py -M HybridNew --LHCmode LHC-limits  -n %s -d %s --rMin 0 --rMax 50 --cl 0.90 -t 10 --expectedFromGrid 0.84 --job-mode condor --sub-opts='+JobFlavour=\"workday\"'  --task-name HybridTest%s " % (str(lu)+categories[cat],categories[cat]+"/datacards_modified/dc_"+str(lu)+".txt",str(lu)+categories[cat])
+        #                            os.system(command_run)
+        #                            print("Running Sigma +2")
+        #                            command_run = "combineTool.py -M HybridNew --LHCmode LHC-limits  -n %s -d %s --rMin 0 --rMax 50 --cl 0.90 -t 10 --expectedFromGrid 0.975 --job-mode condor --sub-opts='+JobFlavour=\"workday\"'  --task-name HybridTest%s " % (str(lu)+categories[cat],categories[cat]+"/datacards_modified/dc_"+str(lu)+".txt",str(lu)+categories[cat])
+        #                            os.system(command_run)
+                                    
+                            else:
+                                    
+                                    command_run = "combineTool.py -M AsymptoticLimits --run blind  --cl 0.90 -n %s -d %s  --job-mode condor --sub-opts='+JobFlavour=\"workday\"'  --task-name Asymptotic%s " % (str(lu)+"_"+categories[cat]+"_"+subcat[cat_sub],categories[cat]+"/"+subcat[cat_sub]+"/datacards_modified/dc_"+str(lu)+".txt",str(lu)+"_"+categories[cat]+"_"+subcat[cat_sub])
+        
+                                    print("Run:   ", command_run)
+                                    os.system(command_run)
             
 
 # GET limits from root file
@@ -111,61 +126,82 @@ def plotUpperLimits(lumi,categories,Whether_Hybrid):
     N = len(lumi)
     Cat_No = len(categories)
     
+    WhetherMultipleBroadCategories = False
+    if (Cat_No>1):
+            WhetherMultipleBroadCategories = True
+    
     label=[None] * Cat_No
     
+    subcat = []
+    subcat_label = []
     for cat in range(Cat_No):
             if categories[cat]=='HF':
                     label[cat] = 'Heavy Flavor'
+                    subcat = ["HF"]
+                    subcat_label = ["HF"]
             if categories[cat]=='ZTT':
                     label[cat] = 'ZTT'
+                    subcat = ['taue','taumu','tauhA','tauhB','all']
+                    subcat_label = ['taue','taumu','tauhA','tauhB','all']
             if categories[cat]=='W':
                     label[cat] = 'W'
+                    subcat = ["W"]
+                    subcat_label = ["W"]
     
-    yellow=[None] * Cat_No
-    green=[None] * Cat_No
-    median=[None] * Cat_No
+    Cat_No_sub = len(subcat)
+    
+    WhetherMultipleSmallCategories = False
+    if (Cat_No_sub>1):
+            WhetherMultipleSmallCategories = True
+    
+    yellow=[[None] * Cat_No_sub for _ in range(Cat_No)]
+    green=[[None] * Cat_No_sub for _ in range(Cat_No)]
+    median=[[None] * Cat_No_sub for _ in range(Cat_No)]
     
     for cat in range(Cat_No):
     
-            yellow[cat] = TGraph(2*N)   
-            green[cat] = TGraph(2*N)  
-            median[cat] = TGraph(N)  
-            
-            text_limits=open("TextLimits.txt","w")
-            
-            if(Whether_Hybrid):
-                    for i in range(N):
-                        file_name1 = "higgsCombine"+str(lumi[i])+categories[cat]+".HybridNew.mH120.123456.quant0.025.root"
-                        limit1 = getLimits(file_name1)
-                        file_name2 = "higgsCombine"+str(lumi[i])+categories[cat]+".HybridNew.mH120.123456.quant0.160.root"
-                        limit2 = getLimits(file_name2)
-                        file_name3 = "higgsCombine"+str(lumi[i])+categories[cat]+".HybridNew.mH120.123456.quant0.500.root"
-                        limit3 = getLimits(file_name3)
-                        file_name4 = "higgsCombine"+str(lumi[i])+categories[cat]+".HybridNew.mH120.123456.quant0.840.root"
-                        limit4 = getLimits(file_name4)
-                        file_name5 = "higgsCombine"+str(lumi[i])+categories[cat]+".HybridNew.mH120.123456.quant0.975.root"
-                        limit5 = getLimits(file_name5)
-                        
-                        yellow.SetPoint( 2*N-1-i, lumi[i], limit1[2]) # - 2 sigma
-                        green[cat].SetPoint(  2*N-1-i, lumi[i], limit2[2]) # - 1 sigma
-                        median[cat].SetPoint(    i,    lumi[i], limit3[2]) #    median
-                        green[cat].SetPoint(     i,    lumi[i], limit4[2]) # + 1 sigma
-                        yellow[cat].SetPoint(    i,    lumi[i], limit5[2]) # + 2 sigma
-                        
-                        text_limits.write("bdt %.2f     median[cat] exp %.2f\n"%(lumi[i],limit3[2]))
-            
-            else:
-                    for i in range(N):
-                        file_name1 = "higgsCombine"+str(lumi[i])+categories[cat]+".AsymptoticLimits.mH120.root"
-                        limit1 = getLimits(file_name1)
-                        
-                        yellow[cat].SetPoint( 2*N-1-i, lumi[i], limit1[0]) # - 2 sigma
-                        green[cat].SetPoint(  2*N-1-i, lumi[i], limit1[1]) # - 1 sigma
-                        median[cat].SetPoint(    i,    lumi[i], limit1[2]) #    median
-                        green[cat].SetPoint(     i,    lumi[i], limit1[3]) # + 1 sigma
-                        yellow[cat].SetPoint(    i,    lumi[i], limit1[4]) # + 2 sigma
-                        
-                        text_limits.write("bdt %.2f     median[cat] exp %.2f\n"%(lumi[i],limit1[2]))
+            for cat_sub in range(Cat_No_sub):
+                    
+                    yellow[cat][cat_sub] = TGraph(2*N)   
+                    green[cat][cat_sub] = TGraph(2*N)  
+                    median[cat][cat_sub] = TGraph(N)  
+                    
+                    text_limits=open("TextLimits.txt","w")
+                    
+                    
+                    if(Whether_Hybrid):
+                            for i in range(N):
+                                file_name1 = "higgsCombine"+str(lumi[i])+"_"+categories[cat]+"_"+subcat[cat_sub]+".HybridNew.mH120.123456.quant0.025.root"
+                                limit1 = getLimits(file_name1)
+                                file_name2 = "higgsCombine"+str(lumi[i])+"_"+categories[cat]+"_"+subcat[cat_sub]+".HybridNew.mH120.123456.quant0.160.root"
+                                limit2 = getLimits(file_name2)
+                                file_name3 = "higgsCombine"+str(lumi[i])+"_"+categories[cat]+"_"+subcat[cat_sub]+".HybridNew.mH120.123456.quant0.500.root"
+                                limit3 = getLimits(file_name3)
+                                file_name4 = "higgsCombine"+str(lumi[i])+"_"+categories[cat]+"_"+subcat[cat_sub]+".HybridNew.mH120.123456.quant0.840.root"
+                                limit4 = getLimits(file_name4)
+                                file_name5 = "higgsCombine"+str(lumi[i])+"_"+categories[cat]+"_"+subcat[cat_sub]+".HybridNew.mH120.123456.quant0.975.root"
+                                limit5 = getLimits(file_name5)
+                                
+                                yellow[cat][cat_sub].SetPoint( 2*N-1-i, lumi[i], limit1[2]) # - 2 sigma
+                                green[cat][cat_sub].SetPoint(  2*N-1-i, lumi[i], limit2[2]) # - 1 sigma
+                                median[cat][cat_sub].SetPoint(    i,    lumi[i], limit3[2]) #    median
+                                green[cat][cat_sub].SetPoint(     i,    lumi[i], limit4[2]) # + 1 sigma
+                                yellow[cat][cat_sub].SetPoint(    i,    lumi[i], limit5[2]) # + 2 sigma
+                                
+                                text_limits.write("bdt %.2f     median[cat] exp %.2f\n"%(lumi[i],limit3[2]))
+                    
+                    else:
+                            for i in range(N):
+                                file_name1 = "higgsCombine"+str(lumi[i])+"_"+categories[cat]+"_"+subcat[cat_sub]+".AsymptoticLimits.mH120.root"
+                                limit1 = getLimits(file_name1)
+                                
+                                yellow[cat][cat_sub].SetPoint( 2*N-1-i, lumi[i], limit1[0]) # - 2 sigma
+                                green[cat][cat_sub].SetPoint(  2*N-1-i, lumi[i], limit1[1]) # - 1 sigma
+                                median[cat][cat_sub].SetPoint(    i,    lumi[i], limit1[2]) #    median
+                                green[cat][cat_sub].SetPoint(     i,    lumi[i], limit1[3]) # + 1 sigma
+                                yellow[cat][cat_sub].SetPoint(    i,    lumi[i], limit1[4]) # + 2 sigma
+                                
+                                text_limits.write("bdt %.2f     median[cat] exp %.2f\n"%(lumi[i],limit1[2]))
 
     W = 800
     H  = 600
@@ -214,22 +250,24 @@ def plotUpperLimits(lumi,categories,Whether_Hybrid):
     frame.GetXaxis().SetLimits(min(lumi) ,max(lumi)*1.2)
 
 
-    for cat in range(Cat_No):
-            yellow[cat].SetFillColor(ROOT.kOrange)
-            yellow[cat].SetLineColor(ROOT.kOrange)
-            yellow[cat].SetFillStyle(1001)
-            yellow[cat].Draw('F')
-         
-            green[cat].SetFillColor(ROOT.kGreen+1)
-            green[cat].SetLineColor(ROOT.kGreen+1)
-            green[cat].SetFillStyle(1001)
-            green[cat].Draw('Fsame')
-         
-            median[cat].SetLineColor(1)
-            median[cat].SetLineWidth(2)
-            median[cat].SetLineStyle(2)
-            median[cat].Draw('Lsame')
-            median[cat].Draw()
+    #for cat in range(Cat_No):
+    if((not WhetherMultipleBroadCategories) and WhetherMultipleSmallCategories):
+            for cat_sub in range(Cat_No_sub):
+                    #yellow[cat][cat_sub].SetFillColor(ROOT.kOrange)
+                    #yellow[cat][cat_sub].SetLineColor(ROOT.kOrange)
+                    #yellow[cat][cat_sub].SetFillStyle(1001)
+                    #yellow[cat][cat_sub].Draw('F')
+                 
+                    #green[cat][cat_sub].SetFillColor(ROOT.kGreen+1)
+                    #green[cat][cat_sub].SetLineColor(ROOT.kGreen+1)
+                    #green[cat][cat_sub].SetFillStyle(1001)
+                    #green[cat][cat_sub].Draw('Fsame')
+                 
+                    median[cat][cat_sub].SetLineColor(cat_sub+1)
+                    median[cat][cat_sub].SetLineWidth(2)
+                    median[cat][cat_sub].SetLineStyle(2)
+                    median[cat][cat_sub].Draw('Lsame')
+                    median[cat][cat_sub].Draw()
  
 #    CMS_lumi.CMS_lumi(c,13,11)
     ROOT.gPad.SetTicks(1,1)
@@ -237,7 +275,7 @@ def plotUpperLimits(lumi,categories,Whether_Hybrid):
     ROOT.gPad.Update()
     frame.Draw('sameaxis')
  
-    x1 = 0.15
+    x1 = 0.65
     x2 = x1 + 0.24
     y2 = 0.86
     y1 = 0.70
@@ -246,8 +284,9 @@ def plotUpperLimits(lumi,categories,Whether_Hybrid):
     legend.SetBorderSize(0)
     legend.SetTextSize(0.041)
     legend.SetTextFont(42)
-    for cat in range(Cat_No):
-            legend.AddEntry(median[cat], label[cat],'L')
+    if((not WhetherMultipleBroadCategories) and WhetherMultipleSmallCategories):
+            for cat_sub in range(Cat_No_sub):
+                    legend.AddEntry(median[0][cat_sub], subcat_label[cat_sub],'L')
     
 #    legend.AddEntry(median[cat], "HybridNew CL_{s} expected upper limit",'L')
 #    legend.AddEntry(green[cat], "#pm 1 std. deviation",'f')
@@ -273,6 +312,13 @@ def plotUpperLimits(lumi,categories,Whether_Hybrid):
     else:
             c.SaveAs("Limit_scan.png")
     c.Close()
+    
+    
+    
+    
+    #Makesubplpots separately
+    
+    
     
 
         
