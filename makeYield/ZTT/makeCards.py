@@ -8,6 +8,7 @@ import numpy as np
 #import tdrstyle
 #from CMSStyle import CMS_lumi
 import os
+import re
 
 class makeCards:
         
@@ -235,7 +236,52 @@ class makeCards:
                         
                         command_copy_dc = "cp modified_dc_{0}.txt lumi_limit_scans/{0}/BDT_point_{1}/dc_{2}.txt".format(categ, str(point), str(lu))
                         os.system(command_copy_dc)
-        
+                        
+        def CombineSubcategories(self,datafile,categ):
+                pattern = re.compile(r'dc_(\d+)\.txt')
+                
+                
+                files_dict = {}
+                
+                sub_cats = ['taue','taumu','tauhA','tauhB']
+                
+                dirs = []
+                
+                for subcatno in range(len(sub_cats)):
+                        dirs.append(sub_cats[subcatno]+'/datacards_modified')
+                
+                os.system('mkdir combined')
+                os.system('mkdir combined/datacards_modified')
+                
+                
+                
+                for directory in dirs:
+                    for filename in os.listdir(directory):
+                        match = pattern.match(filename)
+                        if match:
+                            number = match.group(1)
+                            if number not in files_dict:
+                                files_dict[number] = {}
+                            files_dict[number][directory] = os.path.join(directory, filename)
+                
+                
+                for number, files in files_dict.items():
+                    if len(files) == len(dirs):  # Make sure all directories have this number
+                        file1 = files['taue/datacards_modified']
+                        file2 = files['taumu/datacards_modified']
+                        file3 = files['tauhA/datacards_modified']
+                        file4 = files['tauhB/datacards_modified']
+                        output_file = "dc_%s.txt" % str(number)
+                        
+                
+                #        command = "combineCards.py %s %s %s > %s"% (str(file1) ,str(file2) ,str(file3), str(output_file))  # rm ZTT for now
+                        command = "combineCards.py %s %s %s %s > %s"% (str(file1),str(file2),str(file3) ,str(file4), str(output_file))
+                        
+                        print("Running command: %s" % (command) )
+                        os.system(command)
+                        os.system('mv dc_*txt combined/datacards_modified')
+                    else:
+                        print("Skipping number %s, not all directories have the file." % str(number))
         
 
 
@@ -392,8 +438,8 @@ if __name__ == "__main__":
         
         datafile = "Combine_Tree_ztau3mutau.root"
         #categories = ['all']
-        categories = ['taue','taumu','tauhA','tauhB','all']
-        #categories = ['combined']
+        #categories = ['taue','taumu','tauhA','tauhB','all']
+        categories = ['combined']
         
 
         
@@ -413,7 +459,7 @@ if __name__ == "__main__":
         Cat_No = len(categories)
         
         #To create datacards
-        WhetherFitBDTandMakeCards = False
+        WhetherFitBDTandMakeCards = True
         
         for cat in range(Cat_No):
                 categ = categories[cat]
@@ -439,11 +485,10 @@ if __name__ == "__main__":
                         
                 if(WhetherFitBDTandMakeCards and categ == 'combined'):
                         BDTFit_Cat = makeCards()
-                        BDTFit_Cat.FitBDT(datafile,categ)
-                        BDTFit_Cat.MakeLumiScanCards(lumi,categ,analyzed_lumi)
+                        BDTFit_Cat.CombineSubcategories(datafile,categ)
                 
                 
-        executeDataCards_onCondor(lumi,categories,False,bdt_points)
+        #executeDataCards_onCondor(lumi,categories,False,bdt_points)
         #ReadAndCopyMinimumBDTCard(lumi,categories,False,bdt_points)
 
         

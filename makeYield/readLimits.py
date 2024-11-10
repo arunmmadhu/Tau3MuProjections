@@ -71,7 +71,8 @@ def executeDataCards_onCondor(lumi,categories,Whether_Hybrid):
                     if(args.category=="HF"):
                             subcat = ["HF"]
                     if(args.category=="ZTT"):
-                            subcat = ['taue','taumu','tauhA','tauhB','all']
+                            #subcat = ['taue','taumu','tauhA','tauhB','all','combined']
+                            subcat = ['combined']
                     if(args.category=="Combo"):
                             subcat = ["Combo"]
                     
@@ -141,8 +142,10 @@ def plotUpperLimits(lumi,categories,Whether_Hybrid):
                     subcat_label = ["HF"]
             if categories[cat]=='ZTT':
                     label[cat] = 'ZTT'
-                    subcat = ['taue','taumu','tauhA','tauhB','all']
-                    subcat_label = ['taue','taumu','tauhA','tauhB','all']
+                    subcat = ['taue','taumu','tauhA','tauhB','all','combined']
+                    subcat_label = ['taue','taumu','tauhA','tauhB','inclusive','combined']
+                    #subcat = ['tauhB','all']
+                    #subcat_label = ['tauhB','all']
             if categories[cat]=='W':
                     label[cat] = 'W'
                     subcat = ["W"]
@@ -245,7 +248,7 @@ def plotUpperLimits(lumi,categories,Whether_Hybrid):
     #frame.SetMaximum(median[cat].GetHistogram().GetMinimum()+(5.0/3.0)*(median[cat].GetHistogram().GetMaximum()-median[cat].GetHistogram().GetMinimum()))
     
     frame.SetMinimum(0.01)
-    frame.SetMaximum(5.0)
+    frame.SetMaximum(25.0)
     
     frame.GetXaxis().SetLimits(min(lumi) ,max(lumi)*1.2)
 
