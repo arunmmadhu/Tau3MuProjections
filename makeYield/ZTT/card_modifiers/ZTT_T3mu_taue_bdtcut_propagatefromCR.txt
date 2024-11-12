@@ -12,13 +12,13 @@ observation       -1
 bin                                     categorytaue       categorytaue
 process                                 signal              background
 process                                 0                   1
-rate                                   0.2378              0.7
+rate                                   0.2449              2
 #note: background value now is a sideband estimation
 --------------------------------------------------------------------------------
 extrap_factor_taue    rateParam        categorytaue         background  0.212121 [0.185,0.235]
 extrap_factor_unc     lnN              -                    1.10
 # relative SB uncertainty
-control_region_unc    lnN              -                    2.195
+control_region_unc    lnN              -                    1.7071
 lumi                  lnN              1.025                -
 Zxs                   lnN              1.0249               -
 BrTauX                lnN              1.0022               -
