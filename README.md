@@ -1,32 +1,35 @@
 # Projections
 
-Run the following before using any code in this repository:
+To create datacards in the `makeYield/ZTT`, `makeYield/ZTT` and `makeYield/W` directories, run the `python makeCards.py` file in these directories to create the datacards in the `makeYield/*/datacards_modified` directory.
+
+For the ZTT limit projections, a limit scan needs to be run at each luminosity wrt BDT cuts. To create the datacards for it, define the categories to run here:
 
 ~~~
-cmsrel CMSSW_10_2_13
-cd CMSSW_10_2_13/src
-cmsenv
+https://github.com/T3MuAnalysisTools/Projections/blob/cb5efdac12f291e91bc00f29275c390868a90af3/makeYield/ZTT/makeCards.py#L486
 ~~~
-
-Run the following in the makeYield_ZTT directory in ROOT (for Limit/Significance scan):
-~~~
-.x makeYield_fromBDTFit_Combine_2018.C
-~~~
-
-Run the following to get projected signal/background yields at future luminosities:
+Set WhetherFitBDTandMakeCards to True and run makeCards.py to create the datacards for the limit scan wrt bdt cuts. Once the datacards are made, Set it to false and uncomment the following:
 
 ~~~
-makeYield_ZTT/makeYield_fromBDTFit_Combine.C
-makeYield_W/makeYield_fromBDTFit_Combine_W.C
+https://github.com/T3MuAnalysisTools/Projections/blob/cb5efdac12f291e91bc00f29275c390868a90af3/makeYield/ZTT/makeCards.py#L537
+https://github.com/T3MuAnalysisTools/Projections/blob/cb5efdac12f291e91bc00f29275c390868a90af3/makeYield/ZTT/makeCards.py#L538
 ~~~
 
-These give the limits at different luminosities:
+This submits the lumi limit runs to condor and then reads the limits, finds the minimum BDT cut and copies the datacards to the `makeYield/*/datacards_modified` folder.
+
+This isn't needed for the 'combined' category. For that category, run all the other categories first before setting the `categories` to `['combined']` and run with WhetherFitBDTandMakeCards set to True.
+
+Once the datacards are made, run the following:
 
 ~~~
-makeYield_ZTT/LumiLimit.py
-makeYield_HF/LumiLimit_HF.py
-makeYield_W/LumiLimit_W.py
+./readLimits.py
 ~~~
+
+Help for running it is:
+
+~~~
+./readLimits.py -h
+~~~
+
 
 To make the final plot:
 
