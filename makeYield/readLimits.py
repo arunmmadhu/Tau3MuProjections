@@ -6,9 +6,10 @@ import CMS_lumi, tdrstyle
 import subprocess # to execute shell command
 import argparse
 import numpy as np
-import tdrstyle
 from CMSStyle import CMS_lumi
 import os
+import ctypes
+import math
 
 
 import argparse
@@ -34,21 +35,26 @@ tdrstyle.setTDRStyle()
 #lumi = [59.0,97.7, 129.0, 377.0, 700.0, 1500.0, 2250.0, 3000.0, 3750.0, 4500.0]
 #lumi = [59.0,97.7, 129.0]
 
-
+analyzed_lumi = 1.0
 if(args.category=="W"):
         lumi = np.round(np.arange(100,3050,100), 0)
         lumi = np.insert(lumi, 0 , 97.7)
+        analyzed_lumi = 97.7
 
 if(args.category=="HF"):
         lumi = np.round(np.arange(100,3050,100), 0)
         lumi = np.insert(lumi, 0 , 97.7)
+        analyzed_lumi = 97.7
 
 if(args.category=="ZTT"):
         lumi = np.round(np.arange(100,4500,500), 0)
         lumi = np.insert(lumi, 0 , 59.8)
+        lumi = np.append(lumi, 4500)
+        analyzed_lumi = 59.8
 
 if(args.category=="Combo"):
         lumi = np.round(np.arange(100,3050,100), 0)
+        analyzed_lumi = 59.8
 
 
 
@@ -71,8 +77,8 @@ def executeDataCards_onCondor(lumi,categories,Whether_Hybrid):
                     if(args.category=="HF"):
                             subcat = ["HF"]
                     if(args.category=="ZTT"):
-                            #subcat = ['taue','taumu','tauhA','tauhB','all','combined']
-                            subcat = ['combined']
+                            subcat = ['taue','taumu','tauhA','tauhB','all','combined']
+                            #subcat = ['combined']
                     if(args.category=="Combo"):
                             subcat = ["Combo"]
                     
@@ -87,18 +93,18 @@ def executeDataCards_onCondor(lumi,categories,Whether_Hybrid):
                                     print("Run:   ", command_run)
                                     os.system(command_run)
                                     
-        #                            print("Running Sigma -2")
-        #                            command_run = "combineTool.py -M HybridNew --LHCmode LHC-limits  -n %s -d %s --rMin 0 --rMax 50 --cl 0.90 -t 10 --expectedFromGrid 0.025 --job-mode condor --sub-opts='+JobFlavour=\"workday\"'  --task-name HybridTest%s " % (str(lu)+categories[cat],categories[cat]+"/datacards_modified/dc_"+str(lu)+".txt",str(lu)+categories[cat])
-        #                            os.system(command_run)
-        #                            print("Running Sigma -1")
-        #                            command_run = "combineTool.py -M HybridNew --LHCmode LHC-limits  -n %s -d %s --rMin 0 --rMax 50 --cl 0.90 -t 10 --expectedFromGrid 0.16 --job-mode condor --sub-opts='+JobFlavour=\"workday\"'  --task-name HybridTest%s " % (str(lu)+categories[cat],categories[cat]+"/datacards_modified/dc_"+str(lu)+".txt",str(lu)+categories[cat])
-        #                            os.system(command_run)
-        #                            print("Running Sigma +1")
-        #                            command_run = "combineTool.py -M HybridNew --LHCmode LHC-limits  -n %s -d %s --rMin 0 --rMax 50 --cl 0.90 -t 10 --expectedFromGrid 0.84 --job-mode condor --sub-opts='+JobFlavour=\"workday\"'  --task-name HybridTest%s " % (str(lu)+categories[cat],categories[cat]+"/datacards_modified/dc_"+str(lu)+".txt",str(lu)+categories[cat])
-        #                            os.system(command_run)
-        #                            print("Running Sigma +2")
-        #                            command_run = "combineTool.py -M HybridNew --LHCmode LHC-limits  -n %s -d %s --rMin 0 --rMax 50 --cl 0.90 -t 10 --expectedFromGrid 0.975 --job-mode condor --sub-opts='+JobFlavour=\"workday\"'  --task-name HybridTest%s " % (str(lu)+categories[cat],categories[cat]+"/datacards_modified/dc_"+str(lu)+".txt",str(lu)+categories[cat])
-        #                            os.system(command_run)
+                                    print("Running Sigma -2")
+                                    command_run = "combineTool.py -M HybridNew --LHCmode LHC-limits  -n %s -d %s --rMin 0 --rMax 50 --cl 0.90 -t 10 --expectedFromGrid 0.025 --job-mode condor --sub-opts='+JobFlavour=\"workday\"'  --task-name HybridTest%s " % (str(lu)+categories[cat],categories[cat]+"/datacards_modified/dc_"+str(lu)+".txt",str(lu)+categories[cat])
+                                    os.system(command_run)
+                                    print("Running Sigma -1")
+                                    command_run = "combineTool.py -M HybridNew --LHCmode LHC-limits  -n %s -d %s --rMin 0 --rMax 50 --cl 0.90 -t 10 --expectedFromGrid 0.16 --job-mode condor --sub-opts='+JobFlavour=\"workday\"'  --task-name HybridTest%s " % (str(lu)+categories[cat],categories[cat]+"/datacards_modified/dc_"+str(lu)+".txt",str(lu)+categories[cat])
+                                    os.system(command_run)
+                                    print("Running Sigma +1")
+                                    command_run = "combineTool.py -M HybridNew --LHCmode LHC-limits  -n %s -d %s --rMin 0 --rMax 50 --cl 0.90 -t 10 --expectedFromGrid 0.84 --job-mode condor --sub-opts='+JobFlavour=\"workday\"'  --task-name HybridTest%s " % (str(lu)+categories[cat],categories[cat]+"/datacards_modified/dc_"+str(lu)+".txt",str(lu)+categories[cat])
+                                    os.system(command_run)
+                                    print("Running Sigma +2")
+                                    command_run = "combineTool.py -M HybridNew --LHCmode LHC-limits  -n %s -d %s --rMin 0 --rMax 50 --cl 0.90 -t 10 --expectedFromGrid 0.975 --job-mode condor --sub-opts='+JobFlavour=\"workday\"'  --task-name HybridTest%s " % (str(lu)+categories[cat],categories[cat]+"/datacards_modified/dc_"+str(lu)+".txt",str(lu)+categories[cat])
+                                    os.system(command_run)
                                     
                             else:
                                     
@@ -122,10 +128,13 @@ def getLimits(file_name):
     return limits[:6]
 
 # PLOT upper limits
-def plotUpperLimits(lumi,categories,Whether_Hybrid):
+def plotUpperLimits(lumi,categories,Whether_Hybrid,WhetherIndividualPlots):
  
     N = len(lumi)
     Cat_No = len(categories)
+    
+    # Whether to make individual plots
+    #WhetherIndividualPlots = True
     
     WhetherMultipleBroadCategories = False
     if (Cat_No>1):
@@ -143,9 +152,9 @@ def plotUpperLimits(lumi,categories,Whether_Hybrid):
             if categories[cat]=='ZTT':
                     label[cat] = 'ZTT'
                     subcat = ['taue','taumu','tauhA','tauhB','all','combined']
-                    subcat_label = ['taue','taumu','tauhA','tauhB','inclusive','combined']
-                    #subcat = ['tauhB','all']
-                    #subcat_label = ['tauhB','all']
+                    subcat_label = [r"$\tau_{e}$", r"$\tau_{\mu}$", r"$\tau_{h,1-prong}$", r"$\tau_{h,3-prong}$", "Inclusive", "Combined"]
+                    #subcat = ['combined']
+                    #subcat_label = ['combined']
             if categories[cat]=='W':
                     label[cat] = 'W'
                     subcat = ["W"]
@@ -206,55 +215,59 @@ def plotUpperLimits(lumi,categories,Whether_Hybrid):
                                 
                                 text_limits.write("bdt %.2f     median[cat] exp %.2f\n"%(lumi[i],limit1[2]))
 
-    W = 800
-    H  = 600
-    T = 0.08*H
-    B = 0.12*H
-    L = 0.12*W
-    R = 0.04*W
-    c = TCanvas("c","c",100,100,W,H)
-    c.SetFillColor(0)
-    c.SetBorderMode(0)
-    c.SetFrameFillStyle(0)
-    c.SetFrameBorderMode(0)
-    c.SetLeftMargin( L/W )
-    c.SetRightMargin( R/W )
-    c.SetTopMargin( T/H )
-    c.SetBottomMargin( B/H )
-    c.SetGrid()
-    c.SetFrameLineWidth(2);
-    c.SetTickx();
-    c.SetTicky();
-    c.SetLogy();
-    c.cd()
-
-    frame = c.DrawFrame(1.4,0.001, 4.1, 1.2)
-    frame.GetYaxis().CenterTitle()
-
-    frame.GetYaxis().SetTitleSize(0.05)
-    frame.GetXaxis().SetTitleSize(0.05)
-    frame.GetXaxis().SetLabelSize(0.04)
-    frame.GetYaxis().SetLabelSize(0.04)
-    frame.GetYaxis().SetTitleOffset(0.9)
-    frame.GetXaxis().SetNdivisions(508)
-    frame.GetYaxis().CenterTitle(False)
-    frame.GetYaxis().SetTitle("Expected Limit (10^{-7})")
-    frame.GetXaxis().SetTitle("Integrated Luminosity fb^{-1}")
-
-
-
-
-    #frame.SetMinimum(median[cat].GetHistogram().GetMinimum()*0.8)
-    #frame.SetMaximum(median[cat].GetHistogram().GetMinimum()+(5.0/3.0)*(median[cat].GetHistogram().GetMaximum()-median[cat].GetHistogram().GetMinimum()))
     
-    frame.SetMinimum(0.01)
-    frame.SetMaximum(25.0)
     
-    frame.GetXaxis().SetLimits(min(lumi) ,max(lumi)*1.2)
-
-
-    #for cat in range(Cat_No):
-    if((not WhetherMultipleBroadCategories) and WhetherMultipleSmallCategories):
+    if((not WhetherMultipleBroadCategories) and WhetherMultipleSmallCategories and not WhetherIndividualPlots ):
+            
+            
+            W = 800
+            H  = 600
+            T = 0.08*H
+            B = 0.12*H
+            L = 0.12*W
+            R = 0.04*W
+            c = TCanvas("c","c",100,100,W,H)
+            c.SetFillColor(0)
+            c.SetBorderMode(0)
+            c.SetFrameFillStyle(0)
+            c.SetFrameBorderMode(0)
+            c.SetLeftMargin( L/W )
+            c.SetRightMargin( R/W )
+            c.SetTopMargin( T/H )
+            c.SetBottomMargin( B/H )
+            c.SetGrid()
+            c.SetFrameLineWidth(2);
+            c.SetTickx();
+            c.SetTicky();
+            c.SetLogy();
+            c.cd()
+        
+            frame = c.DrawFrame(1.4,0.001, 4.1, 1.2)
+            frame.GetYaxis().CenterTitle()
+        
+            frame.GetYaxis().SetTitleSize(0.05)
+            frame.GetXaxis().SetTitleSize(0.05)
+            frame.GetXaxis().SetLabelSize(0.04)
+            frame.GetYaxis().SetLabelSize(0.04)
+            frame.GetYaxis().SetTitleOffset(0.9)
+            frame.GetXaxis().SetNdivisions(508)
+            frame.GetYaxis().CenterTitle(False)
+            frame.GetYaxis().SetTitle("Expected Limit (10^{-7})")
+            frame.GetXaxis().SetTitle("Integrated Luminosity fb^{-1}")
+        
+        
+        
+        
+            #frame.SetMinimum(median[cat].GetHistogram().GetMinimum()*0.8)
+            #frame.SetMaximum(median[cat].GetHistogram().GetMinimum()+(5.0/3.0)*(median[cat].GetHistogram().GetMaximum()-median[cat].GetHistogram().GetMinimum()))
+            
+            frame.SetMinimum(0.01)
+            frame.SetMaximum(25.0)
+            
+            frame.GetXaxis().SetLimits(min(lumi) ,max(lumi)*1.2)
+        
+        
+            #for cat in range(Cat_No):
             for cat_sub in range(Cat_No_sub):
                     #yellow[cat][cat_sub].SetFillColor(ROOT.kOrange)
                     #yellow[cat][cat_sub].SetLineColor(ROOT.kOrange)
@@ -271,55 +284,308 @@ def plotUpperLimits(lumi,categories,Whether_Hybrid):
                     median[cat][cat_sub].SetLineStyle(2)
                     median[cat][cat_sub].Draw('Lsame')
                     median[cat][cat_sub].Draw()
- 
-#    CMS_lumi.CMS_lumi(c,13,11)
-    ROOT.gPad.SetTicks(1,1)
-    CMS_lumi(ROOT.gPad, 5, 0)
-    ROOT.gPad.Update()
-    frame.Draw('sameaxis')
- 
-    x1 = 0.65
-    x2 = x1 + 0.24
-    y2 = 0.86
-    y1 = 0.70
-    legend = TLegend(x1,y1,x2,y2)
-    legend.SetFillStyle(0)
-    legend.SetBorderSize(0)
-    legend.SetTextSize(0.041)
-    legend.SetTextFont(42)
-    if((not WhetherMultipleBroadCategories) and WhetherMultipleSmallCategories):
+         
+        #    CMS_lumi.CMS_lumi(c,13,11)
+            ROOT.gPad.SetTicks(1,1)
+            CMS_lumi(ROOT.gPad, 5, 0)
+            ROOT.gPad.Update()
+            frame.Draw('sameaxis')
+         
+            x1 = 0.65
+            x2 = x1 + 0.24
+            y2 = 0.86
+            y1 = 0.70
+            legend = TLegend(x1,y1,x2,y2)
+            legend.SetFillStyle(0)
+            legend.SetBorderSize(0)
+            legend.SetTextSize(0.041)
+            legend.SetTextFont(42)
+            
             for cat_sub in range(Cat_No_sub):
                     legend.AddEntry(median[0][cat_sub], subcat_label[cat_sub],'L')
+            
+        #    legend.AddEntry(median[cat], "HybridNew CL_{s} expected upper limit",'L')
+        #    legend.AddEntry(green[cat], "#pm 1 std. deviation",'f')
+        #    legend.AddEntry(yellow[cat],"#pm 2 std. deviation",'f')
+        
+        
+            legend.Draw()
+            latex = TLatex()
+            latex.SetNDC()
+            latex.SetTextAngle(0)
+            latex.SetTextFont(42)
+            latex.SetTextAlign(31)
+            Text = 'Projected Expected UL'
+            
+        
+            latex.SetTextAlign(1)
+            latex.DrawLatex(0.15, 0.85, Text)
+            latex.Draw('same') 
+            print " "
+            if len(categories) < 2:
+                    c.SaveAs("Limit_scan_"+categories[0]+".png")
+                    c.SaveAs("Limit_scan_"+categories[0]+".pdf")
+            else:
+                    c.SaveAs("Limit_scan.png")
+            c.Close()
+            
+            
+            
     
-#    legend.AddEntry(median[cat], "HybridNew CL_{s} expected upper limit",'L')
-#    legend.AddEntry(green[cat], "#pm 1 std. deviation",'f')
-#    legend.AddEntry(yellow[cat],"#pm 2 std. deviation",'f')
-
-
-    legend.Draw()
-    latex = TLatex()
-    latex.SetNDC()
-    latex.SetTextAngle(0)
-    latex.SetTextFont(42)
-    latex.SetTextAlign(31)
-    Text = 'Projected Expected UL'
     
-
-    latex.SetTextAlign(1)
-    latex.DrawLatex(0.15, 0.85, Text)
-    latex.Draw('same') 
-    print " "
-    if len(categories) < 2:
-            c.SaveAs("Limit_scan_"+categories[0]+".png")
-            c.SaveAs("Limit_scan_"+categories[0]+".pdf")
-    else:
+    
+    
+    
+    if((not WhetherMultipleBroadCategories) and WhetherMultipleSmallCategories and WhetherIndividualPlots):
+            
+            for cat_sub in range(Cat_No_sub):
+            
+                    W = 800
+                    H  = 600
+                    T = 0.08*H
+                    B = 0.12*H
+                    L = 0.12*W
+                    R = 0.04*W
+                    c = TCanvas("c","c",100,100,W,H)
+                    c.SetFillColor(0)
+                    c.SetBorderMode(0)
+                    c.SetFrameFillStyle(0)
+                    c.SetFrameBorderMode(0)
+                    c.SetLeftMargin( L/W )
+                    c.SetRightMargin( R/W )
+                    c.SetTopMargin( T/H )
+                    c.SetBottomMargin( B/H )
+                    c.SetGrid()
+                    c.SetFrameLineWidth(2);
+                    c.SetTickx();
+                    c.SetTicky();
+                    c.SetLogy();
+                    c.cd()
+                
+                    frame = c.DrawFrame(1.4,0.001, 4.1, 1.2)
+                    frame.GetYaxis().CenterTitle()
+                
+                    frame.GetYaxis().SetTitleSize(0.05)
+                    frame.GetXaxis().SetTitleSize(0.05)
+                    frame.GetXaxis().SetLabelSize(0.04)
+                    frame.GetYaxis().SetLabelSize(0.04)
+                    frame.GetYaxis().SetTitleOffset(0.9)
+                    frame.GetXaxis().SetNdivisions(508)
+                    frame.GetYaxis().CenterTitle(False)
+                    frame.GetYaxis().SetTitle("Expected Limit (10^{-7})")
+                    frame.GetXaxis().SetTitle("Integrated Luminosity fb^{-1}")
+                
+                
+                
+                
+                    #frame.SetMinimum(median[cat].GetHistogram().GetMinimum()*0.8)
+                    #frame.SetMaximum(median[cat].GetHistogram().GetMinimum()+(5.0/3.0)*(median[cat].GetHistogram().GetMaximum()-median[cat].GetHistogram().GetMinimum()))
+                    
+                    frame.SetMinimum(0.01)
+                    frame.SetMaximum(25.0)
+                    
+                    frame.GetXaxis().SetLimits(min(lumi) ,max(lumi)*1.2)
+                
+                
+                    #for cat in range(Cat_No):
+                    yellow[cat][cat_sub].SetFillColor(ROOT.kOrange)
+                    yellow[cat][cat_sub].SetLineColor(ROOT.kOrange)
+                    yellow[cat][cat_sub].SetFillStyle(1001)
+                    yellow[cat][cat_sub].Draw('F')
+                 
+                    green[cat][cat_sub].SetFillColor(ROOT.kGreen+1)
+                    green[cat][cat_sub].SetLineColor(ROOT.kGreen+1)
+                    green[cat][cat_sub].SetFillStyle(1001)
+                    green[cat][cat_sub].Draw('Fsame')
+                 
+                    median[cat][cat_sub].SetLineColor(1)
+                    median[cat][cat_sub].SetLineWidth(2)
+                    median[cat][cat_sub].SetLineStyle(2)
+                    median[cat][cat_sub].Draw('Lsame')
+                    median[cat][cat_sub].Draw()
+                    
+                    
+                    x, y = ctypes.c_double(0), ctypes.c_double(0)  # Create c_double variables for x and y
+                    median[cat][cat_sub].GetPoint(0, x, y)  # Get the point at index i
+                    # Convert ctypes values to Python floats
+                    x_val = x.value
+                    y_val = y.value
+                    
+                    
+                    # Create and draw the scaled 1/sqrt(L) line
+                    y_values = [y_val*math.sqrt(analyzed_lumi / l) if l > 0 else 0 for l in lumi]
+                    y_values_L = [y_val*(analyzed_lumi / l) if l > 0 else 0 for l in lumi]
+                    scaled_graph = ROOT.TGraph(len(lumi))
+                    scaled_graph_L = ROOT.TGraph(len(lumi))
+                    for i, (lx, ly) in enumerate(zip(lumi, y_values)):
+                        scaled_graph.SetPoint(i, lx, ly)
+                    for i, (lx, ly) in enumerate(zip(lumi, y_values_L)):
+                        scaled_graph_L.SetPoint(i, lx, ly)
+                
+                    scaled_graph.SetLineColor(ROOT.kBlue)
+                    scaled_graph.SetLineWidth(2)
+                    scaled_graph.SetLineStyle(3)  # Dashed line
+                    scaled_graph.Draw("Lsame")
+                    
+                    scaled_graph_L.SetLineColor(ROOT.kRed)
+                    scaled_graph_L.SetLineWidth(2)
+                    scaled_graph_L.SetLineStyle(3)  # Dashed line
+                    scaled_graph_L.Draw("Lsame")
+                    
+                    
+                 
+                #    CMS_lumi.CMS_lumi(c,13,11)
+                    ROOT.gPad.SetTicks(1,1)
+                    CMS_lumi(ROOT.gPad, 5, 0)
+                    ROOT.gPad.Update()
+                    frame.Draw('sameaxis')
+                 
+                    x1 = 0.65
+                    x2 = x1 + 0.24
+                    y2 = 0.86
+                    y1 = 0.70
+                    legend = TLegend(x1,y1,x2,y2)
+                    legend.SetFillStyle(0)
+                    legend.SetBorderSize(0)
+                    legend.SetTextSize(0.041)
+                    legend.SetTextFont(42)
+                    legend.AddEntry(median[0][cat_sub], subcat_label[cat_sub],'L')
+                    legend.AddEntry(scaled_graph, "sqrt(1/L)", 'L')
+                    legend.AddEntry(scaled_graph_L, "(1/L)", 'L')
+                    
+                #    legend.AddEntry(median[cat], "HybridNew CL_{s} expected upper limit",'L')
+                #    legend.AddEntry(green[cat], "#pm 1 std. deviation",'f')
+                #    legend.AddEntry(yellow[cat],"#pm 2 std. deviation",'f')
+                
+                
+                    legend.Draw()
+                    latex = TLatex()
+                    latex.SetNDC()
+                    latex.SetTextAngle(0)
+                    latex.SetTextFont(42)
+                    latex.SetTextAlign(31)
+                    Text = 'Projected Expected UL'
+                    
+                
+                    latex.SetTextAlign(1)
+                    latex.DrawLatex(0.15, 0.85, Text)
+                    latex.Draw('same') 
+                    print " "
+                    c.SaveAs("Limit_scan_"+categories[0]+subcat[cat_sub]+".png")
+                    c.SaveAs("Limit_scan_"+categories[0]+subcat[cat_sub]+".png")
+                    
+                    c.Close()
+            
+            
+    
+    
+    
+    if(WhetherMultipleBroadCategories):
+            
+            print "WhetherMultipleBroadCategories 2: ",WhetherMultipleBroadCategories
+            
+            W = 800
+            H  = 600
+            T = 0.08*H
+            B = 0.12*H
+            L = 0.12*W
+            R = 0.04*W
+            c = TCanvas("c","c",100,100,W,H)
+            c.SetFillColor(0)
+            c.SetBorderMode(0)
+            c.SetFrameFillStyle(0)
+            c.SetFrameBorderMode(0)
+            c.SetLeftMargin( L/W )
+            c.SetRightMargin( R/W )
+            c.SetTopMargin( T/H )
+            c.SetBottomMargin( B/H )
+            c.SetGrid()
+            c.SetFrameLineWidth(2);
+            c.SetTickx();
+            c.SetTicky();
+            c.SetLogy();
+            c.cd()
+        
+            frame = c.DrawFrame(1.4,0.001, 4.1, 1.2)
+            frame.GetYaxis().CenterTitle()
+        
+            frame.GetYaxis().SetTitleSize(0.05)
+            frame.GetXaxis().SetTitleSize(0.05)
+            frame.GetXaxis().SetLabelSize(0.04)
+            frame.GetYaxis().SetLabelSize(0.04)
+            frame.GetYaxis().SetTitleOffset(0.9)
+            frame.GetXaxis().SetNdivisions(508)
+            frame.GetYaxis().CenterTitle(False)
+            frame.GetYaxis().SetTitle("Expected Limit (10^{-7})")
+            frame.GetXaxis().SetTitle("Integrated Luminosity fb^{-1}")
+        
+        
+        
+        
+            #frame.SetMinimum(median[cat].GetHistogram().GetMinimum()*0.8)
+            #frame.SetMaximum(median[cat].GetHistogram().GetMinimum()+(5.0/3.0)*(median[cat].GetHistogram().GetMaximum()-median[cat].GetHistogram().GetMinimum()))
+            
+            frame.SetMinimum(0.01)
+            frame.SetMaximum(25.0)
+            
+            frame.GetXaxis().SetLimits(min(lumi) ,max(lumi)*1.2)
+        
+        
+            for cat in range(Cat_No):
+                    #yellow[cat][cat_sub].SetFillColor(ROOT.kOrange)
+                    #yellow[cat][cat_sub].SetLineColor(ROOT.kOrange)
+                    #yellow[cat][cat_sub].SetFillStyle(1001)
+                    #yellow[cat][cat_sub].Draw('F')
+                 
+                    #green[cat][cat_sub].SetFillColor(ROOT.kGreen+1)
+                    #green[cat][cat_sub].SetLineColor(ROOT.kGreen+1)
+                    #green[cat][cat_sub].SetFillStyle(1001)
+                    #green[cat][cat_sub].Draw('Fsame')
+                 
+                    median[cat][0].SetLineColor(cat_sub+1)
+                    median[cat][0].SetLineWidth(2)
+                    median[cat][0].SetLineStyle(2)
+                    median[cat][0].Draw('Lsame')
+                    median[cat][0].Draw()
+         
+        #    CMS_lumi.CMS_lumi(c,13,11)
+            ROOT.gPad.SetTicks(1,1)
+            CMS_lumi(ROOT.gPad, 5, 0)
+            ROOT.gPad.Update()
+            frame.Draw('sameaxis')
+         
+            x1 = 0.65
+            x2 = x1 + 0.24
+            y2 = 0.86
+            y1 = 0.70
+            legend = TLegend(x1,y1,x2,y2)
+            legend.SetFillStyle(0)
+            legend.SetBorderSize(0)
+            legend.SetTextSize(0.041)
+            legend.SetTextFont(42)
+            for cat in range(Cat_No):
+                    legend.AddEntry(median[cat][0], label[cat],'L')
+            
+        #    legend.AddEntry(median[cat], "HybridNew CL_{s} expected upper limit",'L')
+        #    legend.AddEntry(green[cat], "#pm 1 std. deviation",'f')
+        #    legend.AddEntry(yellow[cat],"#pm 2 std. deviation",'f')
+        
+        
+            legend.Draw()
+            latex = TLatex()
+            latex.SetNDC()
+            latex.SetTextAngle(0)
+            latex.SetTextFont(42)
+            latex.SetTextAlign(31)
+            Text = 'Projected Expected UL'
+            
+        
+            latex.SetTextAlign(1)
+            latex.DrawLatex(0.15, 0.85, Text)
+            latex.Draw('same') 
+            print " "
             c.SaveAs("Limit_scan.png")
-    c.Close()
-    
-    
-    
-    
-    #Makesubplpots separately
+            c.Close()
     
     
     
@@ -335,17 +601,19 @@ def main():
 #    categories = ['ZTT']
 #    categories = ['W']
 #    categories = ['HF']
+#    categories = ['HF','W']
     
     Whether_Hybrid=False
     if(args.Method == 'H'):
             Whether_Hybrid=True
     
+    #actual categories
     categories=[args.category]
     
     if(args.runType == 'run'):
             executeDataCards_onCondor(lumi,categories,Whether_Hybrid)
     if(args.runType == 'plot'):
-            plotUpperLimits(lumi,categories,Whether_Hybrid)
+            plotUpperLimits(lumi,categories,Whether_Hybrid,True)
 
 if __name__ == '__main__':
     main()

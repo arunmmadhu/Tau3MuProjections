@@ -1,14 +1,22 @@
 import ROOT
 from ROOT import TFile, TTree, TCanvas, TGraph, TMultiGraph, TGraphErrors, TLegend, TPaveLabel, TPaveText, TLatex
 from ROOT import RooRealVar, RooFormulaVar, RooExponential, RooDataHist, RooArgList, RooAddPdf, RooFit, RooDataSet, RooGenericPdf, RooBifurGauss
-#import CMS_lumi, tdrstyle
 import subprocess # to execute shell command
 import argparse
 import numpy as np
-#import tdrstyle
-#from CMSStyle import CMS_lumi
+import CMS_lumi, tdrstyle
+from CMSStyle import CMS_lumi
 import os
 import re
+
+
+# CMS style
+CMS_lumi.cmsText = "CMS, work in progress"
+CMS_lumi.extraText = ""
+CMS_lumi.cmsTextSize = 0.65
+CMS_lumi.outOfFrame = True
+tdrstyle.setTDRStyle()
+
 
 class makeCards:
         
@@ -22,10 +30,13 @@ class makeCards:
                 self.bgaus_distMC = None
                 self.BDTNorm_MC = None
                 self.BDT_distribution_MC = None
+                self.MCSelector = None
+                self.fullmc = None
                 
                 self.a = None
                 self.b = None
                 self.c = None
+                self.d = None
                 self.quadratic = None
                 self.expModel = None
                 self.BDTNorm = None
@@ -46,21 +57,27 @@ class makeCards:
                 
                 treeName=''
                 signalnorm = 1.0
+                cat_label = ""
                 if(categ == 'taue'):
                         treeName  = 'ztau3mutaue'
                         signalnorm = 0.00000856928
+                        cat_label = r"$\tau_{e}$"
                 if(categ == 'taumu'):
                         treeName = 'ztau3mutaumu'
                         signalnorm = 0.00000822810
+                        cat_label = r"$\tau_{\mu}$"
                 if(categ == 'tauhA'):
                         treeName = 'ztau3mutauh_A'
                         signalnorm = 0.00000815958
+                        cat_label = r"$\tau_{h,1-prong}$"
                 if(categ == 'tauhB'):
                         treeName = 'ztau3mutauh_B'
                         signalnorm = 0.00000815958
+                        cat_label = r"$\tau_{h,3-prong}$"
                 if(categ == 'all'):
                         treeName   = 'ztautau'
                         signalnorm = 0.00000824176
+                        cat_label = "Inclusive"
                 
                 tree = MiniTreeFile.Get(treeName)
                 
@@ -102,14 +119,15 @@ class makeCards:
                 self.a = RooRealVar("a", "a", 1.0, 0.0, 10.0)
                 self.b = RooRealVar("b", "b", 1.0, -10.0, 10.0)
                 self.c = RooRealVar("c", "c", 1.0, -10.0, 10.0)
+                self.d = RooRealVar("d", "d", 1.0, -10.0, 10.0)
                 
                 #quadratic = RooFormulaVar("quadratic", "a + b*self.bdt_cv + c*self.bdt_cv*self.bdt_cv", RooArgList(a, b, c, self.bdt_cv))
                 #expModel = RooGenericPdf("expModel", "exp(quadratic)", RooArgList(quadratic)) #Exponential of the quadratic polynomial
                 
-                self.quadratic = RooFormulaVar("quadratic", "a + b*bdt_cv + c*bdt_cv*bdt_cv", RooArgList(self.a, self.b, self.c, self.bdt_cv))
-                self.expModel = RooGenericPdf("expModel", "exp(quadratic)", RooArgList(self.quadratic)) #Exponential of the quadratic polynomial
+                self.quadratic = RooFormulaVar("quadratic", "a + b*bdt_cv + c*bdt_cv*bdt_cv + d*bdt_cv*bdt_cv*bdt_cv", RooArgList(self.a, self.b, self.c, self.d, self.bdt_cv))
+                self.expModel = RooGenericPdf("expModel", "exp(quadratic)", RooArgList(self.quadratic)) #Exponential of the cubic polynomial
                 
-                self.BDTNorm = RooRealVar("BDTNorm", "BDTNorm", 500.0, 0.1, 5000000)
+                self.BDTNorm = RooRealVar("BDTNorm", "BDTNorm", 500.0, 0.1, 1000000000)
                 self.BDT_distribution = RooAddPdf("BDT_distribution", "BDT_distribution",RooArgList(self.expModel), RooArgList(self.BDTNorm))
                 #BDT_distribution = RooAddPdf("BDT_distribution", "BDT_distribution",RooArgList(quadratic), RooArgList(BDTNorm))
                 
@@ -121,9 +139,9 @@ class makeCards:
                 
                 # For fitting BDT Output in Signal
                 
-                MCSelector = RooFormulaVar('MCSelector', 'MCSelector', phivetoes+omegavetoes+' isMC !=0 & (isMC == 211 | isMC == 210231 | isMC == 210232 | isMC == 210233 ) & (tripletMass>=%s & tripletMass<=%s) ' %(fit_range_lo,fit_range_hi) , RooArgList(variables))
+                self.MCSelector = RooFormulaVar('MCSelector', 'MCSelector', phivetoes+omegavetoes+' isMC !=0 & (isMC == 211 | isMC == 210231 | isMC == 210232 | isMC == 210233 ) & (tripletMass>=%s & tripletMass<=%s) ' %(fit_range_lo,fit_range_hi) , RooArgList(variables))
                 
-                fullmc = RooDataSet('mc', 'mc', tree, variables, MCSelector,'scale')
+                self.fullmc = RooDataSet('mc', 'mc', tree, variables, self.MCSelector,'scale')
                 
                 self.bdt_cv.setRange("BDT_MC_Fit_Range", -1.0, 1.0);
                 
@@ -136,7 +154,7 @@ class makeCards:
                 self.BDTNorm_MC = RooRealVar("BDTNorm_MC", "BDTNorm_MC", 500.0, 0.1, 50000)
                 self.BDT_distribution_MC = RooAddPdf("BDT_distribution", "BDT_distribution",RooArgList(self.bgaus_distMC), RooArgList(self.BDTNorm_MC))
                 
-                results_mcpdf = self.BDT_distribution_MC.fitTo(fullmc, RooFit.Range('BDT_MC_Fit_Range'), RooFit.Save())
+                results_mcpdf = self.BDT_distribution_MC.fitTo(self.fullmc, RooFit.Range('BDT_MC_Fit_Range'), RooFit.Save())
                 results_mcpdf.Print()
                 
                 
@@ -144,13 +162,15 @@ class makeCards:
                 
                 frame1 = self.bdt_cv.frame()
                 frame1.SetTitle('')
+                frame1.GetXaxis().SetTitle("BDT score, "+cat_label)
                 
                 frame2 = self.bdt_cv.frame()
                 frame2.SetTitle('')
+                frame2.GetXaxis().SetTitle("BDT score, "+cat_label)
                 
                 nbins = 100
                 
-                fullmc.plotOn(frame1, 
+                self.fullmc.plotOn(frame1, 
                               ROOT.RooFit.Binning(nbins), 
                               ROOT.RooFit.XErrorSize(0), 
                               ROOT.RooFit.LineWidth(2),
@@ -159,7 +179,8 @@ class makeCards:
                               ROOT.RooFit.MarkerSize(0.75),
                               ROOT.RooFit.FillColor(ROOT.kCyan  + 2)
                 )
-                self.BDT_distribution_MC.plotOn(frame1, ROOT.RooFit.LineColor(ROOT.kRed ))
+                #self.BDT_distribution_MC.plotOn(frame1, ROOT.RooFit.LineColor(ROOT.kRed ))
+                
                 
                 fulldata.plotOn(frame2, 
                         ROOT.RooFit.Binning(nbins),
@@ -169,17 +190,33 @@ class makeCards:
                         
                 #BDT_distribution.plotOn(frame2,  ROOT.RooFit.LineColor(ROOT.kBlue) , ROOT.RooFit.Normalization(fulldata.sumEntries("1", "BDT_Fit_Range"), ROOT.RooAbsReal.NumEvent), ROOT.RooFit.ProjectionRange('BDT_Fit_Range') )
                 #BDT_distribution.plotOn(frame2,  ROOT.RooFit.LineColor(ROOT.kBlue) , ROOT.RooFit.Normalization(BDTNorm.getVal()*BDT_distribution.createIntegral(ROOT.RooArgSet(self.bdt_cv), ROOT.RooArgSet(self.bdt_cv), "BDT_Fit_Range").getVal(), ROOT.RooAbsReal.NumEvent), ROOT.RooFit.ProjectionRange('BDT_Fit_Range') )
+                
                 self.BDT_distribution.plotOn(frame2,  ROOT.RooFit.LineColor(ROOT.kBlue) )
                 
                 frame1.Draw()
+                ROOT.gPad.SetTicks(1,1)
+                CMS_lumi(ROOT.gPad, 5, 0)
+                ROOT.gPad.Update()
+                frame1.Draw('sameaxis')
                 ROOT.gPad.SaveAs('bdt_fit_mc_'+categ+'.png')
                 ROOT.gPad.Clear()
                 
+                ROOT.gPad.SetLogy()
                 frame2.Draw()
+                ROOT.gPad.SetTicks(1,1)
+                CMS_lumi(ROOT.gPad, 5, 0)
+                ROOT.gPad.Update()
+                frame2.Draw('sameaxis')
                 ROOT.gPad.SaveAs('bdt_fit_bkg_'+categ+'.png')
+                ROOT.gPad.SetLogy(0)
                 
                 
-                return frame1, frame2, fullmc, fulldata
+                #print "Certain BDT cut: ", self.fullmc.reduce('bdt_cv > 0.5').sumEntries()
+                
+                
+                return frame1, frame2, self.fullmc, fulldata
+                
+                
         
         
         #To create datacards
@@ -215,17 +252,22 @@ class makeCards:
                 
                 for point in bdt_points:  # For loop for bdt cuts in range [X_min;X_max]
                 
-                    self.bdt_cv.setRange("Integral_Range", point, 100.0)
+                    self.bdt_cv.setRange("Integral_Range", point, 1.0)
                     
                     command_recreate_lumidir = "rm -r lumi_limit_scans/{0}/BDT_point_{1}; mkdir lumi_limit_scans/{0}/BDT_point_{1}".format(categ, str(point))
                     os.system(command_recreate_lumidir)
+                    
+                    BDT_cut = 'bdt_cv > %s' % point
+                    
+                    MC_dataset_with_BDT_cut = self.fullmc.reduce(BDT_cut)
                     
                     for lu_no in range(len(lumi)):
                         
                         lu = lumi[lu_no]
                         print(lu)
                         
-                        sig_est = self.BDTNorm_MC.getVal() * (self.BDT_distribution_MC.createIntegral(ROOT.RooArgSet(self.bdt_cv), ROOT.RooArgSet(self.bdt_cv), "Integral_Range").getVal() ) * lu/analyzed_lumi
+                        sig_est = MC_dataset_with_BDT_cut.sumEntries() * lu/analyzed_lumi
+                        #sig_est = self.BDTNorm_MC.getVal() * (self.BDT_distribution_MC.createIntegral(ROOT.RooArgSet(self.bdt_cv), ROOT.RooArgSet(self.bdt_cv), "Integral_Range").getVal() ) * lu/analyzed_lumi
                         bkg_est = exp_fact * self.BDTNorm.getVal() * (self.BDT_distribution.createIntegral(ROOT.RooArgSet(self.bdt_cv), ROOT.RooArgSet(self.bdt_cv), "Integral_Range").getVal() ) * lu/analyzed_lumi
                         sb_est = self.BDTNorm.getVal() * (self.BDT_distribution.createIntegral(ROOT.RooArgSet(self.bdt_cv), ROOT.RooArgSet(self.bdt_cv), "Integral_Range").getVal() ) * lu/analyzed_lumi
                         
@@ -294,19 +336,22 @@ def executeDataCards_onCondor(lumi,categories,Whether_Hybrid,bdt_points):
         for cat in range(Cat_No):
         
                 for point in bdt_points:  # For loop for bdt cuts in range [X_min;X_max]
+                        
                         for lu_no in range(len(lumi)):
                             lu = lumi[lu_no]
                             print('Luminosity: ', lu)
                                 
                             if(Whether_Hybrid):
                                     
-                                    command_run = "combineTool.py -M HybridNew --LHCmode LHC-limits  -n %s -d %s --rMin 0 --rMax 50 --cl 0.90 -t 10 --expectedFromGrid 0.5 --job-mode condor --sub-opts='+JobFlavour=\"workday\"'  --task-name HybridTest%s " % (str(lu)+'_'+categories[cat]+'_'+str(point),"lumi_limit_scans/{0}/BDT_point_{1}/dc_{2}.txt".format(categories[cat], str(point), str(lu)),str(lu)+'_'+categories[cat]+'_'+str(point))
+                                    command_run = "combineTool.py -M HybridNew --LHCmode LHC-limits  -n %s -d %s --rMin 0 --rMax 50 --cl 0.90 -t 5 --expectedFromGrid 0.5 --job-mode condor --sub-opts='+JobFlavour=\"workday\"'  --task-name HybridTest%s " % (str(lu)+'_'+categories[cat]+'_'+str(point),"lumi_limit_scans/{0}/BDT_point_{1}/dc_{2}.txt".format(categories[cat], str(point), str(lu)),str(lu)+'_'+categories[cat]+'_'+str(point))
                                     print("Run:   ", command_run)
                                     os.system(command_run)
                                     
                             else:
                                     
                                     command_run = "combineTool.py -M AsymptoticLimits --run blind  --cl 0.90 -n %s -d %s  --job-mode condor --sub-opts='+JobFlavour=\"workday\"'  --task-name AsymTest%s " % (str(lu)+'_'+categories[cat]+'_'+str(point),"lumi_limit_scans/{0}/BDT_point_{1}/dc_{2}.txt".format(categories[cat], str(point), str(lu)),str(lu)+'_'+categories[cat]+'_'+str(point))
+                                    
+                                    #command_run = "combineTool.py -M AsymptoticLimits --run blind  --cl 0.90 -n %s -d %s  " % (str(lu)+'_'+categories[cat]+'_'+str(point),"lumi_limit_scans/{0}/BDT_point_{1}/dc_{2}.txt".format(categories[cat], str(point), str(lu)))
         
                                     print("Run:   ", command_run)
                                     os.system(command_run)
@@ -437,29 +482,30 @@ if __name__ == "__main__":
         ROOT.gROOT.SetBatch(True)
         
         datafile = "Combine_Tree_ztau3mutau.root"
-        #categories = ['all']
+        categories = ['taue']
         #categories = ['taue','taumu','tauhA','tauhB','all']
-        categories = ['combined']
+        #categories = ['tauhA','tauhB','all']
+        #categories = ['combined'] # Can only be run after the other 4 categories are read and copied
         
 
         
         lumi = np.round(np.arange(100,4500,500), 0)
         #lumi = np.round(np.arange(100,200,100), 0)
         lumi = np.insert(lumi, 0 , 59.8)
+        lumi = np.append(lumi, 4500)
         
         cmd1 = 'mkdir lumi_limit_scans;'
         os.system(cmd1)
         
-        #cmd2 = 'mkdir datacards_modified;'
-        #os.system(cmd2)
+        #num_points = 20
+        #bdt_points = np.round(np.linspace(0.2,0.7,num_points), 2)
         
-        num_points = 20
-        bdt_points = np.round(np.linspace(0.0,1.0,num_points), 2)
+        bdt_points = np.round(np.arange(0.2, 0.7 + 0.02, 0.02), 2)
         
         Cat_No = len(categories)
         
         #To create datacards
-        WhetherFitBDTandMakeCards = True
+        WhetherFitBDTandMakeCards = False
         
         for cat in range(Cat_No):
                 categ = categories[cat]
@@ -489,7 +535,7 @@ if __name__ == "__main__":
                 
                 
         #executeDataCards_onCondor(lumi,categories,False,bdt_points)
-        #ReadAndCopyMinimumBDTCard(lumi,categories,False,bdt_points)
+        ReadAndCopyMinimumBDTCard(lumi,categories,False,bdt_points)
 
         
         
