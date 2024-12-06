@@ -273,6 +273,10 @@ class makeCards:
                         
                         print "bdt point: ", point," sig_est: ", sig_est, " bkg_est: ", bkg_est, " sb_est: ", sb_est
                         
+                        exp_fact = (signal_range_hi-signal_range_lo)/(fit_range_hi-fit_range_lo-(signal_range_hi-signal_range_lo))
+                        exp_fact_different_pdf = getExtrapFactor('unfixed_exp', categ, point)
+                        exp_uncert = extrap_error = 1.0 + abs(exp_fact_different_pdf-exp_fact)/exp_fact
+                        
                         command_mod_card = "python card_modifiers/Card_Mod.py --categ " + str(categ) + " --sig_exp " + str(sig_est) + " --bkg_exp " + str(bkg_est) + " --sb_exp " + str(sb_est) 
                         os.system(command_mod_card)
                         
@@ -476,6 +480,134 @@ def ReadAndCopyMinimumBDTCard(lumi,categories,Whether_Hybrid,bdt_points):
                     
                     #print(min_indices)
 
+# Get Extrapolation Factor
+def getExtrapFactor(pdftype, categ, bdtcut):
+    file_path_1 = 'Slopes_' + categ + '_' + pdftype + '.txt'
+    
+    closest_cut = None  # To store the closest cut
+    closest_ext_fact = None  # To store the extrapolation factor corresponding to the closest cut
+    min_diff = float('inf')  # Initialize with a large number
+    
+    with open(file_path_1, 'r') as file1:
+        # Read lines from the file
+        for line1 in file1:
+            # Split the line into components
+            parts_1 = line1.split()
+            
+            cut = float(parts_1[1])
+            ext_fact = float(parts_1[10])
+            n_sideband = round(float(parts_1[5]))
+            
+            # Calculate the difference between the current cut and bdtcut
+            diff = abs(cut - bdtcut)
+            
+            # Update the closest cut and its extrapolation factor if this cut is closer
+            if diff < min_diff and n_sideband > 0.5:
+                min_diff = diff
+                closest_cut = cut
+                closest_ext_fact = ext_fact
+    
+    # Return the closest cut and its extrapolation factor
+    return closest_ext_fact
+
+def MakeAndSaveExpFactors(datafile,categ,bdt_points):
+        
+        
+        fit_range_lo = 1.6
+        fit_range_hi = 2.0
+        
+        signal_range_lo = 1.74
+        signal_range_hi = 1.81
+        
+        MiniTreeFile = ROOT.TFile.Open(datafile)
+        MiniTreeFile.cd()
+        
+        treeName=''
+        signalnorm = 1.0
+        cat_label = ""
+        if(categ == 'taue'):
+                treeName  = 'ztau3mutaue'
+                signalnorm = 0.00000856928
+                cat_label = r"$\tau_{e}$"
+        if(categ == 'taumu'):
+                treeName = 'ztau3mutaumu'
+                signalnorm = 0.00000822810
+                cat_label = r"$\tau_{\mu}$"
+        if(categ == 'tauhA'):
+                treeName = 'ztau3mutauh_A'
+                signalnorm = 0.00000815958
+                cat_label = r"$\tau_{h,1-prong}$"
+        if(categ == 'tauhB'):
+                treeName = 'ztau3mutauh_B'
+                signalnorm = 0.00000815958
+                cat_label = r"$\tau_{h,3-prong}$"
+        if(categ == 'all'):
+                treeName   = 'ztautau'
+                signalnorm = 0.00000824176
+                cat_label = "Inclusive"
+        
+        tree = MiniTreeFile.Get(treeName)
+        
+        tripletMass          = ROOT.RooRealVar('tripletMass'                , '3#mu mass'           , fit_range_lo, fit_range_hi, 'GeV')
+        bdt_cv               = ROOT.RooRealVar('bdt_cv'                     , 'bdt_cv'              , -1 , 1)
+        dimu_OS1             = ROOT.RooRealVar('dimu_OS1'                   , 'dimu_OS1'            ,  0 , 2)
+        dimu_OS2             = ROOT.RooRealVar('dimu_OS2'                   , 'dimu_OS2'            ,  0 , 2)
+        event_weight         = ROOT.RooRealVar('weight'                     , 'event_weight'        ,  0,  5)  # this weight includes also the scale  mc signal scale
+        category             = ROOT.RooRealVar('category'                   , 'category'            ,  0,  5)
+        isMC                 = ROOT.RooRealVar('isMC'                       , 'isMC'                ,  0,  1000000)
+        scale                = ROOT.RooRealVar('scale'                      , 'scale'               ,  signalnorm)  
+        
+        
+        
+        variables = ROOT.RooArgSet()
+        variables.add(tripletMass)
+        variables.add(bdt_cv)
+        variables.add(dimu_OS1)
+        variables.add(dimu_OS2)
+        variables.add(event_weight)
+        variables.add(category)
+        variables.add(isMC)
+        variables.add(scale)
+        
+        phivetoes="(fabs(dimu_OS1 - 1.020)>0.020)&(fabs(dimu_OS2 - 1.020)>0.020)"
+        omegavetoes="&fabs(dimu_OS1 - 0.782)>0.020&fabs(dimu_OS2 - 0.782)>0.020&"
+        
+        
+        for bdt_cut in bdt_points:
+        
+                
+                # For fitting BDT Output in Data
+                
+                BDT_Score_Min=-0.3
+                
+                BlindDataSelector = RooFormulaVar('DataSelector', 'DataSelector',' bdt_cv > ' + str(bdt_cut)+' & '+ phivetoes+omegavetoes+' isMC == 0 & (tripletMass<=%s || tripletMass>=%s) & (tripletMass>=%s & tripletMass<=%s) ' %(signal_range_lo,signal_range_hi,fit_range_lo,fit_range_hi) , RooArgList(variables))
+                
+                fulldata = RooDataSet('data', 'data', tree,  variables, BlindDataSelector)
+                
+                bdt_cv.setRange("BDT_Fit_Range", BDT_Score_Min, 1.0);
+                
+                
+                tripletMass.setRange('left' , fit_range_lo    , signal_range_lo)
+                tripletMass.setRange('right', signal_range_hi , fit_range_hi)
+                tripletMass.setRange('full' , fit_range_lo    , fit_range_hi)
+                
+                tripletMass.setRange("SB1",fit_range_lo,1.75)
+                tripletMass.setRange("SB2",1.80,fit_range_hi)
+                tripletMass.setRange("fullRange",fit_range_lo,fit_range_hi)
+                tripletMass.setRange("SIG",signal_range_lo,signal_range_hi)
+                
+                nbkg = ROOT.RooRealVar('nbkg', 'nbkg', 1000, 0, 500000)
+                slope = ROOT.RooRealVar('slope', 'slope', 1.0, -100, 100)
+                expo = ROOT.RooExponential('bkg_expo', 'bkg_expo', tripletMass, slope)
+                pdfmodel = ROOT.RooAddPdf('bkg_extended_expo', 'bkg_extended_expo', ROOT.RooArgList(expo), ROOT.RooArgList(nbkg))
+                results_pdf = pdfmodel.fitTo(fulldata, ROOT.RooFit.Range('left,right'), ROOT.RooFit.Save())
+                
+                SG_integral = pdfmodel.createIntegral(ROOT.RooArgSet(tripletMass), ROOT.RooArgSet(tripletMass), "SIG").getVal()
+                SB_integral = pdfmodel.createIntegral(ROOT.RooArgSet(tripletMass), ROOT.RooArgSet(tripletMass), "left,right").getVal()
+                
+                with open("Slopes_%s_%s"%(categ,"unfixed_exp")+".txt", "a") as f:
+                        f.write("Cut: %s nbkg: %s n_sideband: %s expected_bkg: %s SG/SB ratio: %s \n"%(bdt_cut,nbkg.getVal(),fulldata.numEntries(),nbkg.getVal()*SG_integral,SG_integral/SB_integral))
+
 if __name__ == "__main__":
     
         # Enable batch mode
@@ -505,7 +637,7 @@ if __name__ == "__main__":
         Cat_No = len(categories)
         
         #To create datacards
-        WhetherFitBDTandMakeCards = False
+        WhetherFitBDTandMakeCards = True
         
         for cat in range(Cat_No):
                 categ = categories[cat]
@@ -525,9 +657,11 @@ if __name__ == "__main__":
                         analyzed_lumi = 59.83
                         
                 if(WhetherFitBDTandMakeCards and (not categ == 'combined')):
-                        BDTFit_Cat = makeCards()
-                        BDTFit_Cat.FitBDT(datafile,categ)
-                        BDTFit_Cat.MakeLumiScanCards(lumi,categ,analyzed_lumi)
+                        open("Slopes_%s_%s"%(categ,"unfixed_exp")+".txt", 'w').close()
+                        MakeAndSaveExpFactors(datafile,categ,bdt_points)
+                        #BDTFit_Cat = makeCards()
+                        #BDTFit_Cat.FitBDT(datafile,categ)
+                        #BDTFit_Cat.MakeLumiScanCards(lumi,categ,analyzed_lumi)
                         
                 if(WhetherFitBDTandMakeCards and categ == 'combined'):
                         BDTFit_Cat = makeCards()
@@ -535,7 +669,7 @@ if __name__ == "__main__":
                 
                 
         #executeDataCards_onCondor(lumi,categories,False,bdt_points)
-        ReadAndCopyMinimumBDTCard(lumi,categories,False,bdt_points)
+        #ReadAndCopyMinimumBDTCard(lumi,categories,False,bdt_points)
 
         
         
