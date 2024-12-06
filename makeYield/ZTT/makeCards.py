@@ -659,9 +659,9 @@ if __name__ == "__main__":
                 if(WhetherFitBDTandMakeCards and (not categ == 'combined')):
                         open("Slopes_%s_%s"%(categ,"unfixed_exp")+".txt", 'w').close()
                         MakeAndSaveExpFactors(datafile,categ,bdt_points)
-                        #BDTFit_Cat = makeCards()
-                        #BDTFit_Cat.FitBDT(datafile,categ)
-                        #BDTFit_Cat.MakeLumiScanCards(lumi,categ,analyzed_lumi)
+                        BDTFit_Cat = makeCards()
+                        BDTFit_Cat.FitBDT(datafile,categ)
+                        BDTFit_Cat.MakeLumiScanCards(lumi,categ,analyzed_lumi)
                         
                 if(WhetherFitBDTandMakeCards and categ == 'combined'):
                         BDTFit_Cat = makeCards()
