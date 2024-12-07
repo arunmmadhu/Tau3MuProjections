@@ -276,8 +276,13 @@ class makeCards:
                         print("bdt point: ", point," sig_est: ", sig_est, " bkg_est: ", bkg_est, " sb_est: ", sb_est)
                         
                         exp_fact = (signal_range_hi-signal_range_lo)/(fit_range_hi-fit_range_lo-(signal_range_hi-signal_range_lo))
+                        print('   exp_fact   ', exp_fact)
                         exp_fact_different_pdf = getExtrapFactor('unfixed_exp', categ, point)
+                        print('   exp_fact_different_pdf   ', exp_fact_different_pdf )
                         exp_uncert = extrap_error = 1.0 + abs(exp_fact_different_pdf-exp_fact)/exp_fact
+                        
+                        
+
                         
                         command_mod_card = "python card_modifiers/Card_Mod.py --categ " + str(categ) + " --sig_exp " + str(sig_est) + " --bkg_exp " + str(bkg_est) + " --sb_exp " + str(sb_est) 
                         os.system(command_mod_card)
@@ -486,7 +491,7 @@ def ReadAndCopyMinimumBDTCard(lumi,categories,Whether_Hybrid,bdt_points):
 def getExtrapFactor(pdftype, categ, bdtcut):
     file_path_1 = 'Slopes_' + categ + '_' + pdftype + '.txt'
     
-    closest_cut = None  # To store the closest cut
+    closest_cut = None       # To store the closest cut
     closest_ext_fact = None  # To store the extrapolation factor corresponding to the closest cut
     min_diff = float('inf')  # Initialize with a large number
     
@@ -510,6 +515,7 @@ def getExtrapFactor(pdftype, categ, bdtcut):
                 closest_ext_fact = ext_fact
     
     # Return the closest cut and its extrapolation factor
+    print('------>  ', closest_ext_fact)
     return closest_ext_fact
 
 def MakeAndSaveExpFactors(datafile,categ,bdt_points):
@@ -616,8 +622,8 @@ if __name__ == "__main__":
         ROOT.gROOT.SetBatch(True)
         
         datafile = "Combine_Tree_ztau3mutau.root"
-        #categories = ['taue']
-        categories = ['taue','taumu','tauhA','tauhB','all']
+        categories = ['taumu']
+        #categories = ['taue','taumu','tauhA','tauhB','all']
         #categories = ['tauhA','tauhB','all']
         #categories = ['combined'] # Can only be run after the other 4 categories are read and copied
         
