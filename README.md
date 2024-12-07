@@ -4,7 +4,18 @@ To create datacards in the `makeYield/ZTT`, `makeYield/ZTT` and `makeYield/W` di
 
 For the ZTT limit projections, a limit scan needs to be run at each luminosity wrt BDT cuts. The steps are:
 
-0) cmsenv is done with CMSSW_11 before all these steps
+
+
+0) cmsenv is done with CMSSW_14_1_0_pre4:
+
+cmsrel CMSSW_14_1_0_pre4
+cd CMSSW_14_1_0_pre4/src
+cmsenv
+git clone https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit
+scramv1 b clean; scramv1 b
+
+
+
 1) Define the categories to be run here (do not run the 'combined' category at this stage, but all the other categories can be run here):
 
 [categories = ['taue','taumu','tauhA','tauhB','all']](https://github.com/T3MuAnalysisTools/Projections/blob/cb5efdac12f291e91bc00f29275c390868a90af3/makeYield/ZTT/makeCards.py#L486)
