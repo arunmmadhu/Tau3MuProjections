@@ -1,4 +1,4 @@
-
+#!/usr/bin/env python3
 
 import ROOT
 from ROOT import TFile, TTree, TCanvas, TGraph, TMultiGraph, TGraphErrors, TLegend, TPaveLabel, TPaveText, TLatex
@@ -616,8 +616,8 @@ if __name__ == "__main__":
         ROOT.gROOT.SetBatch(True)
         
         datafile = "Combine_Tree_ztau3mutau.root"
-        categories = ['taue']
-        #categories = ['taue','taumu','tauhA','tauhB','all']
+        #categories = ['taue']
+        categories = ['taue','taumu','tauhA','tauhB','all']
         #categories = ['tauhA','tauhB','all']
         #categories = ['combined'] # Can only be run after the other 4 categories are read and copied
         
@@ -639,7 +639,7 @@ if __name__ == "__main__":
         Cat_No = len(categories)
         
         #To create datacards
-        WhetherFitBDTandMakeCards = False
+        WhetherFitBDTandMakeCards = True
         
         for cat in range(Cat_No):
                 categ = categories[cat]
@@ -670,7 +670,7 @@ if __name__ == "__main__":
                         BDTFit_Cat.CombineSubcategories(datafile,categ)
                 
                 
-        executeDataCards_onCondor(lumi,categories,False,bdt_points)
+        #executeDataCards_onCondor(lumi,categories,False,bdt_points)
         #ReadAndCopyMinimumBDTCard(lumi,categories,False,bdt_points)
 
         
