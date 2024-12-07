@@ -504,11 +504,12 @@ def getExtrapFactor(pdftype, categ, bdtcut):
             cut = float(parts_1[1])
             ext_fact = float(parts_1[10])
             n_sideband = round(float(parts_1[5]))
-            
+            print(' round  ', float(parts_1[5]), parts_1)
             # Calculate the difference between the current cut and bdtcut
             diff = abs(cut - bdtcut)
             
             # Update the closest cut and its extrapolation factor if this cut is closer
+            print('diff ', diff, ' min_diff   ', min_diff, '  n_sideband   ', n_sideband)
             if diff < min_diff and n_sideband > 0.5:
                 min_diff = diff
                 closest_cut = cut
@@ -517,6 +518,12 @@ def getExtrapFactor(pdftype, categ, bdtcut):
     # Return the closest cut and its extrapolation factor
     print('------>  ', closest_ext_fact)
     return closest_ext_fact
+
+
+
+
+
+
 
 def MakeAndSaveExpFactors(datafile,categ,bdt_points):
         
@@ -612,10 +619,17 @@ def MakeAndSaveExpFactors(datafile,categ,bdt_points):
                 
                 SG_integral = pdfmodel.createIntegral(ROOT.RooArgSet(tripletMass), ROOT.RooArgSet(tripletMass), "SIG").getVal()
                 SB_integral = pdfmodel.createIntegral(ROOT.RooArgSet(tripletMass), ROOT.RooArgSet(tripletMass), "left,right").getVal()
-                
+                print('>>>>>>>>>>>>>>>>>>>>> ',fulldata.numEntries())
                 with open("Slopes_%s_%s"%(categ,"unfixed_exp")+".txt", "a") as f:
                         f.write("Cut: %s nbkg: %s n_sideband: %s expected_bkg: %s SG/SB ratio: %s \n"%(bdt_cut,nbkg.getVal(),fulldata.numEntries(),nbkg.getVal()*SG_integral,SG_integral/SB_integral))
 
+
+
+
+
+
+
+                        
 if __name__ == "__main__":
     
         # Enable batch mode
