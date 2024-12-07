@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 #need to cmsenv somewhere first
 
 import os
