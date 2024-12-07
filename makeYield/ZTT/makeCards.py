@@ -1,3 +1,5 @@
+
+
 import ROOT
 from ROOT import TFile, TTree, TCanvas, TGraph, TMultiGraph, TGraphErrors, TLegend, TPaveLabel, TPaveText, TLatex
 from ROOT import RooRealVar, RooFormulaVar, RooExponential, RooDataHist, RooArgList, RooAddPdf, RooFit, RooDataSet, RooGenericPdf, RooBifurGauss
@@ -271,7 +273,7 @@ class makeCards:
                         bkg_est = exp_fact * self.BDTNorm.getVal() * (self.BDT_distribution.createIntegral(ROOT.RooArgSet(self.bdt_cv), ROOT.RooArgSet(self.bdt_cv), "Integral_Range").getVal() ) * lu/analyzed_lumi
                         sb_est = self.BDTNorm.getVal() * (self.BDT_distribution.createIntegral(ROOT.RooArgSet(self.bdt_cv), ROOT.RooArgSet(self.bdt_cv), "Integral_Range").getVal() ) * lu/analyzed_lumi
                         
-                        print "bdt point: ", point," sig_est: ", sig_est, " bkg_est: ", bkg_est, " sb_est: ", sb_est
+                        print("bdt point: ", point," sig_est: ", sig_est, " bkg_est: ", bkg_est, " sb_est: ", sb_est)
                         
                         exp_fact = (signal_range_hi-signal_range_lo)/(fit_range_hi-fit_range_lo-(signal_range_hi-signal_range_lo))
                         exp_fact_different_pdf = getExtrapFactor('unfixed_exp', categ, point)
@@ -369,7 +371,7 @@ def getLimits(file_name):
     limits = [ ]
     for quantile in tree:
         limits.append(tree.limit)
-        print ">>>   %.2f" % limits[-1]
+        print(">>>   %.2f" % limits[-1])
  
     return limits[:6]
     
@@ -416,7 +418,7 @@ def ReadAndCopyMinimumBDTCard(lumi,categories,Whether_Hybrid,bdt_points):
                                 if len(limit)<5:
                                         limit = [1000000.0,1000000.0,1000000.0,1000000.0,1000000.0]
                                 
-                                print " cat: ",categories[cat]," lumi: ",lumi[i]," bdt point: ",point," Limit: ",limit[2]
+                                print(" cat: ",categories[cat]," lumi: ",lumi[i]," bdt point: ",point," Limit: ",limit[2])
                                 limits_read_row.append(limit[2])
                                 
                             limits_read.append(limits_read_row)
@@ -424,8 +426,8 @@ def ReadAndCopyMinimumBDTCard(lumi,categories,Whether_Hybrid,bdt_points):
                     # Getting the BDT cut at minimum limit
                     transposed_matrix = list(zip(*limits_read))
                     min_values = [min(column) for column in transposed_matrix]
-                    print "limits_read values: ",limits_read
-                    print "min values: ",min_values
+                    print("limits_read values: ",limits_read)
+                    print("min values: ",min_values)
                     min_indices = []
                     for col_index, min_val in enumerate(min_values):
                             # Find the row in the original matrix where the minimum value is located in this column
@@ -438,7 +440,7 @@ def ReadAndCopyMinimumBDTCard(lumi,categories,Whether_Hybrid,bdt_points):
                             text_limits.write("bdt %.2f   lumi %.2f     median exp %.2f\n"%(bdt_points[bdt_index],lumi[lumi_index],limits_read[bdt_index][lumi_index]))
                             
                             command_copy_dc = "cp  lumi_limit_scans/{0}/BDT_point_{1}/dc_{2}.txt {0}/datacards_modified/dc_{2}.txt".format(categ, str(bdt_points[bdt_index]), str(lumi[lumi_index]))
-                            print "Copy command: ",command_copy_dc
+                            print("Copy command: ",command_copy_dc)
                             os.system(command_copy_dc)
                     
                     #print(min_indices)
@@ -455,7 +457,7 @@ def ReadAndCopyMinimumBDTCard(lumi,categories,Whether_Hybrid,bdt_points):
                                 if len(limit)<5:
                                         limit = [1000000.0,1000000.0,1000000.0,1000000.0,1000000.0]
                                 
-                                print " cat: ",categories[cat]," lumi: ",lumi[i]," bdt point: ",point," Limit: ",limit[2]
+                                print(" cat: ",categories[cat]," lumi: ",lumi[i]," bdt point: ",point," Limit: ",limit[2])
                                 limits_read_row.append(limit[2])
                                 
                             limits_read.append(limits_read_row)
@@ -475,7 +477,7 @@ def ReadAndCopyMinimumBDTCard(lumi,categories,Whether_Hybrid,bdt_points):
                             text_limits.write("bdt %.2f   lumi %.2f     median exp %.2f\n"%(bdt_points[bdt_index],lumi[lumi_index],limits_read[bdt_index][lumi_index]))
                             
                             command_copy_dc = "cp  lumi_limit_scans/{0}/BDT_point_{1}/dc_{2}.txt {0}/datacards_modified/dc_{2}.txt".format(categ, str(bdt_points[bdt_index]), str(lumi[lumi_index]))
-                            print "Copy command: ",command_copy_dc
+                            print("Copy command: ",command_copy_dc)
                             os.system(command_copy_dc)
                     
                     #print(min_indices)
@@ -637,7 +639,7 @@ if __name__ == "__main__":
         Cat_No = len(categories)
         
         #To create datacards
-        WhetherFitBDTandMakeCards = True
+        WhetherFitBDTandMakeCards = False
         
         for cat in range(Cat_No):
                 categ = categories[cat]
@@ -668,7 +670,7 @@ if __name__ == "__main__":
                         BDTFit_Cat.CombineSubcategories(datafile,categ)
                 
                 
-        #executeDataCards_onCondor(lumi,categories,False,bdt_points)
+        executeDataCards_onCondor(lumi,categories,False,bdt_points)
         #ReadAndCopyMinimumBDTCard(lumi,categories,False,bdt_points)
 
         
