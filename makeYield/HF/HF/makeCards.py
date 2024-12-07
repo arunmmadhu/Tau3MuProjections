@@ -18,7 +18,7 @@ for lu_no in range(len(lumi)):
     lu = lumi[lu_no]
     print(lu)
     
-    command_a = "python card_modifiers/HF_test.py --luminosity " + str(lu)
+    command_a = "python3 card_modifiers/HF_test.py --luminosity " + str(lu)
     os.system(command_a)
     
     command_copy_dc = "cp HF_Combined_Mod.txt datacards_modified/dc_"+ str(lu)+".txt"
