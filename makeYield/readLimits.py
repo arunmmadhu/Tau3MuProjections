@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import ROOT
 from ROOT import TFile, TTree, TCanvas, TGraph, TMultiGraph, TGraphErrors, TLegend, TPaveLabel, TPaveText, TLatex
@@ -123,7 +123,7 @@ def getLimits(file_name):
     limits = [ ]
     for quantile in tree:
         limits.append(tree.limit)
-        print ">>>   %.2f" % limits[-1]
+        print(">>>   %.2f" % limits[-1])
  
     return limits[:6]
 
@@ -321,7 +321,7 @@ def plotUpperLimits(lumi,categories,Whether_Hybrid,WhetherIndividualPlots):
             latex.SetTextAlign(1)
             latex.DrawLatex(0.15, 0.85, Text)
             latex.Draw('same') 
-            print " "
+            print(" ")
             if len(categories) < 2:
                     c.SaveAs("Limit_scan_"+categories[0]+".png")
                     c.SaveAs("Limit_scan_"+categories[0]+".pdf")
@@ -470,7 +470,7 @@ def plotUpperLimits(lumi,categories,Whether_Hybrid,WhetherIndividualPlots):
                     latex.SetTextAlign(1)
                     latex.DrawLatex(0.15, 0.85, Text)
                     latex.Draw('same') 
-                    print " "
+                    print(" ")
                     c.SaveAs("Limit_scan_"+categories[0]+subcat[cat_sub]+".png")
                     c.SaveAs("Limit_scan_"+categories[0]+subcat[cat_sub]+".png")
                     
@@ -482,7 +482,7 @@ def plotUpperLimits(lumi,categories,Whether_Hybrid,WhetherIndividualPlots):
     
     if(WhetherMultipleBroadCategories):
             
-            print "WhetherMultipleBroadCategories 2: ",WhetherMultipleBroadCategories
+            print("WhetherMultipleBroadCategories 2: ",WhetherMultipleBroadCategories)
             
             W = 800
             H  = 600
@@ -583,7 +583,7 @@ def plotUpperLimits(lumi,categories,Whether_Hybrid,WhetherIndividualPlots):
             latex.SetTextAlign(1)
             latex.DrawLatex(0.15, 0.85, Text)
             latex.Draw('same') 
-            print " "
+            print(" ")
             c.SaveAs("Limit_scan.png")
             c.Close()
     
