@@ -7,13 +7,16 @@ For the ZTT limit projections, a limit scan needs to be run at each luminosity w
 
 
 0) cmsenv is done with CMSSW_14_1_0_pre4:
+```sh
 
-cmsrel CMSSW_14_1_0_pre4
-cd CMSSW_14_1_0_pre4/src
-cmsenv
-git clone https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit
-scramv1 b clean; scramv1 b
 
+cmsrel CMSSW_14_1_0_pre4;
+cd CMSSW_14_1_0_pre4/src;
+cmsenv;
+git clone https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit;
+scramv1 b clean; scramv1 b;
+
+```
 
 
 1) Define the categories to be run here (do not run the 'combined' category at this stage, but all the other categories can be run here):
