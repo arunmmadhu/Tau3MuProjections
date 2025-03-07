@@ -1,3 +1,5 @@
+#Run with python3
+
 import math
 import argparse
 from scipy.stats import poisson
@@ -24,7 +26,9 @@ def calculate_poisson_sum(numbers, lambda_val):
         raise ValueError("Both k and lambda_val must be non-negative.")
     
     # Using map to calculate the Poisson function for each pair of number and lambda
-    poisson_values = map(lambda x: (math.exp(-lambda_val) * (lambda_val ** x)) / math.factorial(x), numbers)
+    #poisson_values = map(lambda x: (math.exp(-lambda_val) * (lambda_val ** x)) / math.factorial(x), numbers)
+    #poisson_values = map(lambda x: math.exp(x * math.log(lambda_val) - lambda_val - lgamma(x + 1)), numbers)
+    poisson_values = poisson.pmf(numbers, lambda_val)
     
     # Using sum to calculate the sum of the Poisson values
     total_sum = sum(poisson_values)
@@ -44,6 +48,8 @@ def find_domain_for_value(function,s_exp,b_exp):
     start = max(s_exp-range_for_s,0.0)
     end=s_exp+range_for_s
     step=0.01
+    
+    print(f"Starting value for the s_exp_calc scan is {start}, end is {end} with a step size of {step}.")
     
     """
     Find the domain of a function for which it returns a specific target value.

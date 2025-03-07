@@ -23,7 +23,7 @@ for linenum, line in enumerate(file):
             #print(imod)
             res = "{:.4f}".format(imod)
             #print(res)
-            line_mod=line_mod.replace(i, res)
+            line_mod=line_mod.replace(' '+i+' ', ' '+res+' ')
         print(line_mod)
         replacement = replacement + line_mod
     else:

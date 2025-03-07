@@ -271,14 +271,16 @@ class makeCards:
                         bkg_est = exp_fact * self.BDTNorm.getVal() * (self.BDT_distribution.createIntegral(ROOT.RooArgSet(self.bdt_cv), ROOT.RooArgSet(self.bdt_cv), "Integral_Range").getVal() ) * lu/analyzed_lumi
                         sb_est = self.BDTNorm.getVal() * (self.BDT_distribution.createIntegral(ROOT.RooArgSet(self.bdt_cv), ROOT.RooArgSet(self.bdt_cv), "Integral_Range").getVal() ) * lu/analyzed_lumi
                         
-                        print "bdt point: ", point," sig_est: ", sig_est, " bkg_est: ", bkg_est, " sb_est: ", sb_est
                         
                         exp_fact = (signal_range_hi-signal_range_lo)/(fit_range_hi-fit_range_lo-(signal_range_hi-signal_range_lo))
                         exp_fact_different_pdf = getExtrapFactor('unfixed_exp', categ, point)
-                        exp_uncert = extrap_error = 1.0 + abs(exp_fact_different_pdf-exp_fact)/exp_fact
+                        exp_uncert = 1.0 + abs(exp_fact_different_pdf-exp_fact)/exp_fact
                         
-                        command_mod_card = "python card_modifiers/Card_Mod.py --categ " + str(categ) + " --sig_exp " + str(sig_est) + " --bkg_exp " + str(bkg_est) + " --sb_exp " + str(sb_est) 
+                        print "bdt point: ", point," sig_est: ", sig_est, " bkg_est: ", bkg_est, " sb_est: ", sb_est, " exp_uncert: ", exp_uncert
+                        
+                        command_mod_card = "python card_modifiers/Card_Mod.py --categ " + str(categ) + " --sig_exp " + str(sig_est) + " --bkg_exp " + str(bkg_est) + " --sb_exp " + str(sb_est) + " --ext_unc " + str(exp_uncert) 
                         os.system(command_mod_card)
+                        print(command_mod_card)
                         
                         command_copy_dc = "cp modified_dc_{0}.txt lumi_limit_scans/{0}/BDT_point_{1}/dc_{2}.txt".format(categ, str(point), str(lu))
                         os.system(command_copy_dc)
@@ -614,10 +616,10 @@ if __name__ == "__main__":
         ROOT.gROOT.SetBatch(True)
         
         datafile = "Combine_Tree_ztau3mutau.root"
-        categories = ['taue']
+        #categories = ['tauhB']
         #categories = ['taue','taumu','tauhA','tauhB','all']
         #categories = ['tauhA','tauhB','all']
-        #categories = ['combined'] # Can only be run after the other 4 categories are read and copied
+        categories = ['combined'] # Can only be run after the other 4 categories are read and copied
         
 
         
@@ -632,7 +634,7 @@ if __name__ == "__main__":
         #num_points = 20
         #bdt_points = np.round(np.linspace(0.2,0.7,num_points), 2)
         
-        bdt_points = np.round(np.arange(0.2, 0.7 + 0.02, 0.02), 2)
+        bdt_points = np.round(np.arange(0.2, 0.8 + 0.04, 0.04), 2)
         
         Cat_No = len(categories)
         

@@ -3,24 +3,24 @@ imax 6 number of bins
 jmax 1 number of processes minus 1
 kmax 38 number of nuisance parameters
 ----------------------------------------------------------------------------------------------------------------------------------
-shapes bkg       ch1_ch1   W/2018/blind/workspaces/CMS_T3M_13TeV_W_A18.root t3m_shapes:bkg
-shapes data_obs  ch1_ch1   W/2018/blind/workspaces/CMS_T3M_13TeV_W_A18.root t3m_shapes:data_obs
-shapes sig       ch1_ch1   W/2018/blind/workspaces/CMS_T3M_13TeV_W_A18.root t3m_shapes:sig
-shapes bkg       ch1_ch2   W/2018/blind/workspaces/CMS_T3M_13TeV_W_B18.root t3m_shapes:bkg
-shapes data_obs  ch1_ch2   W/2018/blind/workspaces/CMS_T3M_13TeV_W_B18.root t3m_shapes:data_obs
-shapes sig       ch1_ch2   W/2018/blind/workspaces/CMS_T3M_13TeV_W_B18.root t3m_shapes:sig
-shapes bkg       ch1_ch3   W/2018/blind/workspaces/CMS_T3M_13TeV_W_C18.root t3m_shapes:bkg
-shapes data_obs  ch1_ch3   W/2018/blind/workspaces/CMS_T3M_13TeV_W_C18.root t3m_shapes:data_obs
-shapes sig       ch1_ch3   W/2018/blind/workspaces/CMS_T3M_13TeV_W_C18.root t3m_shapes:sig
-shapes bkg       ch2_ch1   W/2017/blind/workspaces/CMS_T3M_13TeV_W_A17.root t3m_shapes:bkg
-shapes data_obs  ch2_ch1   W/2017/blind/workspaces/CMS_T3M_13TeV_W_A17.root t3m_shapes:data_obs
-shapes sig       ch2_ch1   W/2017/blind/workspaces/CMS_T3M_13TeV_W_A17.root t3m_shapes:sig
-shapes bkg       ch2_ch2   W/2017/blind/workspaces/CMS_T3M_13TeV_W_B17.root t3m_shapes:bkg
-shapes data_obs  ch2_ch2   W/2017/blind/workspaces/CMS_T3M_13TeV_W_B17.root t3m_shapes:data_obs
-shapes sig       ch2_ch2   W/2017/blind/workspaces/CMS_T3M_13TeV_W_B17.root t3m_shapes:sig
-shapes bkg       ch2_ch3   W/2017/blind/workspaces/CMS_T3M_13TeV_W_C17.root t3m_shapes:bkg
-shapes data_obs  ch2_ch3   W/2017/blind/workspaces/CMS_T3M_13TeV_W_C17.root t3m_shapes:data_obs
-shapes sig       ch2_ch3   W/2017/blind/workspaces/CMS_T3M_13TeV_W_C17.root t3m_shapes:sig
+shapes bkg       ch1_ch1   W/W/2018/blind/workspaces/CMS_T3M_13TeV_W_A18.root t3m_shapes:bkg
+shapes data_obs  ch1_ch1   W/W/2018/blind/workspaces/CMS_T3M_13TeV_W_A18.root t3m_shapes:data_obs
+shapes sig       ch1_ch1   W/W/2018/blind/workspaces/CMS_T3M_13TeV_W_A18.root t3m_shapes:sig
+shapes bkg       ch1_ch2   W/W/2018/blind/workspaces/CMS_T3M_13TeV_W_B18.root t3m_shapes:bkg
+shapes data_obs  ch1_ch2   W/W/2018/blind/workspaces/CMS_T3M_13TeV_W_B18.root t3m_shapes:data_obs
+shapes sig       ch1_ch2   W/W/2018/blind/workspaces/CMS_T3M_13TeV_W_B18.root t3m_shapes:sig
+shapes bkg       ch1_ch3   W/W/2018/blind/workspaces/CMS_T3M_13TeV_W_C18.root t3m_shapes:bkg
+shapes data_obs  ch1_ch3   W/W/2018/blind/workspaces/CMS_T3M_13TeV_W_C18.root t3m_shapes:data_obs
+shapes sig       ch1_ch3   W/W/2018/blind/workspaces/CMS_T3M_13TeV_W_C18.root t3m_shapes:sig
+shapes bkg       ch2_ch1   W/W/2017/blind/workspaces/CMS_T3M_13TeV_W_A17.root t3m_shapes:bkg
+shapes data_obs  ch2_ch1   W/W/2017/blind/workspaces/CMS_T3M_13TeV_W_A17.root t3m_shapes:data_obs
+shapes sig       ch2_ch1   W/W/2017/blind/workspaces/CMS_T3M_13TeV_W_A17.root t3m_shapes:sig
+shapes bkg       ch2_ch2   W/W/2017/blind/workspaces/CMS_T3M_13TeV_W_B17.root t3m_shapes:bkg
+shapes data_obs  ch2_ch2   W/W/2017/blind/workspaces/CMS_T3M_13TeV_W_B17.root t3m_shapes:data_obs
+shapes sig       ch2_ch2   W/W/2017/blind/workspaces/CMS_T3M_13TeV_W_B17.root t3m_shapes:sig
+shapes bkg       ch2_ch3   W/W/2017/blind/workspaces/CMS_T3M_13TeV_W_C17.root t3m_shapes:bkg
+shapes data_obs  ch2_ch3   W/W/2017/blind/workspaces/CMS_T3M_13TeV_W_C17.root t3m_shapes:data_obs
+shapes sig       ch2_ch3   W/W/2017/blind/workspaces/CMS_T3M_13TeV_W_C17.root t3m_shapes:sig
 ----------------------------------------------------------------------------------------------------------------------------------
 bin          ch1_ch1  ch1_ch2  ch1_ch3  ch2_ch1  ch2_ch2  ch2_ch3
 observation  -1       -1       -1       -1       -1       -1     

@@ -18,5 +18,6 @@ lumi              lnN                       1.025               -
 Zxs               lnN                       1.0249              -
 BrTauX            lnN                       1.0026        -
 extrap_factor_tauhB     gmN     2    -                   0.212121
-extrap_factor_unc lnN                       -                   1.10
+extrap_factor_unc lnN                       -                   1.09 
+rounding_unc      lnN                       -                   1.10 
 --------------------------------------------------------------------------------

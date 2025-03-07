@@ -9,6 +9,7 @@ import numpy as np
 
 lumi = np.round(np.arange(100,3050,100), 0)
 lumi = np.insert(lumi, 0 , 97.7)
+lumi = np.append(lumi, 4500)
 
 print('Lumi points:  ', lumi)
 
