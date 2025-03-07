@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import ROOT
 from ROOT import TFile, TTree, TCanvas, TGraph, TMultiGraph, TGraphErrors, TLegend, TPaveLabel, TPaveText, TLatex
 from ROOT import RooRealVar, RooFormulaVar, RooExponential, RooDataHist, RooArgList, RooAddPdf, RooFit, RooDataSet, RooGenericPdf, RooBifurGauss
@@ -271,14 +273,18 @@ class makeCards:
                         bkg_est = exp_fact * self.BDTNorm.getVal() * (self.BDT_distribution.createIntegral(ROOT.RooArgSet(self.bdt_cv), ROOT.RooArgSet(self.bdt_cv), "Integral_Range").getVal() ) * lu/analyzed_lumi
                         sb_est = self.BDTNorm.getVal() * (self.BDT_distribution.createIntegral(ROOT.RooArgSet(self.bdt_cv), ROOT.RooArgSet(self.bdt_cv), "Integral_Range").getVal() ) * lu/analyzed_lumi
                         
-                        
                         exp_fact = (signal_range_hi-signal_range_lo)/(fit_range_hi-fit_range_lo-(signal_range_hi-signal_range_lo))
+                        print('   exp_fact   ', exp_fact)
                         exp_fact_different_pdf = getExtrapFactor('unfixed_exp', categ, point)
+                        
                         exp_uncert = 1.0 + abs(exp_fact_different_pdf-exp_fact)/exp_fact
                         
                         print "bdt point: ", point," sig_est: ", sig_est, " bkg_est: ", bkg_est, " sb_est: ", sb_est, " exp_uncert: ", exp_uncert
                         
                         command_mod_card = "python card_modifiers/Card_Mod.py --categ " + str(categ) + " --sig_exp " + str(sig_est) + " --bkg_exp " + str(bkg_est) + " --sb_exp " + str(sb_est) + " --ext_unc " + str(exp_uncert) 
+                        print('   exp_fact_different_pdf   ', exp_fact_different_pdf )
+                        
+                        
                         os.system(command_mod_card)
                         print(command_mod_card)
                         
@@ -371,7 +377,7 @@ def getLimits(file_name):
     limits = [ ]
     for quantile in tree:
         limits.append(tree.limit)
-        print ">>>   %.2f" % limits[-1]
+        print(">>>   %.2f" % limits[-1])
  
     return limits[:6]
     
@@ -418,7 +424,7 @@ def ReadAndCopyMinimumBDTCard(lumi,categories,Whether_Hybrid,bdt_points):
                                 if len(limit)<5:
                                         limit = [1000000.0,1000000.0,1000000.0,1000000.0,1000000.0]
                                 
-                                print " cat: ",categories[cat]," lumi: ",lumi[i]," bdt point: ",point," Limit: ",limit[2]
+                                print(" cat: ",categories[cat]," lumi: ",lumi[i]," bdt point: ",point," Limit: ",limit[2])
                                 limits_read_row.append(limit[2])
                                 
                             limits_read.append(limits_read_row)
@@ -426,8 +432,8 @@ def ReadAndCopyMinimumBDTCard(lumi,categories,Whether_Hybrid,bdt_points):
                     # Getting the BDT cut at minimum limit
                     transposed_matrix = list(zip(*limits_read))
                     min_values = [min(column) for column in transposed_matrix]
-                    print "limits_read values: ",limits_read
-                    print "min values: ",min_values
+                    print("limits_read values: ",limits_read)
+                    print("min values: ",min_values)
                     min_indices = []
                     for col_index, min_val in enumerate(min_values):
                             # Find the row in the original matrix where the minimum value is located in this column
@@ -440,7 +446,7 @@ def ReadAndCopyMinimumBDTCard(lumi,categories,Whether_Hybrid,bdt_points):
                             text_limits.write("bdt %.2f   lumi %.2f     median exp %.2f\n"%(bdt_points[bdt_index],lumi[lumi_index],limits_read[bdt_index][lumi_index]))
                             
                             command_copy_dc = "cp  lumi_limit_scans/{0}/BDT_point_{1}/dc_{2}.txt {0}/datacards_modified/dc_{2}.txt".format(categ, str(bdt_points[bdt_index]), str(lumi[lumi_index]))
-                            print "Copy command: ",command_copy_dc
+                            print("Copy command: ",command_copy_dc)
                             os.system(command_copy_dc)
                     
                     #print(min_indices)
@@ -457,7 +463,7 @@ def ReadAndCopyMinimumBDTCard(lumi,categories,Whether_Hybrid,bdt_points):
                                 if len(limit)<5:
                                         limit = [1000000.0,1000000.0,1000000.0,1000000.0,1000000.0]
                                 
-                                print " cat: ",categories[cat]," lumi: ",lumi[i]," bdt point: ",point," Limit: ",limit[2]
+                                print(" cat: ",categories[cat]," lumi: ",lumi[i]," bdt point: ",point," Limit: ",limit[2])
                                 limits_read_row.append(limit[2])
                                 
                             limits_read.append(limits_read_row)
@@ -477,7 +483,7 @@ def ReadAndCopyMinimumBDTCard(lumi,categories,Whether_Hybrid,bdt_points):
                             text_limits.write("bdt %.2f   lumi %.2f     median exp %.2f\n"%(bdt_points[bdt_index],lumi[lumi_index],limits_read[bdt_index][lumi_index]))
                             
                             command_copy_dc = "cp  lumi_limit_scans/{0}/BDT_point_{1}/dc_{2}.txt {0}/datacards_modified/dc_{2}.txt".format(categ, str(bdt_points[bdt_index]), str(lumi[lumi_index]))
-                            print "Copy command: ",command_copy_dc
+                            print("Copy command: ",command_copy_dc)
                             os.system(command_copy_dc)
                     
                     #print(min_indices)
@@ -486,7 +492,7 @@ def ReadAndCopyMinimumBDTCard(lumi,categories,Whether_Hybrid,bdt_points):
 def getExtrapFactor(pdftype, categ, bdtcut):
     file_path_1 = 'Slopes_' + categ + '_' + pdftype + '.txt'
     
-    closest_cut = None  # To store the closest cut
+    closest_cut = None       # To store the closest cut
     closest_ext_fact = None  # To store the extrapolation factor corresponding to the closest cut
     min_diff = float('inf')  # Initialize with a large number
     
@@ -499,18 +505,26 @@ def getExtrapFactor(pdftype, categ, bdtcut):
             cut = float(parts_1[1])
             ext_fact = float(parts_1[10])
             n_sideband = round(float(parts_1[5]))
-            
+            print(' round  ', float(parts_1[5]), parts_1)
             # Calculate the difference between the current cut and bdtcut
             diff = abs(cut - bdtcut)
             
             # Update the closest cut and its extrapolation factor if this cut is closer
+            print('diff ', diff, ' min_diff   ', min_diff, '  n_sideband   ', n_sideband)
             if diff < min_diff and n_sideband > 0.5:
                 min_diff = diff
                 closest_cut = cut
                 closest_ext_fact = ext_fact
     
     # Return the closest cut and its extrapolation factor
+    print('------>  ', closest_ext_fact)
     return closest_ext_fact
+
+
+
+
+
+
 
 def MakeAndSaveExpFactors(datafile,categ,bdt_points):
         
@@ -606,17 +620,23 @@ def MakeAndSaveExpFactors(datafile,categ,bdt_points):
                 
                 SG_integral = pdfmodel.createIntegral(ROOT.RooArgSet(tripletMass), ROOT.RooArgSet(tripletMass), "SIG").getVal()
                 SB_integral = pdfmodel.createIntegral(ROOT.RooArgSet(tripletMass), ROOT.RooArgSet(tripletMass), "left,right").getVal()
-                
+                print('>>>>>>>>>>>>>>>>>>>>> ',fulldata.numEntries())
                 with open("Slopes_%s_%s"%(categ,"unfixed_exp")+".txt", "a") as f:
                         f.write("Cut: %s nbkg: %s n_sideband: %s expected_bkg: %s SG/SB ratio: %s \n"%(bdt_cut,nbkg.getVal(),fulldata.numEntries(),nbkg.getVal()*SG_integral,SG_integral/SB_integral))
 
+
+
+
+
+
+
+                        
 if __name__ == "__main__":
     
         # Enable batch mode
         ROOT.gROOT.SetBatch(True)
         
-        datafile = "Combine_Tree_ztau3mutau.root"
-        #categories = ['tauhB']
+        #categories = ['taumu']
         #categories = ['taue','taumu','tauhA','tauhB','all']
         #categories = ['tauhA','tauhB','all']
         categories = ['combined'] # Can only be run after the other 4 categories are read and copied
