@@ -1,0 +1,68 @@
+Combination of CMS_T3MSignal_13TeV_A1.txt  CMS_T3MSignal_13TeV_A2.txt  CMS_T3MSignal_13TeV_A3.txt  CMS_T3MSignal_13TeV_B1.txt  CMS_T3MSignal_13TeV_B2.txt  CMS_T3MSignal_13TeV_B3.txt  CMS_T3MSignal_13TeV_C1.txt  CMS_T3MSignal_13TeV_C2.txt  CMS_T3MSignal_13TeV_C3.txt
+imax 9 number of bins
+jmax 1 number of processes minus 1
+kmax 18 number of nuisance parameters
+----------------------------------------------------------------------------------------------------------------------------------
+shapes bkg       ch1       ../workspaces/CMS_T3MBkg_13TeV.root w_all:t3m_bkg_expo_threeGlobal_2018_A1
+shapes data_obs  ch1       ../workspaces/CMS_T3MBkg_13TeV.root w_all:data_obs_A1
+shapes sig       ch1       ../workspaces/CMS_T3MSignal_13TeV.root w_all:SignalModel_A1
+shapes bkg       ch2       ../workspaces/CMS_T3MBkg_13TeV.root w_all:t3m_bkg_expo_threeGlobal_2018_A2
+shapes data_obs  ch2       ../workspaces/CMS_T3MBkg_13TeV.root w_all:data_obs_A2
+shapes sig       ch2       ../workspaces/CMS_T3MSignal_13TeV.root w_all:SignalModel_A2
+shapes bkg       ch3       ../workspaces/CMS_T3MBkg_13TeV.root w_all:t3m_bkg_expo_threeGlobal_2018_A3
+shapes data_obs  ch3       ../workspaces/CMS_T3MBkg_13TeV.root w_all:data_obs_A3
+shapes sig       ch3       ../workspaces/CMS_T3MSignal_13TeV.root w_all:SignalModel_A3
+shapes bkg       ch4       ../workspaces/CMS_T3MBkg_13TeV.root w_all:t3m_bkg_expo_threeGlobal_2018_B1
+shapes data_obs  ch4       ../workspaces/CMS_T3MBkg_13TeV.root w_all:data_obs_B1
+shapes sig       ch4       ../workspaces/CMS_T3MSignal_13TeV.root w_all:SignalModel_B1
+shapes bkg       ch5       ../workspaces/CMS_T3MBkg_13TeV.root w_all:t3m_bkg_expo_threeGlobal_2018_B2
+shapes data_obs  ch5       ../workspaces/CMS_T3MBkg_13TeV.root w_all:data_obs_B2
+shapes sig       ch5       ../workspaces/CMS_T3MSignal_13TeV.root w_all:SignalModel_B2
+shapes bkg       ch6       ../workspaces/CMS_T3MBkg_13TeV.root w_all:t3m_bkg_expo_threeGlobal_2018_B3
+shapes data_obs  ch6       ../workspaces/CMS_T3MBkg_13TeV.root w_all:data_obs_B3
+shapes sig       ch6       ../workspaces/CMS_T3MSignal_13TeV.root w_all:SignalModel_B3
+shapes bkg       ch7       ../workspaces/CMS_T3MBkg_13TeV.root w_all:t3m_bkg_expo_threeGlobal_2018_C1
+shapes data_obs  ch7       ../workspaces/CMS_T3MBkg_13TeV.root w_all:data_obs_C1
+shapes sig       ch7       ../workspaces/CMS_T3MSignal_13TeV.root w_all:SignalModel_C1
+shapes bkg       ch8       ../workspaces/CMS_T3MBkg_13TeV.root w_all:t3m_bkg_expo_threeGlobal_2018_C2
+shapes data_obs  ch8       ../workspaces/CMS_T3MBkg_13TeV.root w_all:data_obs_C2
+shapes sig       ch8       ../workspaces/CMS_T3MSignal_13TeV.root w_all:SignalModel_C2
+shapes bkg       ch9       ../workspaces/CMS_T3MBkg_13TeV.root w_all:t3m_bkg_expo_threeGlobal_2018_C3
+shapes data_obs  ch9       ../workspaces/CMS_T3MBkg_13TeV.root w_all:data_obs_C3
+shapes sig       ch9       ../workspaces/CMS_T3MSignal_13TeV.root w_all:SignalModel_C3
+----------------------------------------------------------------------------------------------------------------------------------
+bin          ch1    ch2    ch3    ch4    ch5    ch6    ch7    ch8    ch9  
+observation  63     372    2569   18     254    3464   17     107    1037 
+----------------------------------------------------------------------------------------------------------------------------------
+bin                                    ch1      ch1      ch2      ch2      ch3      ch3      ch4      ch4      ch5      ch5      ch6      ch6      ch7      ch7      ch8      ch8      ch9      ch9    
+process                                sig      bkg      sig      bkg      sig      bkg      sig      bkg      sig      bkg      sig      bkg      sig      bkg      sig      bkg      sig      bkg    
+process                                0        1        0        1        0        1        0        1        0        1        0        1        0        1        0        1        0        1      
+rate                                   4.81555  63       9.96361  372      17.7558  2569     2.50251  18       13.4414  254      35.763   3464     2.74387  17       5.1883   107      11.5771  1037   
+----------------------------------------------------------------------------------------------------------------------------------
+DsNorm_18               lnN            1.04     -        1.04     -        1.04     -        1.04     -        1.04     -        1.04     -        1.04     -        1.04     -        1.04     -      
+UncBDTCut_18            lnN            1.05     -        1.05     -        1.05     -        1.05     -        1.05     -        1.05     -        1.05     -        1.05     -        1.05     -      
+UncHLT_18               lnN            1.05     -        1.05     -        1.05     -        1.05     -        1.05     -        1.05     -        1.05     -        1.05     -        1.05     -      
+UncL1_18                lnN            1.02     -        1.02     -        1.02     -        1.02     -        1.02     -        1.02     -        1.02     -        1.02     -        1.02     -      
+UncMVAshape_18_3glb     lnN            1.06     -        1.06     -        1.06     -        1.06     -        1.06     -        1.06     -        1.06     -        1.06     -        1.06     -      
+UncMuonEff_18_3glb      lnN            1.016    -        1.016    -        1.016    -        1.016    -        1.016    -        1.016    -        1.016    -        1.016    -        1.016    -      
+UncPionEff_18           lnN            1.021    -        1.021    -        1.021    -        1.021    -        1.021    -        1.021    -        1.021    -        1.021    -        1.021    -      
+UncRatioAcc_18          lnN            1.01     -        1.01     -        1.01     -        1.01     -        1.01     -        1.01     -        1.01     -        1.01     -        1.01     -      
+WNorm_18_3glb           lnN            1.05     -        1.05     -        1.05     -        1.05     -        1.05     -        1.05     -        1.05     -        1.05     -        1.05     -      
+fUnc_18                 lnN            1.02     -        1.02     -        1.02     -        1.02     -        1.02     -        1.02     -        1.02     -        1.02     -        1.02     -      
+ySig_bds                lnN            1.05     -        1.05     -        1.05     -        1.05     -        1.05     -        1.05     -        1.05     -        1.05     -        1.05     -      
+ySig_bscal              lnN            1.04     -        1.04     -        1.04     -        1.04     -        1.04     -        1.04     -        1.04     -        1.04     -        1.04     -      
+ySig_bt                 lnN            1.03     -        1.03     -        1.03     -        1.03     -        1.03     -        1.03     -        1.03     -        1.03     -        1.03     -      
+ySig_dscal              lnN            1.03     -        1.03     -        1.03     -        1.03     -        1.03     -        1.03     -        1.03     -        1.03     -        1.03     -      
+ySig_dsmmp              lnN            1.08     -        1.08     -        1.08     -        1.08     -        1.08     -        1.08     -        1.08     -        1.08     -        1.08     -      
+ySig_dstn               lnN            1.03     -        1.03     -        1.03     -        1.03     -        1.03     -        1.03     -        1.03     -        1.03     -        1.03     -      
+UncSigma      param  0.0 1.0
+UncMean       param  0.0 1.0
+bkg_exp_slope_threeGlobal_2018_B2  flatParam
+bkg_exp_slope_threeGlobal_2018_B3  flatParam
+bkg_exp_slope_threeGlobal_2018_C3  flatParam
+bkg_exp_slope_threeGlobal_2018_B1  flatParam
+bkg_exp_slope_threeGlobal_2018_A3  flatParam
+bkg_exp_slope_threeGlobal_2018_A2  flatParam
+bkg_exp_slope_threeGlobal_2018_A1  flatParam
+bkg_exp_slope_threeGlobal_2018_C1  flatParam
+bkg_exp_slope_threeGlobal_2018_C2  flatParam

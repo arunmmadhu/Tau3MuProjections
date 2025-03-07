@@ -1,0 +1,36 @@
+# HF Tau to three mu
+imax 1
+jmax 1
+kmax *
+---------------
+shapes data_obs  B2 ../workspaces/CMS_T3MBkg_13TeV.root w_all:data_obs_B2
+shapes bkg B2 ../workspaces/CMS_T3MBkg_13TeV.root w_all:t3m_bkg_expo_threeGlobal_2018_B2
+shapes sig B2 ../workspaces/CMS_T3MSignal_13TeV.root w_all:SignalModel_B2
+---------------
+bin            B2  
+observation   -1
+------------------------------
+bin               B2        B2     
+process              sig     bkg     
+process                0          1      
+rate                 13.4414    254
+--------------------------------
+ySig_dstn         lnN  1.03      - 
+ySig_dsmmp        lnN  1.08      - 
+ySig_bds          lnN  1.05      - 
+ySig_bt           lnN  1.03      - 
+ySig_dscal        lnN  1.03      - 
+ySig_bscal        lnN  1.04      - 
+DsNorm_18      lnN  1.04      - 
+fUnc_18        lnN  1.02      - 
+UncHLT_18      lnN  1.05      - 
+UncL1_18       lnN  1.02      - 
+UncBDTCut_18   lnN  1.05      - 
+UncRatioAcc_18 lnN  1.01      - 
+UncPionEff_18  lnN  1.021      - 
+WNorm_18_3glb       lnN  1.05      - 
+UncMuonEff_18_3glb  lnN  1.016     - 
+UncMVAshape_18_3glb  lnN  1.06     - 
+bkg_exp_slope_threeGlobal_2018_B2 flatParam
+UncMean	param 	0.0	1.0	
+UncSigma	param 	0.0	1.0	

@@ -1,0 +1,55 @@
+Combination of CMS_T3MSignal_13TeV_A1.txt  CMS_T3MSignal_13TeV_A2.txt  CMS_T3MSignal_13TeV_B1.txt  CMS_T3MSignal_13TeV_B2.txt  CMS_T3MSignal_13TeV_C1.txt  CMS_T3MSignal_13TeV_C2.txt
+imax 6 number of bins
+jmax 1 number of processes minus 1
+kmax 17 number of nuisance parameters
+----------------------------------------------------------------------------------------------------------------------------------
+shapes bkg       ch1       ../workspaces/CMS_T3MBkg_13TeV.root w_all:multipdf_A1
+shapes data_obs  ch1       ../workspaces/CMS_T3MBkg_13TeV.root w_all:data_obs_A1
+shapes sig       ch1       ../workspaces/CMS_T3MSignal_13TeV.root w_all:SignalModel_A1
+shapes bkg       ch2       ../workspaces/CMS_T3MBkg_13TeV.root w_all:multipdf_A2
+shapes data_obs  ch2       ../workspaces/CMS_T3MBkg_13TeV.root w_all:data_obs_A2
+shapes sig       ch2       ../workspaces/CMS_T3MSignal_13TeV.root w_all:SignalModel_A2
+shapes bkg       ch3       ../workspaces/CMS_T3MBkg_13TeV.root w_all:multipdf_B1
+shapes data_obs  ch3       ../workspaces/CMS_T3MBkg_13TeV.root w_all:data_obs_B1
+shapes sig       ch3       ../workspaces/CMS_T3MSignal_13TeV.root w_all:SignalModel_B1
+shapes bkg       ch4       ../workspaces/CMS_T3MBkg_13TeV.root w_all:multipdf_B2
+shapes data_obs  ch4       ../workspaces/CMS_T3MBkg_13TeV.root w_all:data_obs_B2
+shapes sig       ch4       ../workspaces/CMS_T3MSignal_13TeV.root w_all:SignalModel_B2
+shapes bkg       ch5       ../workspaces/CMS_T3MBkg_13TeV.root w_all:multipdf_C1
+shapes data_obs  ch5       ../workspaces/CMS_T3MBkg_13TeV.root w_all:data_obs_C1
+shapes sig       ch5       ../workspaces/CMS_T3MSignal_13TeV.root w_all:SignalModel_C1
+shapes bkg       ch6       ../workspaces/CMS_T3MBkg_13TeV.root w_all:multipdf_C2
+shapes data_obs  ch6       ../workspaces/CMS_T3MBkg_13TeV.root w_all:data_obs_C2
+shapes sig       ch6       ../workspaces/CMS_T3MSignal_13TeV.root w_all:SignalModel_C2
+----------------------------------------------------------------------------------------------------------------------------------
+bin          ch1    ch2    ch3    ch4    ch5    ch6  
+observation  41     202    196    1799   121    974  
+----------------------------------------------------------------------------------------------------------------------------------
+bin                                      ch1      ch1      ch2      ch2      ch3      ch3      ch4      ch4      ch5      ch5      ch6      ch6    
+process                                  sig      bkg      sig      bkg      sig      bkg      sig      bkg      sig      bkg      sig      bkg    
+process                                  0        1        0        1        0        1        0        1        0        1        0        1      
+rate                                     1.14454  41       1.71945  202      4.84557  196      8.5972   1799     2.56299  121      4.38063  974    
+----------------------------------------------------------------------------------------------------------------------------------
+DsNorm_18               lnN              1.04     -        1.04     -        1.04     -        1.04     -        1.04     -        1.04     -      
+UncBDTCut_18            lnN              1.05     -        1.05     -        1.05     -        1.05     -        1.05     -        1.05     -      
+UncHLT_18               lnN              1.05     -        1.05     -        1.05     -        1.05     -        1.05     -        1.05     -      
+UncL1_18                lnN              1.02     -        1.02     -        1.02     -        1.02     -        1.02     -        1.02     -      
+UncMVAshape_18_2glbtk   lnN              1.04     -        1.04     -        1.04     -        1.04     -        1.04     -        1.04     -      
+UncMuonEff_18_2glbtk    lnN              1.08     -        1.08     -        1.08     -        1.08     -        1.08     -        1.08     -      
+UncPionEff_18           lnN              1.021    -        1.021    -        1.021    -        1.021    -        1.021    -        1.021    -      
+UncRatioAcc_18          lnN              1.01     -        1.01     -        1.01     -        1.01     -        1.01     -        1.01     -      
+fUnc_18                 lnN              1.02     -        1.02     -        1.02     -        1.02     -        1.02     -        1.02     -      
+ySig_bds                lnN              1.05     -        1.05     -        1.05     -        1.05     -        1.05     -        1.05     -      
+ySig_bscal              lnN              1.04     -        1.04     -        1.04     -        1.04     -        1.04     -        1.04     -      
+ySig_bt                 lnN              1.03     -        1.03     -        1.03     -        1.03     -        1.03     -        1.03     -      
+ySig_dscal              lnN              1.03     -        1.03     -        1.03     -        1.03     -        1.03     -        1.03     -      
+ySig_dsmmp              lnN              1.08     -        1.08     -        1.08     -        1.08     -        1.08     -        1.08     -      
+ySig_dstn               lnN              1.03     -        1.03     -        1.03     -        1.03     -        1.03     -        1.03     -      
+UncSigma      param  0.0 1.0
+UncMean       param  0.0 1.0
+roomultipdf_cat_2018_twoGlobalTracker_B1  discrete
+roomultipdf_cat_2018_twoGlobalTracker_A2  discrete
+roomultipdf_cat_2018_twoGlobalTracker_A1  discrete
+roomultipdf_cat_2018_twoGlobalTracker_B2  discrete
+roomultipdf_cat_2018_twoGlobalTracker_C2  discrete
+roomultipdf_cat_2018_twoGlobalTracker_C1  discrete
