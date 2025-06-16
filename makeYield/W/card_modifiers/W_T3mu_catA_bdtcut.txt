@@ -1,23 +1,31 @@
 
-# ZTT
+# W has br_Wmunu because that's the measurement that's used to normalize the signal sample.
+# https://github.com/t3mucommontools/T3MCombine/tree/master/T3MCombineAll/preapproval/W/2018/blind/datacards
 imax 1 number of bins
 jmax * number of processes minus 1
 kmax * number of nuisance parameters
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
-bin               categorytauhA
+bin               categoryA
 observation       -1
 --------------------------------------------------------------------------------
 
-bin                                     categorytauhA       categorytauhA
+bin                                     categoryA           categoryA
 process                                 signal              background
 process                                 0                   1
-rate                                   0.4747        1.0606
+rate                                    0.4747          1.0606
 --------------------------------------------------------------------------------
 lumi              lnN                       1.025               -
-Zxs               lnN                       1.0249              -
-BrTauX            lnN                       1.0026        -
-extrap_factor_tauhA     gmN     5    -                   0.212121
-extrap_factor_unc lnN                       -                   1.09 
-rounding_unc      lnN                       -                   1.10 
+xs_W              lnN                       1.037               -
+br_Wtaunu         lnN                       1.018               -
+br_Wmunu          lnN                       1.014               -
+WNLO              lnN                       1.04               -
+muonID_A18        lnN                       1.039               -
+HLT_Mu_A18        lnN                       1.01               -
+HLT_iso18         lnN                       1.07               -
+HLT_TkMu_A18      lnN                       1.08               -
+mc_stat_A18       lnN                       1.0100        -   
+extrap_factor_catA     gmN     5    -                   0.212121
+extrap_factor_unc_catA lnN                       -                   1.09 
+rounding_unc_catA      lnN                       -                   1.10 
 --------------------------------------------------------------------------------

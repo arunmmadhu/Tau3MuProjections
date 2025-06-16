@@ -5,7 +5,7 @@ parser = argparse.ArgumentParser(description='For scaling events by lumi')
 
 # No longer necessary
 parser.add_argument('--luminosity', action='store', default=97.7, help="Lumi scale\n DEFAULT: 97.7")
-parser.add_argument('--categ', action='store', default='taue', help="Card Category\n DEFAULT: taue")
+parser.add_argument('--categ', action='store', default='catA', help="Card Category\n DEFAULT: catA")
 parser.add_argument('--sig_exp', action='store', default=1.0, help="Signal yield\n DEFAULT: 1.0")
 parser.add_argument('--bkg_exp', action='store', default=1.0, help="bkg yield\n DEFAULT: 1.0")
 parser.add_argument('--sb_exp', action='store', default=1.0, help="sideband yield\n DEFAULT: 1.0")
@@ -26,32 +26,20 @@ linenum_actual_2 = 10
 linenum_actual_3 = 10
 linenum_actual_4 = 10
 
-if(categ == 'taue'):
-        card_name = 'ZTT_T3mu_taue_bdtcut'
+if(categ == 'catA'):
+        card_name = 'W_T3mu_catA_bdtcut'
         linenum_actual_1 = 14
         linenum_actual_2 = 19
         linenum_actual_3 = 20
         linenum_actual_4 = 21
-if(categ == 'taumu'):
-        card_name = 'ZTT_T3mu_taumu_bdtcut'
+if(categ == 'catB'):
+        card_name = 'W_T3mu_catB_bdtcut'
         linenum_actual_1 = 14
         linenum_actual_2 = 19
         linenum_actual_3 = 20
         linenum_actual_4 = 21
-if(categ == 'tauhA'):
-        card_name = 'ZTT_T3mu_tauhA_bdtcut'
-        linenum_actual_1 = 14
-        linenum_actual_2 = 19
-        linenum_actual_3 = 20
-        linenum_actual_4 = 21
-if(categ == 'tauhB'):
-        card_name = 'ZTT_T3mu_tauhB_bdtcut'
-        linenum_actual_1 = 14
-        linenum_actual_2 = 19
-        linenum_actual_3 = 20
-        linenum_actual_4 = 21
-if(categ == 'all'):
-        card_name = 'ZTT_T3mu_all_bdtcut'
+if(categ == 'catC'):
+        card_name = 'W_T3mu_catC_bdtcut'
         linenum_actual_1 = 14
         linenum_actual_2 = 19
         linenum_actual_3 = 20
