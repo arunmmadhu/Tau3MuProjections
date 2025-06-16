@@ -141,9 +141,9 @@ def getLimits(file_name):
 def plotUpperLimits(lumi_W,lumi_HF,lumi_ZTT,analyzed_lumi_W,analyzed_lumi_HF,analyzed_lumi_ZTT,categories,Whether_Hybrid,WhetherIndividualPlots):
  
     #placeholder
-    N = len(lumi_HF)
-    lumi = lumi_W
-    analyzed_lumi = analyzed_lumi_W
+    N = len(lumi_HF) #dummy value
+    lumi = lumi_W #dummy value
+    analyzed_lumi = analyzed_lumi_W #dummy value
     
     N1 = len(lumi_HF)
     N2 = len(lumi_ZTT)
@@ -151,7 +151,7 @@ def plotUpperLimits(lumi_W,lumi_HF,lumi_ZTT,analyzed_lumi_W,analyzed_lumi_HF,ana
     Cat_No = len(categories)
     
     # Whether to make individual plots
-    #WhetherIndividualPlots = True
+    WhetherIndividualPlots = True
     
     WhetherMultipleBroadCategories = False
     if (Cat_No>1):

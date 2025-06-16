@@ -270,6 +270,8 @@ class makeCards:
                         
                         sig_est = MC_dataset_with_BDT_cut.sumEntries() * lu/analyzed_lumi
                         #sig_est = self.BDTNorm_MC.getVal() * (self.BDT_distribution_MC.createIntegral(ROOT.RooArgSet(self.bdt_cv), ROOT.RooArgSet(self.bdt_cv), "Integral_Range").getVal() ) * lu/analyzed_lumi
+                        #bkg_est =bkg in signal region; sb_est = bkg in sideband
+                        
                         bkg_est = exp_fact * self.BDTNorm.getVal() * (self.BDT_distribution.createIntegral(ROOT.RooArgSet(self.bdt_cv), ROOT.RooArgSet(self.bdt_cv), "Integral_Range").getVal() ) * lu/analyzed_lumi
                         sb_est = self.BDTNorm.getVal() * (self.BDT_distribution.createIntegral(ROOT.RooArgSet(self.bdt_cv), ROOT.RooArgSet(self.bdt_cv), "Integral_Range").getVal() ) * lu/analyzed_lumi
                         
