@@ -28,22 +28,22 @@ linenum_actual_4 = 10
 
 if(categ == 'catA'):
         card_name = 'W_T3mu_catA_bdtcut'
-        linenum_actual_1 = 14
-        linenum_actual_2 = 19
-        linenum_actual_3 = 20
-        linenum_actual_4 = 21
+        linenum_actual_1 = 15
+        linenum_actual_2 = 27
+        linenum_actual_3 = 28
+        linenum_actual_4 = 29
 if(categ == 'catB'):
         card_name = 'W_T3mu_catB_bdtcut'
-        linenum_actual_1 = 14
-        linenum_actual_2 = 19
-        linenum_actual_3 = 20
-        linenum_actual_4 = 21
+        linenum_actual_1 = 15
+        linenum_actual_2 = 27
+        linenum_actual_3 = 28
+        linenum_actual_4 = 29
 if(categ == 'catC'):
         card_name = 'W_T3mu_catC_bdtcut'
-        linenum_actual_1 = 14
-        linenum_actual_2 = 19
-        linenum_actual_3 = 20
-        linenum_actual_4 = 21
+        linenum_actual_1 = 15
+        linenum_actual_2 = 27
+        linenum_actual_3 = 28
+        linenum_actual_4 = 29
 
 # opening the file in read mode
 file = open("card_modifiers/"+card_name+".txt", "r")
