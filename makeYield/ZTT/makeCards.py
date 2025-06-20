@@ -643,6 +643,7 @@ if __name__ == "__main__":
         #categories = ['tauhA','tauhB','all']
         categories = ['combined'] # Can only be run after the other 4 categories are read and copied
         
+        datafile = "Combine_Tree_ztau3mutau.root"
 
         
         lumi = np.round(np.arange(100,4500,500), 0)

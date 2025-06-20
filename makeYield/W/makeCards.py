@@ -54,6 +54,164 @@ class makeCards:
                 signal_range_lo = 1.74
                 signal_range_hi = 1.81
                 
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                # Constants
+                MC_NORM17 = 30541./(500e+3)*(8580+11370)*0.1138/0.1063*1E-7
+                MC_NORM18 = 59828./(492e+3)*(8580+11370)*0.1138/0.1063*1E-7
+                
+                phi_veto_min = 1.000
+                phi_veto_max = 1.040
+                omega_veto_min = 0.762
+                omega_veto_max = 0.802
+                
+                signal_region_min = 1.6
+                signal_region_max = 2.0
+                fit_range_lo = 1.5
+                fit_range_hi = 2.1
+                signal_peak_region_min = 1.76
+                signal_peak_region_max = 1.80
+                Loose_BDT_Cut = 0.5
+                BDT_Score_Min = -0.3
+                signalnorm = 0.00000824176
+                
+                # Load file and tree
+                MiniTreeFile = ROOT.TFile.Open("luca_root/signal_threeMedium_weighted_16Mar2022.root")
+                tree = MiniTreeFile.Get("ztautau")
+                
+                # Define RooFit variables
+                tripletMass = RooRealVar("tripletMass", "3#mu mass", fit_range_lo, fit_range_hi, "GeV")
+                bdt_cv = RooRealVar("bdt_cv", "bdt_cv", -1, 1)
+                mass12 = RooRealVar("cand_refit_mass12", "mass12", 0, 2)
+                mass13 = RooRealVar("cand_refit_mass13", "mass13", 0, 2)
+                mass23 = RooRealVar("cand_refit_mass23", "mass23", 0, 2)
+                charge12 = RooRealVar("cand_charge12", "charge12", -1, 1)
+                charge13 = RooRealVar("cand_charge13", "charge13", -1, 1)
+                charge23 = RooRealVar("cand_charge23", "charge23", -1, 1)
+                massE = RooRealVar("cand_refit_tau_massE", "massE", 0, 1)
+                year = RooRealVar("year", "year", 17, 18)
+                tau_sv_ls = RooRealVar("tau_sv_ls", "tau_sv_ls", 0, 100)
+                isMC = RooRealVar("isMC", "isMC", 0, 1000000)
+                scale = RooRealVar("scale", "scale", signalnorm)
+                weight = RooRealVar("weight", "event_weight", 0, 5)
+                
+                variables = RooArgSet()
+                for var in [tripletMass, bdt_cv, mass12, mass13, mass23, charge12, charge13, charge23,
+                            massE, year, tau_sv_ls, isMC, scale, weight]:
+                    variables.add(var)
+                
+                # Define mass resolution cut per category
+                if categ == 'categ1':
+                    cat_expr = "sqrt(cand_refit_tau_massE)/tripletMass >= 0.000 && sqrt(cand_refit_tau_massE)/tripletMass < 0.007"
+                elif categ == 'categ2':
+                    cat_expr = "sqrt(cand_refit_tau_massE)/tripletMass >= 0.007 && sqrt(cand_refit_tau_massE)/tripletMass < 0.012"
+                elif categ == 'categ3':
+                    cat_expr = "sqrt(cand_refit_tau_massE)/tripletMass >= 0.012 && sqrt(cand_refit_tau_massE)/tripletMass < 9999."
+                
+                # Define phi and omega veto
+                veto_expr = (
+                    f"(cand_charge12 != 0 || ((cand_refit_mass12 < {phi_veto_min} || cand_refit_mass12 > {phi_veto_max}) && "
+                    f"(cand_refit_mass12 < {omega_veto_min} || cand_refit_mass12 > {omega_veto_max}))) && "
+                    f"(cand_charge13 != 0 || ((cand_refit_mass13 < {phi_veto_min} || cand_refit_mass13 > {phi_veto_max}) && "
+                    f"(cand_refit_mass13 < {omega_veto_min} || cand_refit_mass13 > {omega_veto_max}))) && "
+                    f"(cand_charge23 != 0 || ((cand_refit_mass23 < {phi_veto_min} || cand_refit_mass23 > {phi_veto_max}) && "
+                    f"(cand_refit_mass23 < {omega_veto_min} || cand_refit_mass23 > {omega_veto_max})))"
+                )
+                
+                # Common expression
+                common_expr = (
+                    f"({cat_expr}) && "
+                    f"({veto_expr}) && "
+                    f"(year == 18) && (tau_sv_ls > 2.0)"
+                )
+                
+                # Signal selection (MC)
+                MCSelector = RooFormulaVar("MCSelector", "MCSelector",
+                                           f"{common_expr} && isMC != 0 && "
+                                           f"(tripletMass >= {signal_region_min} && tripletMass <= {signal_region_max})",
+                                           RooArgList(variables))
+                fullmc = RooDataSet("mc", "mc", tree, variables, MCSelector, "scale")
+                
+                # Data selection (Blinded)
+                DataSelector = RooFormulaVar("DataSelector", "DataSelector",
+                                              f"{common_expr} && isMC == 0 && "
+                                              f"(tripletMass <= {signal_peak_region_min} || tripletMass >= {signal_peak_region_max}) && "
+                                              f"(tripletMass >= {fit_range_lo} && tripletMass <= {fit_range_hi})",
+                                              RooArgList(variables))
+                fulldata = RooDataSet("data", "data", tree, variables, DataSelector)
+                
+                # Now `fullmc` and `fulldata` can be used for further plotting/fitting
+
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
                 MiniTreeFile = ROOT.TFile.Open(datafile)
                 MiniTreeFile.cd()
                 
