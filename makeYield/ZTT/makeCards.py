@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python2
 
 import ROOT
 from ROOT import TFile, TTree, TCanvas, TGraph, TMultiGraph, TGraphErrors, TLegend, TPaveLabel, TPaveText, TLatex
@@ -632,19 +632,17 @@ def MakeAndSaveExpFactors(datafile,categ,bdt_points):
 
 
 
-                        
 if __name__ == "__main__":
-    
+        
         # Enable batch mode
         ROOT.gROOT.SetBatch(True)
         
         #categories = ['taumu']
-        #categories = ['taue','taumu','tauhA','tauhB','all']
+        categories = ['taue','taumu','tauhA','tauhB','all']
         #categories = ['tauhA','tauhB','all']
-        categories = ['combined'] # Can only be run after the other 4 categories are read and copied
+        #categories = ['combined'] # Can only be run after the other 4 categories are read and copied
         
-        datafile = "Combine_Tree_ztau3mutau.root"
-
+        datafile = "../../../Combine_Tree_ztau3mutau.root"        
         
         lumi = np.round(np.arange(100,4500,500), 0)
         #lumi = np.round(np.arange(100,200,100), 0)
@@ -695,7 +693,6 @@ if __name__ == "__main__":
                 
         #executeDataCards_onCondor(lumi,categories,False,bdt_points)
         #ReadAndCopyMinimumBDTCard(lumi,categories,False,bdt_points)
-
         
         
         
