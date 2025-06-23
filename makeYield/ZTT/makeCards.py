@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 import ROOT
 from ROOT import TFile, TTree, TCanvas, TGraph, TMultiGraph, TGraphErrors, TLegend, TPaveLabel, TPaveText, TLatex
@@ -33,6 +33,7 @@ class makeCards:
                 self.BDTNorm_MC = None
                 self.BDT_distribution_MC = None
                 self.MCSelector = None
+                self.fullmc_unweighted = None
                 self.fullmc = None
                 
                 self.a = None
@@ -102,7 +103,6 @@ class makeCards:
                 variables.add(event_weight)
                 variables.add(category)
                 variables.add(isMC)
-                variables.add(scale)
                 
                 phivetoes="(fabs(dimu_OS1 - 1.020)>0.020)&(fabs(dimu_OS2 - 1.020)>0.020)"
                 omegavetoes="&fabs(dimu_OS1 - 0.782)>0.020&fabs(dimu_OS2 - 0.782)>0.020&"
@@ -140,38 +140,43 @@ class makeCards:
                 
                 
                 # For fitting BDT Output in Signal
-                
+
                 self.MCSelector = RooFormulaVar('MCSelector', 'MCSelector', phivetoes+omegavetoes+' isMC !=0 & (isMC == 211 | isMC == 210231 | isMC == 210232 | isMC == 210233 ) & (tripletMass>=%s & tripletMass<=%s) ' %(fit_range_lo,fit_range_hi) , RooArgList(variables))
                 
-                self.fullmc = RooDataSet('mc', 'mc', tree, variables, self.MCSelector,'scale')
                 
+                self.fullmc_unweighted = RooDataSet('mc', 'mc', tree, variables, self.MCSelector')
+                dataset_vars = fullmc_unweighted.get()
+                dataset_vars.add(scale)
+                
+                self.fullmc = RooDataSet('mc', 'mc', self.fullmc_unweighted, dataset_vars, "",'scale')
+
                 self.bdt_cv.setRange("BDT_MC_Fit_Range", -1.0, 1.0);
-                
+
                 self.bgausmeanMC = RooRealVar("bgausmeanMC", "bgausmeanMC", 0.5, 0.0, 0.9)
                 self.bgaussigmaMC_a = RooRealVar("bgaussigmaMC_a", "bgaussigmaMC_a", 0.2, 0.000001, 1.0)
                 self.bgaussigmaMC_b = RooRealVar("bgaussigmaMC_b", "bgaussigmaMC_b", 0.2, 0.000001, 1.0)
-                
+
                 self.bgaus_distMC = RooBifurGauss("bgaus_distMC", "bgaus dist MC", self.bdt_cv, self.bgausmeanMC, self.bgaussigmaMC_a, self.bgaussigmaMC_b)
-                
+
                 self.BDTNorm_MC = RooRealVar("BDTNorm_MC", "BDTNorm_MC", 500.0, 0.1, 50000)
                 self.BDT_distribution_MC = RooAddPdf("BDT_distribution", "BDT_distribution",RooArgList(self.bgaus_distMC), RooArgList(self.BDTNorm_MC))
-                
+
                 results_mcpdf = self.BDT_distribution_MC.fitTo(self.fullmc, RooFit.Range('BDT_MC_Fit_Range'), RooFit.Save())
                 results_mcpdf.Print()
-                
-                
+
+
                 # Plot BDT for data and MC
-                
+
                 frame1 = self.bdt_cv.frame()
                 frame1.SetTitle('')
                 frame1.GetXaxis().SetTitle("BDT score, "+cat_label)
-                
+
                 frame2 = self.bdt_cv.frame()
                 frame2.SetTitle('')
                 frame2.GetXaxis().SetTitle("BDT score, "+cat_label)
-                
+
                 nbins = 100
-                
+
                 self.fullmc.plotOn(frame1, 
                               ROOT.RooFit.Binning(nbins), 
                               ROOT.RooFit.XErrorSize(0), 
@@ -182,19 +187,19 @@ class makeCards:
                               ROOT.RooFit.FillColor(ROOT.kCyan  + 2)
                 )
                 #self.BDT_distribution_MC.plotOn(frame1, ROOT.RooFit.LineColor(ROOT.kRed ))
-                
-                
+
+
                 fulldata.plotOn(frame2, 
                         ROOT.RooFit.Binning(nbins),
                         ROOT.RooFit.MarkerStyle(20),
                         ROOT.RooFit.MarkerColor(ROOT.kBlack), 
                         ROOT.RooFit.MarkerSize(0.75))
-                        
+
                 #BDT_distribution.plotOn(frame2,  ROOT.RooFit.LineColor(ROOT.kBlue) , ROOT.RooFit.Normalization(fulldata.sumEntries("1", "BDT_Fit_Range"), ROOT.RooAbsReal.NumEvent), ROOT.RooFit.ProjectionRange('BDT_Fit_Range') )
                 #BDT_distribution.plotOn(frame2,  ROOT.RooFit.LineColor(ROOT.kBlue) , ROOT.RooFit.Normalization(BDTNorm.getVal()*BDT_distribution.createIntegral(ROOT.RooArgSet(self.bdt_cv), ROOT.RooArgSet(self.bdt_cv), "BDT_Fit_Range").getVal(), ROOT.RooAbsReal.NumEvent), ROOT.RooFit.ProjectionRange('BDT_Fit_Range') )
-                
+
                 self.BDT_distribution.plotOn(frame2,  ROOT.RooFit.LineColor(ROOT.kBlue) )
-                
+
                 frame1.Draw()
                 ROOT.gPad.SetTicks(1,1)
                 CMS_lumi(ROOT.gPad, 5, 0)
@@ -202,7 +207,7 @@ class makeCards:
                 frame1.Draw('sameaxis')
                 ROOT.gPad.SaveAs('bdt_fit_mc_'+categ+'.png')
                 ROOT.gPad.Clear()
-                
+
                 ROOT.gPad.SetLogy()
                 frame2.Draw()
                 ROOT.gPad.SetTicks(1,1)
@@ -211,11 +216,10 @@ class makeCards:
                 frame2.Draw('sameaxis')
                 ROOT.gPad.SaveAs('bdt_fit_bkg_'+categ+'.png')
                 ROOT.gPad.SetLogy(0)
-                
-                
-                #print "Certain BDT cut: ", self.fullmc.reduce('bdt_cv > 0.5').sumEntries()
-                
-                
+
+
+                #print("Certain BDT cut: ", self.fullmc.reduce('bdt_cv > 0.5').sumEntries())
+
                 return frame1, frame2, self.fullmc, fulldata
                 
                 
@@ -281,7 +285,7 @@ class makeCards:
                         
                         exp_uncert = 1.0 + abs(exp_fact_different_pdf-exp_fact)/exp_fact
                         
-                        print "bdt point: ", point," sig_est: ", sig_est, " bkg_est: ", bkg_est, " sb_est: ", sb_est, " exp_uncert: ", exp_uncert
+                        print("bdt point: ", point," sig_est: ", sig_est, " bkg_est: ", bkg_est, " sb_est: ", sb_est, " exp_uncert: ", exp_uncert)
                         
                         command_mod_card = "python card_modifiers/Card_Mod.py --categ " + str(categ) + " --sig_exp " + str(sig_est) + " --bkg_exp " + str(bkg_est) + " --sb_exp " + str(sb_est) + " --ext_unc " + str(exp_uncert) 
                         print('   exp_fact_different_pdf   ', exp_fact_different_pdf )
@@ -333,7 +337,7 @@ class makeCards:
                 #        command = "combineCards.py %s %s %s > %s"% (str(file1) ,str(file2) ,str(file3), str(output_file))  # rm ZTT for now
                         command = "combineCards.py %s %s %s %s > %s"% (str(file1),str(file2),str(file3) ,str(file4), str(output_file))
                         
-                        print("Running command: %s" % (command) )
+                        print("Running command: %s" % (command))
                         os.system(command)
                         os.system('mv dc_*txt combined/datacards_modified')
                     else:
@@ -585,7 +589,6 @@ def MakeAndSaveExpFactors(datafile,categ,bdt_points):
         variables.add(event_weight)
         variables.add(category)
         variables.add(isMC)
-        variables.add(scale)
         
         phivetoes="(fabs(dimu_OS1 - 1.020)>0.020)&(fabs(dimu_OS2 - 1.020)>0.020)"
         omegavetoes="&fabs(dimu_OS1 - 0.782)>0.020&fabs(dimu_OS2 - 0.782)>0.020&"
