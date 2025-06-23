@@ -151,7 +151,7 @@ class makeCards:
                 
                 # For fitting BDT Output in Signal
 
-                self.MCSelector = RooFormulaVar('MCSelector', 'MCSelector', phivetoes+' isMC !=0 & (isMC == 211 | isMC == 210231 | isMC == 210232 | isMC == 210233 ) & (tripletMass>=%s & tripletMass<=%s) ' %(fit_range_lo,fit_range_hi) , RooArgList(variables))
+                self.MCSelector = RooFormulaVar('MCSelector', 'MCSelector', phivetoes+' isMC !=0 & (isMC == 211 | isMC == 210231 | isMC == 210232 | isMC == 210233 ) & (tripletMass>=%s & tripletMass<=%s) ' %(signal_range_lo,signal_range_hi) , RooArgList(variables))
                 
                 #signal always uses the normalized/final PF tree
                 self.fullmc_unweighted = RooDataSet('mc', 'mc', tree_norm, variables, self.MCSelector)
@@ -651,8 +651,8 @@ if __name__ == "__main__":
         # Enable batch mode
         ROOT.gROOT.SetBatch(True)
         
-        #categories = ['taue']
-        categories = ['taue','taumu','tauhA','tauhB','all']
+        categories = ['taumu']
+        #categories = ['taue','taumu','tauhA','tauhB','all']
         #categories = ['tauhA','tauhB','all']
         #categories = ['combined'] # Can only be run after the other 4 categories are read and copied
         
@@ -660,11 +660,11 @@ if __name__ == "__main__":
         
         datafile_main = "../../../../Combine_Tree_ztau3mutau_PF_PostBDT.root"#The final PF cuts I would prefer to use
         
-        #lumi = np.round(np.arange(100,4500,500), 0)
-        #lumi = np.insert(lumi, 0 , 59.8)
-        #lumi = np.append(lumi, 4500)
+        lumi = np.round(np.arange(100,4500,500), 0)
+        lumi = np.insert(lumi, 0 , 59.8)
+        lumi = np.append(lumi, 4500)
         
-        lumi = np.round([59.8,3000.0])
+        #lumi = np.round([59.8,3000.0])
         
         cmd1 = 'mkdir lumi_limit_scans;'
         os.system(cmd1)
@@ -674,7 +674,7 @@ if __name__ == "__main__":
         Cat_No = len(categories)
         
         #To create datacards
-        WhetherFitBDTandMakeCards = True
+        WhetherFitBDTandMakeCards = False
         
         for cat in range(Cat_No):
                 categ = categories[cat]
@@ -689,7 +689,7 @@ if __name__ == "__main__":
                 if(categ == 'taumu'):
                         analyzed_lumi = 59.83
                         datafile_for_norm = datafile_main
-                        datafile_for_shape = datafile_main
+                        datafile_for_shape = datafile_bdt_shape
                 if(categ == 'tauhA'):
                         analyzed_lumi = 59.83
                         datafile_for_norm = datafile_main
