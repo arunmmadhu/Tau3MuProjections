@@ -47,16 +47,13 @@ class makeCards:
         
         
         
-        def FitBDT(self,datafile,categ):
+        def FitBDT(self,datafile_for_norm,datafile_for_shape,categ):
                 
                 fit_range_lo = 1.6
                 fit_range_hi = 2.0
                 
                 signal_range_lo = 1.74
                 signal_range_hi = 1.81
-                
-                MiniTreeFile = ROOT.TFile.Open(datafile)
-                MiniTreeFile.cd()
                 
                 treeName=''
                 signalnorm = 1.0
@@ -82,7 +79,13 @@ class makeCards:
                         signalnorm = 0.00000824176
                         cat_label = "Inclusive"
                 
+                MiniTreeFile = ROOT.TFile.Open(datafile_for_shape)
+                MiniTreeFile.cd()
                 tree = MiniTreeFile.Get(treeName)
+                
+                MiniTreeFile_ForNorm = ROOT.TFile.Open(datafile_for_norm)
+                MiniTreeFile_ForNorm.cd()
+                tree_norm = MiniTreeFile_ForNorm.Get(treeName)
                 
                 tripletMass          = ROOT.RooRealVar('tripletMass'                , '3#mu mass'           , fit_range_lo, fit_range_hi, 'GeV')
                 self.bdt_cv          = ROOT.RooRealVar('bdt_cv'                     , 'bdt_cv'              , -1 , 1)
@@ -104,17 +107,24 @@ class makeCards:
                 variables.add(category)
                 variables.add(isMC)
                 
-                phivetoes="(fabs(dimu_OS1 - 1.020)>0.020)&(fabs(dimu_OS2 - 1.020)>0.020)"
-                omegavetoes="&fabs(dimu_OS1 - 0.782)>0.020&fabs(dimu_OS2 - 0.782)>0.020&"
+                phivetoes="(fabs(dimu_OS1 - 1.020)>0.020)&(fabs(dimu_OS2 - 1.020)>0.020)&"
+                omegavetoes="fabs(dimu_OS1 - 0.782)>0.020&fabs(dimu_OS2 - 0.782)>0.020&"
                 
                 
                 # For fitting BDT Output in Data
                 
                 BDT_Score_Min=-0.3
                 
-                BlindDataSelector = RooFormulaVar('DataSelector', 'DataSelector', phivetoes+omegavetoes+' isMC == 0 & (tripletMass<=%s || tripletMass>=%s) & (tripletMass>=%s & tripletMass<=%s) ' %(signal_range_lo,signal_range_hi,fit_range_lo,fit_range_hi) , RooArgList(variables))
+                BlindDataSelector = RooFormulaVar('DataSelector', 'DataSelector', phivetoes+' isMC == 0 & (tripletMass<=%s || tripletMass>=%s) & (tripletMass>=%s & tripletMass<=%s) ' %(signal_range_lo,signal_range_hi,fit_range_lo,fit_range_hi) , RooArgList(variables))
                 
-                fulldata = RooDataSet('data', 'data', tree,  variables, BlindDataSelector)
+                fulldata_shape = RooDataSet('fulldata_shape', 'fulldata_shape', tree,  variables, BlindDataSelector)
+                fulldata_norm = RooDataSet('fulldata_norm', 'fulldata_norm', tree_norm,  variables, BlindDataSelector)
+                #print("shape tree norm: ",fulldata_shape.numEntries()," and main tree norm: ",fulldata_norm.numEntries())
+                data_scale = ROOT.RooRealVar('data_scale', 'data_scale', 1.0*fulldata_norm.numEntries()/fulldata_shape.numEntries())
+                dataset_vars_data = fulldata_shape.get()
+                dataset_vars_data.add(data_scale)
+                
+                fulldata = RooDataSet('fulldata', 'fulldata', fulldata_shape,  dataset_vars_data, "",'data_scale')
                 
                 self.bdt_cv.setRange("BDT_Fit_Range", BDT_Score_Min, 1.0);
                 
@@ -141,11 +151,11 @@ class makeCards:
                 
                 # For fitting BDT Output in Signal
 
-                self.MCSelector = RooFormulaVar('MCSelector', 'MCSelector', phivetoes+omegavetoes+' isMC !=0 & (isMC == 211 | isMC == 210231 | isMC == 210232 | isMC == 210233 ) & (tripletMass>=%s & tripletMass<=%s) ' %(fit_range_lo,fit_range_hi) , RooArgList(variables))
+                self.MCSelector = RooFormulaVar('MCSelector', 'MCSelector', phivetoes+' isMC !=0 & (isMC == 211 | isMC == 210231 | isMC == 210232 | isMC == 210233 ) & (tripletMass>=%s & tripletMass<=%s) ' %(fit_range_lo,fit_range_hi) , RooArgList(variables))
                 
-                
-                self.fullmc_unweighted = RooDataSet('mc', 'mc', tree, variables, self.MCSelector')
-                dataset_vars = fullmc_unweighted.get()
+                #signal always uses the normalized/final PF tree
+                self.fullmc_unweighted = RooDataSet('mc', 'mc', tree_norm, variables, self.MCSelector)
+                dataset_vars = self.fullmc_unweighted.get()
                 dataset_vars.add(scale)
                 
                 self.fullmc = RooDataSet('mc', 'mc', self.fullmc_unweighted, dataset_vars, "",'scale')
@@ -208,6 +218,7 @@ class makeCards:
                 ROOT.gPad.SaveAs('bdt_fit_mc_'+categ+'.png')
                 ROOT.gPad.Clear()
 
+                frame2.SetMinimum(1e-2)
                 ROOT.gPad.SetLogy()
                 frame2.Draw()
                 ROOT.gPad.SetTicks(1,1)
@@ -282,13 +293,13 @@ class makeCards:
                         exp_fact = (signal_range_hi-signal_range_lo)/(fit_range_hi-fit_range_lo-(signal_range_hi-signal_range_lo))
                         print('   exp_fact   ', exp_fact)
                         exp_fact_different_pdf = getExtrapFactor('unfixed_exp', categ, point)
+                        print('   exp_fact_different_pdf   ', exp_fact_different_pdf )
                         
                         exp_uncert = 1.0 + abs(exp_fact_different_pdf-exp_fact)/exp_fact
                         
                         print("bdt point: ", point," sig_est: ", sig_est, " bkg_est: ", bkg_est, " sb_est: ", sb_est, " exp_uncert: ", exp_uncert)
                         
-                        command_mod_card = "python card_modifiers/Card_Mod.py --categ " + str(categ) + " --sig_exp " + str(sig_est) + " --bkg_exp " + str(bkg_est) + " --sb_exp " + str(sb_est) + " --ext_unc " + str(exp_uncert) 
-                        print('   exp_fact_different_pdf   ', exp_fact_different_pdf )
+                        command_mod_card = "python3 card_modifiers/Card_Mod.py --categ " + str(categ) + " --sig_exp " + str(sig_est) + " --bkg_exp " + str(bkg_est) + " --sb_exp " + str(sb_est) + " --ext_unc " + str(exp_uncert) 
                         
                         
                         os.system(command_mod_card)
@@ -297,7 +308,7 @@ class makeCards:
                         command_copy_dc = "cp modified_dc_{0}.txt lumi_limit_scans/{0}/BDT_point_{1}/dc_{2}.txt".format(categ, str(point), str(lu))
                         os.system(command_copy_dc)
                         
-        def CombineSubcategories(self,datafile,categ):
+        def CombineSubcategories(self,categ):
                 pattern = re.compile(r'dc_(\d+)\.txt')
                 
                 
@@ -516,7 +527,7 @@ def getExtrapFactor(pdftype, categ, bdtcut):
             diff = abs(cut - bdtcut)
             
             # Update the closest cut and its extrapolation factor if this cut is closer
-            print('diff ', diff, ' min_diff   ', min_diff, '  n_sideband   ', n_sideband)
+            #print('diff ', diff, ' min_diff   ', min_diff, '  n_sideband   ', n_sideband)
             if diff < min_diff and n_sideband > 0.5:
                 min_diff = diff
                 closest_cut = cut
@@ -590,8 +601,8 @@ def MakeAndSaveExpFactors(datafile,categ,bdt_points):
         variables.add(category)
         variables.add(isMC)
         
-        phivetoes="(fabs(dimu_OS1 - 1.020)>0.020)&(fabs(dimu_OS2 - 1.020)>0.020)"
-        omegavetoes="&fabs(dimu_OS1 - 0.782)>0.020&fabs(dimu_OS2 - 0.782)>0.020&"
+        phivetoes="(fabs(dimu_OS1 - 1.020)>0.020)&(fabs(dimu_OS2 - 1.020)>0.020)&"
+        omegavetoes="fabs(dimu_OS1 - 0.782)>0.020&fabs(dimu_OS2 - 0.782)>0.020&"
         
         
         for bdt_cut in bdt_points:
@@ -601,9 +612,9 @@ def MakeAndSaveExpFactors(datafile,categ,bdt_points):
                 
                 BDT_Score_Min=-0.3
                 
-                BlindDataSelector = RooFormulaVar('DataSelector', 'DataSelector',' bdt_cv > ' + str(bdt_cut)+' & '+ phivetoes+omegavetoes+' isMC == 0 & (tripletMass<=%s || tripletMass>=%s) & (tripletMass>=%s & tripletMass<=%s) ' %(signal_range_lo,signal_range_hi,fit_range_lo,fit_range_hi) , RooArgList(variables))
+                BlindDataSelector = RooFormulaVar('DataSelector', 'DataSelector',' bdt_cv > ' + str(bdt_cut)+' & '+ phivetoes+' isMC == 0 & (tripletMass<=%s || tripletMass>=%s) & (tripletMass>=%s & tripletMass<=%s) ' %(signal_range_lo,signal_range_hi,fit_range_lo,fit_range_hi) , RooArgList(variables))
                 
-                fulldata = RooDataSet('data', 'data', tree,  variables, BlindDataSelector)
+                fulldata = RooDataSet('fulldata', 'fulldata', tree,  variables, BlindDataSelector)
                 
                 bdt_cv.setRange("BDT_Fit_Range", BDT_Score_Min, 1.0);
                 
@@ -640,23 +651,23 @@ if __name__ == "__main__":
         # Enable batch mode
         ROOT.gROOT.SetBatch(True)
         
-        #categories = ['taumu']
+        #categories = ['taue']
         categories = ['taue','taumu','tauhA','tauhB','all']
         #categories = ['tauhA','tauhB','all']
         #categories = ['combined'] # Can only be run after the other 4 categories are read and copied
         
-        datafile = "../../../Combine_Tree_ztau3mutau.root"        
+        datafile_bdt_shape = "../../../../Combine_Tree_ztau3mutau_orig_PostBDT.root"
         
-        lumi = np.round(np.arange(100,4500,500), 0)
-        #lumi = np.round(np.arange(100,200,100), 0)
-        lumi = np.insert(lumi, 0 , 59.8)
-        lumi = np.append(lumi, 4500)
+        datafile_main = "../../../../Combine_Tree_ztau3mutau_PF_PostBDT.root"#The final PF cuts I would prefer to use
+        
+        #lumi = np.round(np.arange(100,4500,500), 0)
+        #lumi = np.insert(lumi, 0 , 59.8)
+        #lumi = np.append(lumi, 4500)
+        
+        lumi = np.round([59.8,3000.0])
         
         cmd1 = 'mkdir lumi_limit_scans;'
         os.system(cmd1)
-        
-        #num_points = 20
-        #bdt_points = np.round(np.linspace(0.2,0.7,num_points), 2)
         
         bdt_points = np.round(np.arange(0.2, 0.8 + 0.04, 0.04), 2)
         
@@ -668,30 +679,44 @@ if __name__ == "__main__":
         for cat in range(Cat_No):
                 categ = categories[cat]
                 
+                datafile_for_norm = datafile_main
+                datafile_for_shape = datafile_main
                 analyzed_lumi = 1.0
                 if(categ == 'taue' and WhetherFitBDTandMakeCards):
                         analyzed_lumi = 59.83
+                        datafile_for_norm = datafile_main
+                        datafile_for_shape = datafile_bdt_shape
                 if(categ == 'taumu'):
                         analyzed_lumi = 59.83
+                        datafile_for_norm = datafile_main
+                        datafile_for_shape = datafile_main
                 if(categ == 'tauhA'):
                         analyzed_lumi = 59.83
+                        datafile_for_norm = datafile_main
+                        datafile_for_shape = datafile_bdt_shape
                 if(categ == 'tauhB'):
                         analyzed_lumi = 59.83
+                        datafile_for_norm = datafile_main
+                        datafile_for_shape = datafile_bdt_shape
                 if(categ == 'all'):
                         analyzed_lumi = 59.83
+                        datafile_for_norm = datafile_main
+                        datafile_for_shape = datafile_main
                 if(categ == 'combined'):
                         analyzed_lumi = 59.83
+                        datafile_for_norm = datafile_main
+                        datafile_for_shape = datafile_main
                         
                 if(WhetherFitBDTandMakeCards and (not categ == 'combined')):
                         open("Slopes_%s_%s"%(categ,"unfixed_exp")+".txt", 'w').close()
-                        MakeAndSaveExpFactors(datafile,categ,bdt_points)
+                        MakeAndSaveExpFactors(datafile_for_shape,categ,bdt_points)
                         BDTFit_Cat = makeCards()
-                        BDTFit_Cat.FitBDT(datafile,categ)
+                        BDTFit_Cat.FitBDT(datafile_for_norm,datafile_for_shape,categ)
                         BDTFit_Cat.MakeLumiScanCards(lumi,categ,analyzed_lumi)
                         
                 if(WhetherFitBDTandMakeCards and categ == 'combined'):
                         BDTFit_Cat = makeCards()
-                        BDTFit_Cat.CombineSubcategories(datafile,categ)
+                        BDTFit_Cat.CombineSubcategories(categ)
                 
                 
         #executeDataCards_onCondor(lumi,categories,False,bdt_points)
