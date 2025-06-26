@@ -309,7 +309,7 @@ class makeCards:
                         os.system(command_copy_dc)
                         
         def CombineSubcategories(self,categ):
-                pattern = re.compile(r'dc_(\d+)\.txt')
+                pattern = re.compile(r'dc_(\d+(?:\.\d+)?)\.txt')
                 
                 
                 files_dict = {}
@@ -329,6 +329,7 @@ class makeCards:
                 for directory in dirs:
                     for filename in os.listdir(directory):
                         match = pattern.match(filename)
+                        #print("Matched: ",match)
                         if match:
                             number = match.group(1)
                             if number not in files_dict:
@@ -680,9 +681,9 @@ if __name__ == "__main__":
         ROOT.gROOT.SetBatch(True)
         
         #categories = ['taumu']
-        categories = ['taue','taumu','tauhA','tauhB','all']
+        #categories = ['taue','taumu','tauhA','tauhB','all']
         #categories = ['tauhA','tauhB','all']
-        #categories = ['combined'] # Can only be run after the other 4 categories are read and copied
+        categories = ['combined'] # Can only be run after the other 4 categories are read and copied
         
         datafile_bdt_shape = "../../../../Combine_Tree_ztau3mutau_orig_PostBDT.root"
         
@@ -711,7 +712,7 @@ if __name__ == "__main__":
         Cat_No = len(categories)
         
         #To create datacards
-        WhetherFitBDTandMakeCards = False
+        WhetherFitBDTandMakeCards = True
         
         for cat in range(Cat_No):
                 categ = categories[cat]
@@ -757,7 +758,7 @@ if __name__ == "__main__":
                 
                 
         #executeDataCards_onCondor(lumi,categories,False,bdt_points)
-        ReadAndCopyMinimumBDTCard(lumi,categories,False,bdt_points)
+        #ReadAndCopyMinimumBDTCard(lumi,categories,False,bdt_points)
         
         
         

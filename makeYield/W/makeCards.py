@@ -348,7 +348,7 @@ class makeCards:
                         os.system(command_copy_dc)
                         
         def CombineSubcategories(self,datafile,categ):
-                pattern = re.compile(r'dc_(\d+)\.txt')
+                pattern = re.compile(r'dc_(\d+(?:\.\d+)?)\.txt')
                 
                 
                 files_dict = {}
@@ -790,7 +790,7 @@ if __name__ == "__main__":
         Cat_No = len(categories)
         
         #To create datacards
-        WhetherFitBDTandMakeCards = True
+        WhetherFitBDTandMakeCards = False
         
         for cat in range(Cat_No):
                 categ = categories[cat]
@@ -817,7 +817,7 @@ if __name__ == "__main__":
                         BDTFit_Cat.CombineSubcategories(datafile,categ)
                 
                 
-        #executeDataCards_onCondor(lumi,categories,False,bdt_points)
+        executeDataCards_onCondor(lumi,categories,False,bdt_points)
         #ReadAndCopyMinimumBDTCard(lumi,categories,False,bdt_points)
         
         
