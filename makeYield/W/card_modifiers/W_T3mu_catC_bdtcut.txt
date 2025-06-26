@@ -25,7 +25,7 @@ HLT_Mu_C18        lnN                       1.01               -
 HLT_iso18         lnN                       1.07               -
 HLT_TkMu_C18      lnN                       1.09               -
 mc_stat_C18       lnN                       1.0156             -   
-extrap_factor_catC     gmN     3    -                   0.212121
+extrap_factor_catC     gmN     3    -                   0.250
 extrap_factor_unc_catC lnN                       -                   1.09 
 rounding_unc_catC      lnN                       -                   1.10 
 --------------------------------------------------------------------------------

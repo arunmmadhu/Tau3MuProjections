@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import ROOT
 from ROOT import TFile, TTree, TCanvas, TGraph, TMultiGraph, TGraphErrors, TLegend, TPaveLabel, TPaveText, TLatex
@@ -38,20 +38,27 @@ tdrstyle.setTDRStyle()
 analyzed_lumi = 1.0
 #if(args.category=="W"):
 lumi_W = np.round(np.arange(100,3050,100), 0)
-lumi_W = np.insert(lumi_W, 0 , 97.7)
+lumi_W = np.insert(lumi_W, 0 , 59.8)
+lumi_W = np.append(lumi_W, 2000)
+lumi_W = np.append(lumi_W, 3000)
 lumi_W = np.append(lumi_W, 4500)
-analyzed_lumi_W = 97.7
+lumi_W = np.sort(lumi_W)
+analyzed_lumi_W = 59.8
 
 #if(args.category=="HF"):
 lumi_HF = np.round(np.arange(100,3050,100), 0)
 lumi_HF = np.insert(lumi_HF, 0 , 97.7)
 lumi_HF = np.append(lumi_HF, 4500)
+lumi_HF = np.sort(lumi_HF)
 analyzed_lumi_HF = 97.7
 
 #if(args.category=="ZTT"):
 lumi_ZTT = np.round(np.arange(100,4500,500), 0)
 lumi_ZTT = np.insert(lumi_ZTT, 0 , 59.8)
+lumi_ZTT = np.append(lumi_ZTT, 2000)
+lumi_ZTT = np.append(lumi_ZTT, 3000)
 lumi_ZTT = np.append(lumi_ZTT, 4500)
+lumi_ZTT = np.sort(lumi_ZTT)
 analyzed_lumi_ZTT = 59.8
 
 #if(args.category=="Combo"):
@@ -133,7 +140,7 @@ def getLimits(file_name):
     limits = [ ]
     for quantile in tree:
         limits.append(tree.limit)
-        print ">>>   %.2f" % limits[-1]
+        print(">>>   %.2f" % limits[-1])
  
     return limits[:6]
 
@@ -394,7 +401,7 @@ def plotUpperLimits(lumi_W,lumi_HF,lumi_ZTT,analyzed_lumi_W,analyzed_lumi_HF,ana
             latex.SetTextAlign(1)
             latex.DrawLatex(0.15, 0.85, Text)
             latex.Draw('same') 
-            print " "
+            print(" ")
             if len(categories) < 2:
                     c.SaveAs("Limit_scan_"+categories[0]+".png")
                     c.SaveAs("Limit_scan_"+categories[0]+".pdf")
@@ -555,7 +562,7 @@ def plotUpperLimits(lumi_W,lumi_HF,lumi_ZTT,analyzed_lumi_W,analyzed_lumi_HF,ana
                     latex.SetTextAlign(1)
                     latex.DrawLatex(0.15, 0.85, Text)
                     latex.Draw('same') 
-                    print " "
+                    print(" ")
                     c.SaveAs("Limit_scan_"+categories[0]+subcat[0][cat_sub]+".png")
                     c.SaveAs("Limit_scan_"+categories[0]+subcat[0][cat_sub]+".png")
                     
@@ -567,7 +574,7 @@ def plotUpperLimits(lumi_W,lumi_HF,lumi_ZTT,analyzed_lumi_W,analyzed_lumi_HF,ana
     #For multiple categories in a single plot
     if(WhetherMultipleBroadCategories):
             
-            print "WhetherMultipleBroadCategories 2: ",WhetherMultipleBroadCategories
+            print("WhetherMultipleBroadCategories 2: ",WhetherMultipleBroadCategories)
             
             W = 800
             H  = 600
@@ -671,7 +678,7 @@ def plotUpperLimits(lumi_W,lumi_HF,lumi_ZTT,analyzed_lumi_W,analyzed_lumi_HF,ana
             latex.SetTextAlign(1)
             latex.DrawLatex(0.15, 0.85, Text)
             latex.Draw('same') 
-            print " "
+            print(" ")
             c.SaveAs("Limit_scan.png")
             c.Close()
     
@@ -686,7 +693,7 @@ def main():
 
 
         
-#    categories = ['ZTT']
+    categories = ['ZTT','W']
 #    categories = ['W']
 #    categories = ['HF']
 #    categories = ['ZTT','HF','W']

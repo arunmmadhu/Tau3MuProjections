@@ -2,7 +2,7 @@
 
 import ROOT
 from ROOT import TFile, TTree, TCanvas, TGraph, TMultiGraph, TGraphErrors, TLegend, TPaveLabel, TPaveText, TLatex
-from ROOT import RooRealVar, RooFormulaVar, RooExponential, RooDataHist, RooArgList, RooAddPdf, RooFit, RooDataSet, RooGenericPdf, RooBifurGauss
+from ROOT import RooRealVar, RooFormulaVar, RooExponential, RooDataHist, RooArgList, RooAddPdf, RooFit, RooDataSet, RooGenericPdf, RooBifurGauss, RooArgusBG
 import subprocess # to execute shell command
 import argparse
 import numpy as np
@@ -43,6 +43,7 @@ class makeCards:
                 self.d = None
                 self.quadratic = None
                 self.expModel = None
+                self.argModel = None
                 self.BDTNorm = None
                 self.BDT_distribution_MC = None
         
@@ -53,11 +54,13 @@ class makeCards:
                 fit_range_lo = 1.6
                 fit_range_hi = 2.0
                 
-                
                 # Luca uses 3.5 sigma for catA, 2.3 for B and 1.6 for C. Smae range for all. Is it because he uses shapes. My 2 sigma gives 1.74 and 1.81.
                 signal_range_lo = 1.74
                 signal_range_hi = 1.82
                 
+                #The signal yield I get are the same ones Luca has in his datacards, not his analysis notes (data events in his analysis notes seem same as mine):
+                #https://github.com/lguzzi/T3MCombine/blob/master/T3MCombineAll/April_23_2023/W/unblind/datacards/CMS_T3MSignal_13TeV_W_2018.txt#L22
+                #Does he get signal yield from whole range? Does he remove mcweight? I think yes for the former.
                 
                 # Constants
                 MC_NORM17 = 30541./(500e+3)*(8580+11370)*0.1138/0.1063*1E-7
@@ -113,7 +116,7 @@ class makeCards:
                 tree_bkg = MiniTreeFile_bkg.Get("tree")
                 
                 # Define RooFit variables
-                self.bdt = RooRealVar("bdt", "bdt", 0.95, 1.000001)
+                self.bdt = RooRealVar("bdt", "bdt", 0.95, 1.0)
                 
                 cand_refit_mass12 = RooRealVar("cand_refit_mass12", "mass12", 0, 1000)
                 cand_refit_mass13 = RooRealVar("cand_refit_mass13", "mass13", 0, 1000)
@@ -147,7 +150,7 @@ class makeCards:
                 
                 # For fitting BDT Output in Data
                 
-                BDT_Score_Min=0.97
+                BDT_Score_Min=0.95
                 
                 # Data selection (Blinded)
                 DataSelector = RooFormulaVar("DataSelector", "DataSelector",
@@ -157,22 +160,18 @@ class makeCards:
                                               RooArgList(variables))
                 fulldata = RooDataSet("data", "data", tree_bkg, variables, DataSelector)
                 
-                self.bdt.setRange("BDT_Fit_Range", BDT_Score_Min, 1.000001);
+                self.bdt.setRange("BDT_Fit_Range", BDT_Score_Min, 1.0);
                 
-                self.a = RooRealVar("a", "a", 1.0, 0.0, 10.0)
-                self.b = RooRealVar("b", "b", 1.0, -10.0, 10.0)
-                self.c = RooRealVar("c", "c", 1.0, -10.0, 10.0)
-                self.d = RooRealVar("d", "d", 1.0, -10.0, 10.0)
+                #Fixed at 1 to serve as an endpoint?
+                self.a = RooRealVar("a", "a", 1.0, 1.0, 1.0)
+                self.b = RooRealVar("b", "b", -30, -50, 0.0)
                 
-                #quadratic = RooFormulaVar("quadratic", "a + b*self.bdt + c*self.bdt*self.bdt", RooArgList(a, b, c, self.bdt))
-                #expModel = RooGenericPdf("expModel", "exp(quadratic)", RooArgList(quadratic)) #Exponential of the quadratic polynomial
+                self.argModel = RooArgusBG("argModel", "argModel", self.bdt, self.a, self.b)
                 
-                self.quadratic = RooFormulaVar("quadratic", "a + b*bdt + c*bdt*bdt + d*bdt*bdt*bdt", RooArgList(self.a, self.b, self.c, self.d, self.bdt))
-                self.expModel = RooGenericPdf("expModel", "exp(quadratic)", RooArgList(self.quadratic)) #Exponential of the cubic polynomial
                 
                 self.BDTNorm = RooRealVar("BDTNorm", "BDTNorm", 500.0, 0.1, 1000000000)
-                self.BDT_distribution = RooAddPdf("BDT_distribution", "BDT_distribution",RooArgList(self.expModel), RooArgList(self.BDTNorm))
-                #BDT_distribution = RooAddPdf("BDT_distribution", "BDT_distribution",RooArgList(quadratic), RooArgList(BDTNorm))
+                
+                self.BDT_distribution = RooAddPdf("BDT_distribution", "BDT_distribution",RooArgList(self.argModel), RooArgList(self.BDTNorm))
                 
                 results_pdf = self.BDT_distribution.fitTo(fulldata, RooFit.Range('BDT_Fit_Range'), RooFit.Save())
                 results_pdf.Print()
@@ -216,7 +215,7 @@ class makeCards:
                 
                 self.fullmc = RooDataSet('mc', 'mc', fullmc_scaled, fullmc_scaled.get(), "",'scale')
 
-                self.bdt.setRange("BDT_MC_Fit_Range", BDT_Score_Min, 1.000001);
+                self.bdt.setRange("BDT_MC_Fit_Range", BDT_Score_Min, 1.0);
 
                 self.bgausmeanMC = RooRealVar("bgausmeanMC", "bgausmeanMC", 0.5, 0.0, 0.9)
                 self.bgaussigmaMC_a = RooRealVar("bgaussigmaMC_a", "bgaussigmaMC_a", 0.2, 0.000001, 1.0)
@@ -275,6 +274,7 @@ class makeCards:
                 ROOT.gPad.SaveAs('bdt_fit_mc_'+categ+'.png')
                 ROOT.gPad.Clear()
 
+                frame2.SetMinimum(1e-1)
                 ROOT.gPad.SetLogy()
                 frame2.Draw()
                 ROOT.gPad.SetTicks(1,1)
@@ -425,16 +425,41 @@ def executeDataCards_onCondor(lumi,categories,Whether_Hybrid,bdt_points):
 
 # GET limits from root file
 def getLimits(file_name):
- 
-    file = TFile(file_name)
+    file = TFile.Open(file_name)
+    if not file or file.IsZombie():
+        print(f"[ERROR] Could not open file: {file_name}")
+        return []
+
     tree = file.Get("limit")
- 
-    limits = [ ]
-    for quantile in tree:
-        limits.append(tree.limit)
-        print(">>>   %.2f" % limits[-1])
- 
+    if not tree or not isinstance(tree, TTree):
+        print(f"[ERROR] 'limit' TTree not found or invalid in file: {file_name}")
+        file.Close()
+        return []
+
+    limits = []
+    for i in range(tree.GetEntries()):
+        tree.GetEntry(i)
+        try:
+            limits.append(tree.limit)
+            print(">>>   %.2f" % limits[-1])
+        except AttributeError:
+            print(f"[ERROR] Entry {i} in tree is missing 'limit' branch")
+            limits.append(999999.)
+
+    file.Close()
     return limits[:6]
+    
+#check if combine output file is valid
+def is_valid_root_file(filepath):
+        if not os.path.exists(filepath):
+            return False
+        f = ROOT.TFile.Open(filepath)
+        if not f or f.IsZombie() or f.TestBit(ROOT.TFile.kRecovered):
+            return False
+        if f.GetListOfKeys().GetSize() == 0:
+            return False
+        f.Close()
+        return True
     
 # PLOT upper limits
 def ReadAndCopyMinimumBDTCard(lumi,categories,Whether_Hybrid,bdt_points):
@@ -469,11 +494,15 @@ def ReadAndCopyMinimumBDTCard(lumi,categories,Whether_Hybrid,bdt_points):
                             limits_read_row = []
                             for i in range(N):
                                 file_name = "higgsCombine"+str(lumi[i])+'_'+categories[cat]+'_'+str(point)+".HybridNew.mH120.123456.quant0.500.root"
-                                limit = getLimits(file_name)
                                 
-                                #  Check why some limits only have 1 value
-                                if len(limit)<5:
-                                        limit = [1000000.0,1000000.0,1000000.0,1000000.0,1000000.0]
+                                limit = [1000000.0,1000000.0,1000000.0,1000000.0,1000000.0]
+                                
+                                if is_valid_root_file(file_name1):
+                                        limit = getLimits(file_name1)
+                                        
+                                        #  Check why some limits only have 1 value
+                                        if len(limit)<5:
+                                                limit = [1000000.0,1000000.0,1000000.0,1000000.0,1000000.0]
                                 
                                 print(" cat: ",categories[cat]," lumi: ",lumi[i]," bdt point: ",point," Limit: ",limit[2])
                                 limits_read_row.append(limit[2])
@@ -494,7 +523,7 @@ def ReadAndCopyMinimumBDTCard(lumi,categories,Whether_Hybrid,bdt_points):
                                     break  # Stop searching once the minimum is found
                     for bdt_index, lumi_index in min_indices:
                             #print(f"Minimum value found at row {row_index}, column {col_index}")
-                            text_limits.write("bdt %.2f   lumi %.2f     median exp %.2f\n"%(bdt_points[bdt_index],lumi[lumi_index],limits_read[bdt_index][lumi_index]))
+                            text_limits.write("bdt %.4f   lumi %.2f     median exp %.2f\n"%(bdt_points[bdt_index],lumi[lumi_index],limits_read[bdt_index][lumi_index]))
                             
                             command_copy_dc = "cp  lumi_limit_scans/{0}/BDT_point_{1}/dc_{2}.txt {0}/datacards_modified/dc_{2}.txt".format(categ, str(bdt_points[bdt_index]), str(lumi[lumi_index]))
                             print("Copy command: ",command_copy_dc)
@@ -508,11 +537,15 @@ def ReadAndCopyMinimumBDTCard(lumi,categories,Whether_Hybrid,bdt_points):
                             limits_read_row = []
                             for i in range(N):
                                 file_name1 = "higgsCombine"+str(lumi[i])+'_'+categories[cat]+'_'+str(point)+".AsymptoticLimits.mH120.root"
-                                limit = getLimits(file_name1)
                                 
-                                #  Check why some limits only have 1 value
-                                if len(limit)<5:
-                                        limit = [1000000.0,1000000.0,1000000.0,1000000.0,1000000.0]
+                                limit = [1000000.0,1000000.0,1000000.0,1000000.0,1000000.0]
+                                
+                                if is_valid_root_file(file_name1):
+                                        limit = getLimits(file_name1)
+                                        
+                                        #  Check why some limits only have 1 value
+                                        if len(limit)<5:
+                                                limit = [1000000.0,1000000.0,1000000.0,1000000.0,1000000.0]
                                 
                                 print(" cat: ",categories[cat]," lumi: ",lumi[i]," bdt point: ",point," Limit: ",limit[2])
                                 limits_read_row.append(limit[2])
@@ -531,7 +564,7 @@ def ReadAndCopyMinimumBDTCard(lumi,categories,Whether_Hybrid,bdt_points):
                                     break  # Stop searching once the minimum is found
                     for bdt_index, lumi_index in min_indices:
                             #print(f"Minimum value found at row {row_index}, column {col_index}")
-                            text_limits.write("bdt %.2f   lumi %.2f     median exp %.2f\n"%(bdt_points[bdt_index],lumi[lumi_index],limits_read[bdt_index][lumi_index]))
+                            text_limits.write("bdt %.4f   lumi %.2f     median exp %.2f\n"%(bdt_points[bdt_index],lumi[lumi_index],limits_read[bdt_index][lumi_index]))
                             
                             command_copy_dc = "cp  lumi_limit_scans/{0}/BDT_point_{1}/dc_{2}.txt {0}/datacards_modified/dc_{2}.txt".format(categ, str(bdt_points[bdt_index]), str(lumi[lumi_index]))
                             print("Copy command: ",command_copy_dc)
@@ -598,7 +631,7 @@ def MakeAndSaveExpFactors(datafile,categ,bdt_points):
         if(categ == 'CatA'):
                 cat_label = "Category C"
         
-        bdt = RooRealVar("bdt", "bdt", 0.95, 1.000001)
+        bdt = RooRealVar("bdt", "bdt", 0.95, 1.0)
         cand_refit_mass12 = RooRealVar("cand_refit_mass12", "mass12", 0, 1000)
         cand_refit_mass13 = RooRealVar("cand_refit_mass13", "mass13", 0, 1000)
         cand_refit_mass23 = RooRealVar("cand_refit_mass23", "mass23", 0, 1000)
@@ -688,7 +721,7 @@ def MakeAndSaveExpFactors(datafile,categ,bdt_points):
                         c.SaveAs("cand_refit_tau_mass_after_selection.png")
                 
                 
-                bdt.setRange("BDT_Fit_Range", BDT_Score_Min, 1.000001)
+                bdt.setRange("BDT_Fit_Range", BDT_Score_Min, 1.0)
                 
                 cand_refit_tau_mass.setRange('left' , fit_range_lo    , signal_range_lo)
                 cand_refit_tau_mass.setRange('right', signal_range_hi , fit_range_hi)
@@ -722,20 +755,27 @@ if __name__ == "__main__":
         # Enable batch mode
         ROOT.gROOT.SetBatch(True)
         
-        #categories = ['CatA']
+        #categories = ['CatC']
         categories = ['CatA','CatB','CatC']
         #categories = ['combined'] # Can only be run after the other 4 categories are read and copied
         
         datafile_sig = "luca_root/signal_threeMedium_weighted_16Mar2022.root"        
         datafile_bkg = "luca_root/background_threeMedium-UNBLINDED.root" 
         
-        lumi = np.round(np.arange(100,4500,500), 0)
-        lumi = np.insert(lumi, 0 , 59.8)
-        lumi = np.append(lumi, 2000)
-        lumi = np.append(lumi, 3000)
-        lumi = np.append(lumi, 4500)
+        #lumi = np.round(np.arange(100,4500,500), 0)
+        #lumi = np.insert(lumi, 0 , 59.83)
+        #lumi = np.append(lumi, 137) # only 2016-2018
+        #lumi = np.append(lumi, 400)
+        #lumi = np.append(lumi, 2000)
+        #lumi = np.append(lumi, 3000)
+        #lumi = np.append(lumi, 4500)
+        #lumi = np.sort(lumi)
+        #lumi = np.round(lumi,1)
         
         #lumi = np.round([59.83])
+        
+        lumi = np.round([  59.83,  100,  137,  400,  600, 1100, 1600, 2000, 2600, 3000, 3600, 4100, 4500],1)
+        lumi = np.sort(lumi)
         
         cmd1 = 'mkdir lumi_limit_scans;'
         os.system(cmd1)
@@ -743,7 +783,8 @@ if __name__ == "__main__":
         #num_points = 20
         #bdt_points = np.round(np.linspace(0.2,0.7,num_points), 2)
         
-        bdt_points = np.round(np.arange(0.985, 0.998 + 0.001, 0.001), 3)
+        #bdt_points = np.round(np.arange(0.985, 0.998 + 0.001, 0.001), 3)
+        bdt_points = np.round(np.arange(0.989, 0.9995, 0.0005), 4)
         #bdt_points = np.round([0.985],3)
         
         Cat_No = len(categories)
@@ -778,7 +819,6 @@ if __name__ == "__main__":
                 
         #executeDataCards_onCondor(lumi,categories,False,bdt_points)
         #ReadAndCopyMinimumBDTCard(lumi,categories,False,bdt_points)
-
         
         
         

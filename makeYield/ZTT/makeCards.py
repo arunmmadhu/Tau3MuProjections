@@ -89,8 +89,8 @@ class makeCards:
                 
                 tripletMass          = ROOT.RooRealVar('tripletMass'                , '3#mu mass'           , fit_range_lo, fit_range_hi, 'GeV')
                 self.bdt_cv          = ROOT.RooRealVar('bdt_cv'                     , 'bdt_cv'              , -1 , 1)
-                dimu_OS1             = ROOT.RooRealVar('dimu_OS1'                   , 'dimu_OS1'            ,  0 , 2)
-                dimu_OS2             = ROOT.RooRealVar('dimu_OS2'                   , 'dimu_OS2'            ,  0 , 2)
+                dimu_OS1             = ROOT.RooRealVar('dimu_OS1'                   , 'dimu_OS1'            ,  0 , 100)
+                dimu_OS2             = ROOT.RooRealVar('dimu_OS2'                   , 'dimu_OS2'            ,  0 , 100)
                 event_weight         = ROOT.RooRealVar('weight'                     , 'event_weight'        ,  0,  5)  # this weight includes also the scale  mc signal scale
                 category             = ROOT.RooRealVar('category'                   , 'category'            ,  0,  5)
                 isMC                 = ROOT.RooRealVar('isMC'                       , 'isMC'                ,  0,  1000000)
@@ -387,16 +387,41 @@ def executeDataCards_onCondor(lumi,categories,Whether_Hybrid,bdt_points):
 
 # GET limits from root file
 def getLimits(file_name):
- 
-    file = TFile(file_name)
+    file = TFile.Open(file_name)
+    if not file or file.IsZombie():
+        print(f"[ERROR] Could not open file: {file_name}")
+        return []
+
     tree = file.Get("limit")
- 
-    limits = [ ]
-    for quantile in tree:
-        limits.append(tree.limit)
-        print(">>>   %.2f" % limits[-1])
- 
+    if not tree or not isinstance(tree, TTree):
+        print(f"[ERROR] 'limit' TTree not found or invalid in file: {file_name}")
+        file.Close()
+        return []
+
+    limits = []
+    for i in range(tree.GetEntries()):
+        tree.GetEntry(i)
+        try:
+            limits.append(tree.limit)
+            print(">>>   %.2f" % limits[-1])
+        except AttributeError:
+            print(f"[ERROR] Entry {i} in tree is missing 'limit' branch")
+            limits.append(999999.)
+
+    file.Close()
     return limits[:6]
+    
+#check if combine output file is valid
+def is_valid_root_file(filepath):
+        if not os.path.exists(filepath):
+            return False
+        f = ROOT.TFile.Open(filepath)
+        if not f or f.IsZombie() or f.TestBit(ROOT.TFile.kRecovered):
+            return False
+        if f.GetListOfKeys().GetSize() == 0:
+            return False
+        f.Close()
+        return True
     
 # PLOT upper limits
 def ReadAndCopyMinimumBDTCard(lumi,categories,Whether_Hybrid,bdt_points):
@@ -474,15 +499,18 @@ def ReadAndCopyMinimumBDTCard(lumi,categories,Whether_Hybrid,bdt_points):
                             limits_read_row = []
                             for i in range(N):
                                 file_name1 = "higgsCombine"+str(lumi[i])+'_'+categories[cat]+'_'+str(point)+".AsymptoticLimits.mH120.root"
-                                limit = getLimits(file_name1)
                                 
-                                #  Check why some limits only have 1 value
-                                if len(limit)<5:
-                                        limit = [1000000.0,1000000.0,1000000.0,1000000.0,1000000.0]
+                                limit = [1000000.0,1000000.0,1000000.0,1000000.0,1000000.0]
+                                
+                                if is_valid_root_file(file_name1):
+                                        limit = getLimits(file_name1)
+                                        
+                                        #  Check why some limits only have 1 value
+                                        if len(limit)<5:
+                                                limit = [1000000.0,1000000.0,1000000.0,1000000.0,1000000.0]
                                 
                                 print(" cat: ",categories[cat]," lumi: ",lumi[i]," bdt point: ",point," Limit: ",limit[2])
                                 limits_read_row.append(limit[2])
-                                
                             limits_read.append(limits_read_row)
                     
                     # Getting the BDT cut at minimum limit
@@ -651,8 +679,8 @@ if __name__ == "__main__":
         # Enable batch mode
         ROOT.gROOT.SetBatch(True)
         
-        categories = ['taumu']
-        #categories = ['taue','taumu','tauhA','tauhB','all']
+        #categories = ['taumu']
+        categories = ['taue','taumu','tauhA','tauhB','all']
         #categories = ['tauhA','tauhB','all']
         #categories = ['combined'] # Can only be run after the other 4 categories are read and copied
         
@@ -660,11 +688,20 @@ if __name__ == "__main__":
         
         datafile_main = "../../../../Combine_Tree_ztau3mutau_PF_PostBDT.root"#The final PF cuts I would prefer to use
         
-        lumi = np.round(np.arange(100,4500,500), 0)
-        lumi = np.insert(lumi, 0 , 59.8)
-        lumi = np.append(lumi, 4500)
+        #lumi = np.round(np.arange(100,4500,500), 1)
+        #lumi = np.insert(lumi, 0 , 59.83)
+        #lumi = np.append(lumi, 137.0) # only 2016-2018
+        #lumi = np.append(lumi, 400.0)
+        #lumi = np.append(lumi, 2000.0)
+        #lumi = np.append(lumi, 3000.0)
+        #lumi = np.append(lumi, 4500.0)
+        #lumi = np.sort(lumi)
+        #lumi = np.round(lumi,1)
         
-        #lumi = np.round([59.8,3000.0])
+        #lumi = np.round([59.83],1)
+        
+        lumi = np.round([  59.83,  100,  137,  400,  600, 1100, 1600, 2000, 2600, 3000, 3600, 4100, 4500],1)
+        lumi = np.sort(lumi)
         
         cmd1 = 'mkdir lumi_limit_scans;'
         os.system(cmd1)
@@ -689,7 +726,7 @@ if __name__ == "__main__":
                 if(categ == 'taumu'):
                         analyzed_lumi = 59.83
                         datafile_for_norm = datafile_main
-                        datafile_for_shape = datafile_bdt_shape
+                        datafile_for_shape = datafile_main
                 if(categ == 'tauhA'):
                         analyzed_lumi = 59.83
                         datafile_for_norm = datafile_main
@@ -720,7 +757,7 @@ if __name__ == "__main__":
                 
                 
         #executeDataCards_onCondor(lumi,categories,False,bdt_points)
-        #ReadAndCopyMinimumBDTCard(lumi,categories,False,bdt_points)
+        ReadAndCopyMinimumBDTCard(lumi,categories,False,bdt_points)
         
         
         
