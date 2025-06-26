@@ -34,7 +34,7 @@ class makeCards:
                 self.BDTNorm_MC = None
                 self.BDT_distribution_MC = None
                 self.MCSelector = None
-                self.fullmc_unweighted = None
+                self.fullmc_initial_weight = None
                 self.fullmc = None
                 
                 self.a = None
@@ -113,7 +113,7 @@ class makeCards:
                 tree_bkg = MiniTreeFile_bkg.Get("tree")
                 
                 # Define RooFit variables
-                self.bdt = RooRealVar("bdt", "bdt", -1, 1)
+                self.bdt = RooRealVar("bdt", "bdt", 0.95, 1)
                 
                 cand_refit_mass12 = RooRealVar("cand_refit_mass12", "mass12", 0, 1000)
                 cand_refit_mass13 = RooRealVar("cand_refit_mass13", "mass13", 0, 1000)
@@ -130,7 +130,7 @@ class makeCards:
                 weight = RooRealVar("weight", "event_weight", 0, 1000)
                 mcweight = RooRealVar("mcweight", "mcweight", 0, 1000)
                 
-                variables = RooArgSet()
+                variables = ROOT.RooArgSet()
                 for var in [cand_refit_tau_mass, self.bdt, cand_refit_mass12, cand_refit_mass13, cand_refit_mass23, cand_charge12, cand_charge13, cand_charge23,
                             cand_refit_tau_massE, year, tau_sv_ls, weight, mcweight]:
                     variables.add(var)
@@ -147,7 +147,7 @@ class makeCards:
                 
                 # For fitting BDT Output in Data
                 
-                BDT_Score_Min=0.9
+                BDT_Score_Min=0.97
                 
                 # Data selection (Blinded)
                 DataSelector = RooFormulaVar("DataSelector", "DataSelector",
@@ -188,14 +188,14 @@ class makeCards:
                                            f"{common_expr} && "
                                            f"(cand_refit_tau_mass >= {signal_range_lo} && cand_refit_tau_mass <= {signal_range_hi})",
                                            RooArgList(variables))
-                fullmc_initial_weight = RooDataSet("mc_init", "mc_init", tree_sig, variables, self.MCSelector, "mcweight")
+                self.fullmc_initial_weight = RooDataSet("mc_init", "mc_init", tree_sig, variables, self.MCSelector, "mcweight")
                 
                 scale = ROOT.RooRealVar('scale', 'scale', MC_NORM18) 
                 dataset_vars = self.fullmc_initial_weight.get()
                 dataset_vars.add(scale)
                 self.fullmc = RooDataSet('mc', 'mc', self.fullmc_initial_weight, dataset_vars, "",'scale')
 
-                self.bdt.setRange("BDT_MC_Fit_Range", -1.0, 1.0);
+                self.bdt.setRange("BDT_MC_Fit_Range", BDT_Score_Min, 1.0);
 
                 self.bgausmeanMC = RooRealVar("bgausmeanMC", "bgausmeanMC", 0.5, 0.0, 0.9)
                 self.bgaussigmaMC_a = RooRealVar("bgaussigmaMC_a", "bgaussigmaMC_a", 0.2, 0.000001, 1.0)
@@ -220,7 +220,7 @@ class makeCards:
                 frame2.SetTitle('')
                 frame2.GetXaxis().SetTitle("BDT score, "+cat_label)
 
-                nbins = 100
+                nbins = 20
 
                 self.fullmc.plotOn(frame1, 
                               ROOT.RooFit.Binning(nbins), 
@@ -576,7 +576,7 @@ def MakeAndSaveExpFactors(datafile,categ,bdt_points):
         if(categ == 'CatA'):
                 cat_label = "Category C"
         
-        bdt = RooRealVar("bdt", "bdt", -1, 1)
+        bdt = RooRealVar("bdt", "bdt", 0.95, 1)
         cand_refit_mass12 = RooRealVar("cand_refit_mass12", "mass12", 0, 1000)
         cand_refit_mass13 = RooRealVar("cand_refit_mass13", "mass13", 0, 1000)
         cand_refit_mass23 = RooRealVar("cand_refit_mass23", "mass23", 0, 1000)
@@ -640,7 +640,7 @@ def MakeAndSaveExpFactors(datafile,categ,bdt_points):
                 
                 # For fitting BDT Output in Data
                 
-                BDT_Score_Min=0.9
+                BDT_Score_Min=0.98
                 
                 DataSelector = RooFormulaVar("DataSelector", "DataSelector",
                                             f"(bdt > {bdt_cut}) & {common_expr} && "
@@ -700,8 +700,8 @@ if __name__ == "__main__":
         # Enable batch mode
         ROOT.gROOT.SetBatch(True)
         
-        categories = ['CatA']
-        #categories = ['CatA','CatB','CatC']
+        #categories = ['CatA']
+        categories = ['CatA','CatB','CatC']
         #categories = ['combined'] # Can only be run after the other 4 categories are read and copied
         
         datafile_sig = "luca_root/signal_threeMedium_weighted_16Mar2022.root"        
@@ -743,8 +743,8 @@ if __name__ == "__main__":
                 if(WhetherFitBDTandMakeCards and (not categ == 'combined')):
                         open("Slopes_%s_%s"%(categ,"unfixed_exp")+".txt", 'w').close()
                         MakeAndSaveExpFactors(datafile_bkg,categ,bdt_points)
-                        #BDTFit_Cat = makeCards()
-                        #BDTFit_Cat.FitBDT(datafile_sig,datafile_bkg,categ)
+                        BDTFit_Cat = makeCards()
+                        BDTFit_Cat.FitBDT(datafile_sig,datafile_bkg,categ)
                         #BDTFit_Cat.MakeLumiScanCards(lumi,categ,analyzed_lumi)
                         
                 if(WhetherFitBDTandMakeCards and categ == 'combined'):
