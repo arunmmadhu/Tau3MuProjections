@@ -5,7 +5,7 @@ parser = argparse.ArgumentParser(description='For scaling events by lumi')
 
 # No longer necessary
 parser.add_argument('--luminosity', action='store', default=97.7, help="Lumi scale\n DEFAULT: 97.7")
-parser.add_argument('--categ', action='store', default='catA', help="Card Category\n DEFAULT: catA")
+parser.add_argument('--categ', action='store', default='catA', help="Card Category\n DEFAULT: CatA")
 parser.add_argument('--sig_exp', action='store', default=1.0, help="Signal yield\n DEFAULT: 1.0")
 parser.add_argument('--bkg_exp', action='store', default=1.0, help="bkg yield\n DEFAULT: 1.0")
 parser.add_argument('--sb_exp', action='store', default=1.0, help="sideband yield\n DEFAULT: 1.0")
@@ -26,19 +26,19 @@ linenum_actual_2 = 10
 linenum_actual_3 = 10
 linenum_actual_4 = 10
 
-if(categ == 'catA'):
+if(categ == 'CatA'):
         card_name = 'W_T3mu_catA_bdtcut'
         linenum_actual_1 = 15
         linenum_actual_2 = 27
         linenum_actual_3 = 28
         linenum_actual_4 = 29
-if(categ == 'catB'):
+if(categ == 'CatB'):
         card_name = 'W_T3mu_catB_bdtcut'
         linenum_actual_1 = 15
         linenum_actual_2 = 27
         linenum_actual_3 = 28
         linenum_actual_4 = 29
-if(categ == 'catC'):
+if(categ == 'CatC'):
         card_name = 'W_T3mu_catC_bdtcut'
         linenum_actual_1 = 15
         linenum_actual_2 = 27

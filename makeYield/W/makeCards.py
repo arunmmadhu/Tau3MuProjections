@@ -113,7 +113,7 @@ class makeCards:
                 tree_bkg = MiniTreeFile_bkg.Get("tree")
                 
                 # Define RooFit variables
-                self.bdt = RooRealVar("bdt", "bdt", 0.95, 1)
+                self.bdt = RooRealVar("bdt", "bdt", 0.95, 1.000001)
                 
                 cand_refit_mass12 = RooRealVar("cand_refit_mass12", "mass12", 0, 1000)
                 cand_refit_mass13 = RooRealVar("cand_refit_mass13", "mass13", 0, 1000)
@@ -157,7 +157,7 @@ class makeCards:
                                               RooArgList(variables))
                 fulldata = RooDataSet("data", "data", tree_bkg, variables, DataSelector)
                 
-                self.bdt.setRange("BDT_Fit_Range", BDT_Score_Min, 1.0);
+                self.bdt.setRange("BDT_Fit_Range", BDT_Score_Min, 1.000001);
                 
                 self.a = RooRealVar("a", "a", 1.0, 0.0, 10.0)
                 self.b = RooRealVar("b", "b", 1.0, -10.0, 10.0)
@@ -216,7 +216,7 @@ class makeCards:
                 
                 self.fullmc = RooDataSet('mc', 'mc', fullmc_scaled, fullmc_scaled.get(), "",'scale')
 
-                self.bdt.setRange("BDT_MC_Fit_Range", BDT_Score_Min, 1.0);
+                self.bdt.setRange("BDT_MC_Fit_Range", BDT_Score_Min, 1.000001);
 
                 self.bgausmeanMC = RooRealVar("bgausmeanMC", "bgausmeanMC", 0.5, 0.0, 0.9)
                 self.bgaussigmaMC_a = RooRealVar("bgaussigmaMC_a", "bgaussigmaMC_a", 0.2, 0.000001, 1.0)
@@ -227,7 +227,7 @@ class makeCards:
                 self.BDTNorm_MC = RooRealVar("BDTNorm_MC", "BDTNorm_MC", 500.0, 0.1, 50000)
                 self.BDT_distribution_MC = RooAddPdf("BDT_distribution", "BDT_distribution",RooArgList(self.bgaus_distMC), RooArgList(self.BDTNorm_MC))
 
-                #This fit doesn't really work
+                #This fit doesn't really work. Why does it seem to work without normalization
                 #results_mcpdf = self.BDT_distribution_MC.fitTo(self.fullmc, RooFit.Range('BDT_MC_Fit_Range'), RooFit.Save())
                 #results_mcpdf.Print()
 
@@ -337,7 +337,7 @@ class makeCards:
                         
                         print("bdt point: ", point," sig_est: ", sig_est, " bkg_est: ", bkg_est, " sb_est: ", sb_est, " exp_uncert: ", exp_uncert)
                         
-                        command_mod_card = "python card_modifiers/Card_Mod.py --categ " + str(categ) + " --sig_exp " + str(sig_est) + " --bkg_exp " + str(bkg_est) + " --sb_exp " + str(sb_est) + " --ext_unc " + str(exp_uncert) 
+                        command_mod_card = "python3 card_modifiers/Card_Mod.py --categ " + str(categ) + " --sig_exp " + str(sig_est) + " --bkg_exp " + str(bkg_est) + " --sb_exp " + str(sb_est) + " --ext_unc " + str(exp_uncert) 
                         print('   exp_fact_different_pdf   ', exp_fact_different_pdf )
                         
                         
@@ -598,7 +598,7 @@ def MakeAndSaveExpFactors(datafile,categ,bdt_points):
         if(categ == 'CatA'):
                 cat_label = "Category C"
         
-        bdt = RooRealVar("bdt", "bdt", 0.95, 1)
+        bdt = RooRealVar("bdt", "bdt", 0.95, 1.000001)
         cand_refit_mass12 = RooRealVar("cand_refit_mass12", "mass12", 0, 1000)
         cand_refit_mass13 = RooRealVar("cand_refit_mass13", "mass13", 0, 1000)
         cand_refit_mass23 = RooRealVar("cand_refit_mass23", "mass23", 0, 1000)
@@ -688,7 +688,7 @@ def MakeAndSaveExpFactors(datafile,categ,bdt_points):
                         c.SaveAs("cand_refit_tau_mass_after_selection.png")
                 
                 
-                bdt.setRange("BDT_Fit_Range", BDT_Score_Min, 1.0)
+                bdt.setRange("BDT_Fit_Range", BDT_Score_Min, 1.000001)
                 
                 cand_refit_tau_mass.setRange('left' , fit_range_lo    , signal_range_lo)
                 cand_refit_tau_mass.setRange('right', signal_range_hi , fit_range_hi)
@@ -722,18 +722,18 @@ if __name__ == "__main__":
         # Enable batch mode
         ROOT.gROOT.SetBatch(True)
         
-        categories = ['CatA']
-        #categories = ['CatA','CatB','CatC']
+        #categories = ['CatA']
+        categories = ['CatA','CatB','CatC']
         #categories = ['combined'] # Can only be run after the other 4 categories are read and copied
         
         datafile_sig = "luca_root/signal_threeMedium_weighted_16Mar2022.root"        
         datafile_bkg = "luca_root/background_threeMedium-UNBLINDED.root" 
         
-        #lumi = np.round(np.arange(100,4500,500), 0)
-        #lumi = np.insert(lumi, 0 , 59.8)
-        #lumi = np.append(lumi, 4500)
+        lumi = np.round(np.arange(100,4500,500), 0)
+        lumi = np.insert(lumi, 0 , 59.8)
+        lumi = np.append(lumi, 4500)
         
-        lumi = np.round([59.83])
+        #lumi = np.round([59.83])
         
         cmd1 = 'mkdir lumi_limit_scans;'
         os.system(cmd1)
@@ -741,8 +741,8 @@ if __name__ == "__main__":
         #num_points = 20
         #bdt_points = np.round(np.linspace(0.2,0.7,num_points), 2)
         
-        #bdt_points = np.round(np.arange(0.985, 0.998 + 0.01, 0.001), 3)
-        bdt_points = np.round([0.985],3)
+        bdt_points = np.round(np.arange(0.985, 0.998 + 0.001, 0.001), 3)
+        #bdt_points = np.round([0.985],3)
         
         Cat_No = len(categories)
         
