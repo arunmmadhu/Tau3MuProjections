@@ -731,6 +731,8 @@ if __name__ == "__main__":
         
         lumi = np.round(np.arange(100,4500,500), 0)
         lumi = np.insert(lumi, 0 , 59.8)
+        lumi = np.append(lumi, 2000)
+        lumi = np.append(lumi, 3000)
         lumi = np.append(lumi, 4500)
         
         #lumi = np.round([59.83])
