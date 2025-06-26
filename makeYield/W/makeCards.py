@@ -384,7 +384,7 @@ class makeCards:
                         
                 
                 #        command = "combineCards.py %s %s %s > %s"% (str(file1) ,str(file2) ,str(file3), str(output_file))  # rm ZTT for now
-                        command = "combineCards.py %s %s %s %s > %s"% (str(file1),str(file2),str(file3) , str(output_file))
+                        command = "combineCards.py %s %s %s > %s"% (str(file1),str(file2),str(file3) , str(output_file))
                         
                         print("Running command: %s" % (command))
                         os.system(command)
@@ -756,8 +756,8 @@ if __name__ == "__main__":
         ROOT.gROOT.SetBatch(True)
         
         #categories = ['CatC']
-        categories = ['CatA','CatB','CatC']
-        #categories = ['combined'] # Can only be run after the other 4 categories are read and copied
+        #categories = ['CatA','CatB','CatC']
+        categories = ['combined'] # Can only be run after the other 4 categories are read and copied
         
         datafile_sig = "luca_root/signal_threeMedium_weighted_16Mar2022.root"        
         datafile_bkg = "luca_root/background_threeMedium-UNBLINDED.root" 
@@ -790,7 +790,7 @@ if __name__ == "__main__":
         Cat_No = len(categories)
         
         #To create datacards
-        WhetherFitBDTandMakeCards = False
+        WhetherFitBDTandMakeCards = True
         
         for cat in range(Cat_No):
                 categ = categories[cat]
@@ -814,10 +814,10 @@ if __name__ == "__main__":
                         
                 if(WhetherFitBDTandMakeCards and categ == 'combined'):
                         BDTFit_Cat = makeCards()
-                        BDTFit_Cat.CombineSubcategories(datafile,categ)
+                        BDTFit_Cat.CombineSubcategories(datafile_sig,categ)
                 
                 
-        executeDataCards_onCondor(lumi,categories,False,bdt_points)
+        #executeDataCards_onCondor(lumi,categories,False,bdt_points)
         #ReadAndCopyMinimumBDTCard(lumi,categories,False,bdt_points)
         
         

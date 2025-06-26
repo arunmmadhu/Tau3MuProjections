@@ -36,32 +36,32 @@ tdrstyle.setTDRStyle()
 #lumi = [59.0,97.7, 129.0]
 
 analyzed_lumi = 1.0
-#if(args.category=="W"):
-lumi_W = np.round(np.arange(100,3050,100), 0)
-lumi_W = np.insert(lumi_W, 0 , 59.8)
-lumi_W = np.append(lumi_W, 2000)
-lumi_W = np.append(lumi_W, 3000)
-lumi_W = np.append(lumi_W, 4500)
+#lumi_W = np.round(np.arange(100,3050,100), 0)
+#lumi_W = np.insert(lumi_W, 0 , 59.8)
+#lumi_W = np.append(lumi_W, 2000)
+#lumi_W = np.append(lumi_W, 3000)
+#lumi_W = np.append(lumi_W, 4500)
+#lumi_W = np.sort(lumi_W)
+lumi_W = np.round([  59.83,  100,  137,  400,  600, 1100, 1600, 2000, 2600, 3000, 3600, 4100, 4500],1)
 lumi_W = np.sort(lumi_W)
 analyzed_lumi_W = 59.8
 
-#if(args.category=="HF"):
 lumi_HF = np.round(np.arange(100,3050,100), 0)
 lumi_HF = np.insert(lumi_HF, 0 , 97.7)
 lumi_HF = np.append(lumi_HF, 4500)
 lumi_HF = np.sort(lumi_HF)
 analyzed_lumi_HF = 97.7
 
-#if(args.category=="ZTT"):
-lumi_ZTT = np.round(np.arange(100,4500,500), 0)
-lumi_ZTT = np.insert(lumi_ZTT, 0 , 59.8)
-lumi_ZTT = np.append(lumi_ZTT, 2000)
-lumi_ZTT = np.append(lumi_ZTT, 3000)
-lumi_ZTT = np.append(lumi_ZTT, 4500)
+#lumi_ZTT = np.round(np.arange(100,4500,500), 0)
+#lumi_ZTT = np.insert(lumi_ZTT, 0 , 59.8)
+#lumi_ZTT = np.append(lumi_ZTT, 2000)
+#lumi_ZTT = np.append(lumi_ZTT, 3000)
+#lumi_ZTT = np.append(lumi_ZTT, 4500)
+#lumi_ZTT = np.sort(lumi_ZTT)
+lumi_ZTT = np.round([  59.83,  100,  137,  400,  600, 1100, 1600, 2000, 2600, 3000, 3600, 4100, 4500],1)
 lumi_ZTT = np.sort(lumi_ZTT)
 analyzed_lumi_ZTT = 59.8
 
-#if(args.category=="Combo"):
 lumi_Combo = np.round(np.arange(100,3050,100), 0)
 analyzed_lumi_Combo = 59.8
 
@@ -89,14 +89,15 @@ def executeDataCards_onCondor(lumi_W,lumi_HF,lumi_ZTT,categories,Whether_Hybrid)
                     
                     subcat = []
                     
-                    if(args.category=="W"):
-                            subcat = ["W"]
-                    if(args.category=="HF"):
+                    if(categories[cat]=="W"):
+                            #subcat = ["W"]
+                            subcat = ['CatA','CatB','CatC','combined']
+                    if(categories[cat]=="HF"):
                             subcat = ["HF"]
-                    if(args.category=="ZTT"):
+                    if(categories[cat]=="ZTT"):
                             subcat = ['taue','taumu','tauhA','tauhB','all','combined']
                             #subcat = ['combined']
-                    if(args.category=="Combo"):
+                    if(categories[cat]=="Combo"):
                             subcat = ["Combo"]
                     
                     Cat_No_sub = len(subcat)
@@ -158,7 +159,7 @@ def plotUpperLimits(lumi_W,lumi_HF,lumi_ZTT,analyzed_lumi_W,analyzed_lumi_HF,ana
     Cat_No = len(categories)
     
     # Whether to make individual plots
-    WhetherIndividualPlots = True
+    WhetherIndividualPlots = False
     
     WhetherMultipleBroadCategories = False
     if (Cat_No>1):
@@ -181,8 +182,8 @@ def plotUpperLimits(lumi_W,lumi_HF,lumi_ZTT,analyzed_lumi_W,analyzed_lumi_HF,ana
                             subcat[cat] = ['combined']
                             subcat_label[cat] = ['ZTT']
                     else:
-                            subcat[cat] = ['taue','taumu','tauhA','tauhB','all','combined']
-                            subcat_label[cat] = [r"$\tau_{e}$", r"$\tau_{\mu}$", r"$\tau_{h,1-prong}$", r"$\tau_{h,3-prong}$", "Inclusive", "ZTT Combined"]
+                            subcat[cat] = ['combined','taue','taumu','tauhA','tauhB','all']
+                            subcat_label[cat] = ["ZTT Combined", r"$\tau_{e}$", r"$\tau_{\mu}$", r"$\tau_{h,1-prong}$", r"$\tau_{h,3-prong}$", "Inclusive"]
                             
                     #subcat = ['taue','taumu','tauhA','tauhB','all','combined']
                     #subcat_label = [r"$\tau_{e}$", r"$\tau_{\mu}$", r"$\tau_{h,1-prong}$", r"$\tau_{h,3-prong}$", "Inclusive", "Combined"]
@@ -190,8 +191,14 @@ def plotUpperLimits(lumi_W,lumi_HF,lumi_ZTT,analyzed_lumi_W,analyzed_lumi_HF,ana
                     #subcat_label = ['combined']
             if categories[cat]=='W':
                     label[cat] = 'W'
-                    subcat[cat] = ["W"]
-                    subcat_label[cat] = ["W"]
+                    #subcat[cat] = ["W"]
+                    #subcat_label[cat] = ["W"]
+                    if(WhetherMultipleBroadCategories):
+                            subcat[cat] = ['combined']
+                            subcat_label[cat] = ['W']
+                    else:
+                            subcat[cat] = ['combined','CatA','CatB','CatC']
+                            subcat_label[cat] = ["W Combined","Category A", "Category B", "Category C"]
                     
             Cat_No_sub[cat] = len(subcat[cat])
     
@@ -327,26 +334,44 @@ def plotUpperLimits(lumi_W,lumi_HF,lumi_ZTT,analyzed_lumi_W,analyzed_lumi_HF,ana
             
             c.SetLogx();
             c.cd()
-        
-        
+            
+            possible_colors = [1,2,4,6,800,880,416,9]
+            
             #for cat in range(Cat_No):
-            if categories[0]=='ZTT':
+            if categories[0]=='ZTT' or categories[0]=='W':
                     for cat_sub in range(Cat_No_sub[cat]):
-                            #yellow[cat][cat_sub].SetFillColor(ROOT.kOrange)
-                            #yellow[cat][cat_sub].SetLineColor(ROOT.kOrange)
-                            #yellow[cat][cat_sub].SetFillStyle(1001)
-                            #yellow[cat][cat_sub].Draw('F')
-                         
-                            #green[cat][cat_sub].SetFillColor(ROOT.kGreen+1)
-                            #green[cat][cat_sub].SetLineColor(ROOT.kGreen+1)
-                            #green[cat][cat_sub].SetFillStyle(1001)
-                            #green[cat][cat_sub].Draw('Fsame')
-                         
-                            median[cat][cat_sub].SetLineColor(cat_sub+1)
-                            median[cat][cat_sub].SetLineWidth(2)
-                            median[cat][cat_sub].SetLineStyle(2)
-                            median[cat][cat_sub].Draw('Lsame')
-                            median[cat][cat_sub].Draw()
+                            if subcat[cat][cat_sub] == 'combined':
+                                    yellow[cat][cat_sub].SetFillColor(ROOT.kOrange)
+                                    yellow[cat][cat_sub].SetLineColor(ROOT.kOrange)
+                                    yellow[cat][cat_sub].SetFillStyle(1001)
+                                    yellow[cat][cat_sub].Draw('F')
+                                 
+                                    green[cat][cat_sub].SetFillColor(ROOT.kGreen+1)
+                                    green[cat][cat_sub].SetLineColor(ROOT.kGreen+1)
+                                    green[cat][cat_sub].SetFillStyle(1001)
+                                    green[cat][cat_sub].Draw('Fsame')
+                                 
+                                    median[cat][cat_sub].SetLineColor(possible_colors[cat_sub])
+                                    median[cat][cat_sub].SetLineWidth(2)
+                                    median[cat][cat_sub].SetLineStyle(2)
+                                    median[cat][cat_sub].Draw('Lsame')
+                                    median[cat][cat_sub].Draw()
+                            else:
+                                    #yellow[cat][cat_sub].SetFillColor(ROOT.kOrange)
+                                    #yellow[cat][cat_sub].SetLineColor(ROOT.kOrange)
+                                    #yellow[cat][cat_sub].SetFillStyle(1001)
+                                    #yellow[cat][cat_sub].Draw('F')
+                                 
+                                    #green[cat][cat_sub].SetFillColor(ROOT.kGreen+1)
+                                    #green[cat][cat_sub].SetLineColor(ROOT.kGreen+1)
+                                    #green[cat][cat_sub].SetFillStyle(1001)
+                                    #green[cat][cat_sub].Draw('Fsame')
+                                 
+                                    median[cat][cat_sub].SetLineColor(possible_colors[cat_sub])
+                                    median[cat][cat_sub].SetLineWidth(2)
+                                    median[cat][cat_sub].SetLineStyle(2)
+                                    median[cat][cat_sub].Draw('Lsame')
+                                    median[cat][cat_sub].Draw()
             else:
                     for cat_sub in range(Cat_No_sub[cat]):
                             yellow[cat][cat_sub].SetFillColor(ROOT.kOrange)
@@ -359,7 +384,7 @@ def plotUpperLimits(lumi_W,lumi_HF,lumi_ZTT,analyzed_lumi_W,analyzed_lumi_HF,ana
                             green[cat][cat_sub].SetFillStyle(1001)
                             green[cat][cat_sub].Draw('Fsame')
                          
-                            median[cat][cat_sub].SetLineColor(cat_sub+1)
+                            median[cat][cat_sub].SetLineColor(possible_colors[cat_sub])
                             median[cat][cat_sub].SetLineWidth(2)
                             median[cat][cat_sub].SetLineStyle(2)
                             median[cat][cat_sub].Draw('Lsame')
@@ -693,9 +718,9 @@ def main():
 
 
         
-    categories = ['ZTT','W']
-#    categories = ['W']
-#    categories = ['HF']
+#    categories = ['ZTT','W']
+    categories = ['W']
+#    categories = ['ZTT']
 #    categories = ['ZTT','HF','W']
     
     Whether_Hybrid=False
@@ -703,7 +728,7 @@ def main():
             Whether_Hybrid=True
     
     #actual categories
-    categories=[args.category]
+    #categories=[args.category]
     
     #print(lumi_ZTT)
     
