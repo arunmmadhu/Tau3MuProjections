@@ -25,7 +25,7 @@ class makeCards:
         
         def __init__(self):
                 
-                self.bdt_cv = None
+                self.bdt = None
                 
                 self.bgausmeanMC = None
                 self.bgaussigmaMC_a = None
@@ -113,7 +113,7 @@ class makeCards:
                 tree_bkg = MiniTreeFile_bkg.Get("tree")
                 
                 # Define RooFit variables
-                self.bdt_cv = RooRealVar("bdt_cv", "bdt_cv", -1, 1)
+                self.bdt = RooRealVar("bdt", "bdt", -1, 1)
                 
                 cand_refit_mass12 = RooRealVar("cand_refit_mass12", "mass12", 0, 1000)
                 cand_refit_mass13 = RooRealVar("cand_refit_mass13", "mass13", 0, 1000)
@@ -122,7 +122,7 @@ class makeCards:
                 cand_charge13 = RooRealVar("cand_charge13", "charge13", -10, 10)
                 cand_charge23 = RooRealVar("cand_charge23", "charge23", -10, 10)
                 
-                cand_refit_tau_mass = RooRealVar("cand_refit_tau_mass", "3#mu mass", 0, 1000)
+                cand_refit_tau_mass = RooRealVar("cand_refit_tau_mass", "3#mu mass", fit_range_lo, fit_range_hi, 'GeV')
                 cand_refit_tau_massE = RooRealVar("cand_refit_tau_massE", "massE", 0, 1000)
                 
                 year = RooRealVar("year", "year", 17, 18)
@@ -131,7 +131,7 @@ class makeCards:
                 mcweight = RooRealVar("mcweight", "mcweight", 0, 1000)
                 
                 variables = RooArgSet()
-                for var in [cand_refit_tau_mass, self.bdt_cv, cand_refit_mass12, cand_refit_mass13, cand_refit_mass23, cand_charge12, cand_charge13, cand_charge23,
+                for var in [cand_refit_tau_mass, self.bdt, cand_refit_mass12, cand_refit_mass13, cand_refit_mass23, cand_charge12, cand_charge13, cand_charge23,
                             cand_refit_tau_massE, year, tau_sv_ls, weight, mcweight]:
                     variables.add(var)
                 
@@ -157,17 +157,17 @@ class makeCards:
                                               RooArgList(variables))
                 fulldata = RooDataSet("data", "data", tree_bkg, variables, DataSelector)
                 
-                self.bdt_cv.setRange("BDT_Fit_Range", BDT_Score_Min, 1.0);
+                self.bdt.setRange("BDT_Fit_Range", BDT_Score_Min, 1.0);
                 
                 self.a = RooRealVar("a", "a", 1.0, 0.0, 10.0)
                 self.b = RooRealVar("b", "b", 1.0, -10.0, 10.0)
                 self.c = RooRealVar("c", "c", 1.0, -10.0, 10.0)
                 self.d = RooRealVar("d", "d", 1.0, -10.0, 10.0)
                 
-                #quadratic = RooFormulaVar("quadratic", "a + b*self.bdt_cv + c*self.bdt_cv*self.bdt_cv", RooArgList(a, b, c, self.bdt_cv))
+                #quadratic = RooFormulaVar("quadratic", "a + b*self.bdt + c*self.bdt*self.bdt", RooArgList(a, b, c, self.bdt))
                 #expModel = RooGenericPdf("expModel", "exp(quadratic)", RooArgList(quadratic)) #Exponential of the quadratic polynomial
                 
-                self.quadratic = RooFormulaVar("quadratic", "a + b*bdt_cv + c*bdt_cv*bdt_cv + d*bdt_cv*bdt_cv*bdt_cv", RooArgList(self.a, self.b, self.c, self.d, self.bdt_cv))
+                self.quadratic = RooFormulaVar("quadratic", "a + b*bdt + c*bdt*bdt + d*bdt*bdt*bdt", RooArgList(self.a, self.b, self.c, self.d, self.bdt))
                 self.expModel = RooGenericPdf("expModel", "exp(quadratic)", RooArgList(self.quadratic)) #Exponential of the cubic polynomial
                 
                 self.BDTNorm = RooRealVar("BDTNorm", "BDTNorm", 500.0, 0.1, 1000000000)
@@ -195,13 +195,13 @@ class makeCards:
                 dataset_vars.add(scale)
                 self.fullmc = RooDataSet('mc', 'mc', self.fullmc_initial_weight, dataset_vars, "",'scale')
 
-                self.bdt_cv.setRange("BDT_MC_Fit_Range", -1.0, 1.0);
+                self.bdt.setRange("BDT_MC_Fit_Range", -1.0, 1.0);
 
                 self.bgausmeanMC = RooRealVar("bgausmeanMC", "bgausmeanMC", 0.5, 0.0, 0.9)
                 self.bgaussigmaMC_a = RooRealVar("bgaussigmaMC_a", "bgaussigmaMC_a", 0.2, 0.000001, 1.0)
                 self.bgaussigmaMC_b = RooRealVar("bgaussigmaMC_b", "bgaussigmaMC_b", 0.2, 0.000001, 1.0)
 
-                self.bgaus_distMC = RooBifurGauss("bgaus_distMC", "bgaus dist MC", self.bdt_cv, self.bgausmeanMC, self.bgaussigmaMC_a, self.bgaussigmaMC_b)
+                self.bgaus_distMC = RooBifurGauss("bgaus_distMC", "bgaus dist MC", self.bdt, self.bgausmeanMC, self.bgaussigmaMC_a, self.bgaussigmaMC_b)
 
                 self.BDTNorm_MC = RooRealVar("BDTNorm_MC", "BDTNorm_MC", 500.0, 0.1, 50000)
                 self.BDT_distribution_MC = RooAddPdf("BDT_distribution", "BDT_distribution",RooArgList(self.bgaus_distMC), RooArgList(self.BDTNorm_MC))
@@ -212,11 +212,11 @@ class makeCards:
 
                 # Plot BDT for data and MC
 
-                frame1 = self.bdt_cv.frame()
+                frame1 = self.bdt.frame()
                 frame1.SetTitle('')
                 frame1.GetXaxis().SetTitle("BDT score, "+cat_label)
 
-                frame2 = self.bdt_cv.frame()
+                frame2 = self.bdt.frame()
                 frame2.SetTitle('')
                 frame2.GetXaxis().SetTitle("BDT score, "+cat_label)
 
@@ -241,7 +241,7 @@ class makeCards:
                         ROOT.RooFit.MarkerSize(0.75))
 
                 #BDT_distribution.plotOn(frame2,  ROOT.RooFit.LineColor(ROOT.kBlue) , ROOT.RooFit.Normalization(fulldata.sumEntries("1", "BDT_Fit_Range"), ROOT.RooAbsReal.NumEvent), ROOT.RooFit.ProjectionRange('BDT_Fit_Range') )
-                #BDT_distribution.plotOn(frame2,  ROOT.RooFit.LineColor(ROOT.kBlue) , ROOT.RooFit.Normalization(BDTNorm.getVal()*BDT_distribution.createIntegral(ROOT.RooArgSet(self.bdt_cv), ROOT.RooArgSet(self.bdt_cv), "BDT_Fit_Range").getVal(), ROOT.RooAbsReal.NumEvent), ROOT.RooFit.ProjectionRange('BDT_Fit_Range') )
+                #BDT_distribution.plotOn(frame2,  ROOT.RooFit.LineColor(ROOT.kBlue) , ROOT.RooFit.Normalization(BDTNorm.getVal()*BDT_distribution.createIntegral(ROOT.RooArgSet(self.bdt), ROOT.RooArgSet(self.bdt), "BDT_Fit_Range").getVal(), ROOT.RooAbsReal.NumEvent), ROOT.RooFit.ProjectionRange('BDT_Fit_Range') )
 
                 self.BDT_distribution.plotOn(frame2,  ROOT.RooFit.LineColor(ROOT.kBlue) )
 
@@ -263,7 +263,7 @@ class makeCards:
                 ROOT.gPad.SetLogy(0)
 
 
-                #print("Certain BDT cut: ", self.fullmc.reduce('bdt_cv > 0.5').sumEntries())
+                #print("Certain BDT cut: ", self.fullmc.reduce('bdt > 0.5').sumEntries())
 
                 return frame1, frame2, self.fullmc, fulldata
                 
@@ -286,12 +286,12 @@ class makeCards:
                 
                 for point in bdt_points:  # For loop for bdt cuts in range [X_min;X_max]
                 
-                    self.bdt_cv.setRange("Integral_Range", point, 1.0)
+                    self.bdt.setRange("Integral_Range", point, 1.0)
                     
                     command_recreate_lumidir = "rm -r lumi_limit_scans/{0}/BDT_point_{1}; mkdir lumi_limit_scans/{0}/BDT_point_{1}".format(categ, str(point))
                     os.system(command_recreate_lumidir)
                     
-                    BDT_cut = 'bdt_cv > %s' % point
+                    BDT_cut = 'bdt > %s' % point
                     
                     MC_dataset_with_BDT_cut = self.fullmc.reduce(BDT_cut)
                     
@@ -301,11 +301,11 @@ class makeCards:
                         print(lu)
                         
                         sig_est = MC_dataset_with_BDT_cut.sumEntries() * lu/analyzed_lumi
-                        #sig_est = self.BDTNorm_MC.getVal() * (self.BDT_distribution_MC.createIntegral(ROOT.RooArgSet(self.bdt_cv), ROOT.RooArgSet(self.bdt_cv), "Integral_Range").getVal() ) * lu/analyzed_lumi
+                        #sig_est = self.BDTNorm_MC.getVal() * (self.BDT_distribution_MC.createIntegral(ROOT.RooArgSet(self.bdt), ROOT.RooArgSet(self.bdt), "Integral_Range").getVal() ) * lu/analyzed_lumi
                         #bkg_est =bkg in signal region; sb_est = bkg in sideband
                         
-                        bkg_est = exp_fact * self.BDTNorm.getVal() * (self.BDT_distribution.createIntegral(ROOT.RooArgSet(self.bdt_cv), ROOT.RooArgSet(self.bdt_cv), "Integral_Range").getVal() ) * lu/analyzed_lumi
-                        sb_est = self.BDTNorm.getVal() * (self.BDT_distribution.createIntegral(ROOT.RooArgSet(self.bdt_cv), ROOT.RooArgSet(self.bdt_cv), "Integral_Range").getVal() ) * lu/analyzed_lumi
+                        bkg_est = exp_fact * self.BDTNorm.getVal() * (self.BDT_distribution.createIntegral(ROOT.RooArgSet(self.bdt), ROOT.RooArgSet(self.bdt), "Integral_Range").getVal() ) * lu/analyzed_lumi
+                        sb_est = self.BDTNorm.getVal() * (self.BDT_distribution.createIntegral(ROOT.RooArgSet(self.bdt), ROOT.RooArgSet(self.bdt), "Integral_Range").getVal() ) * lu/analyzed_lumi
                         
                         exp_fact = (signal_range_hi-signal_range_lo)/(fit_range_hi-fit_range_lo-(signal_range_hi-signal_range_lo))
                         print('   exp_fact   ', exp_fact)
@@ -576,7 +576,7 @@ def MakeAndSaveExpFactors(datafile,categ,bdt_points):
         if(categ == 'CatA'):
                 cat_label = "Category C"
         
-        bdt_cv = RooRealVar("bdt_cv", "bdt_cv", -1, 1)
+        bdt = RooRealVar("bdt", "bdt", -1, 1)
         cand_refit_mass12 = RooRealVar("cand_refit_mass12", "mass12", 0, 1000)
         cand_refit_mass13 = RooRealVar("cand_refit_mass13", "mass13", 0, 1000)
         cand_refit_mass23 = RooRealVar("cand_refit_mass23", "mass23", 0, 1000)
@@ -584,7 +584,7 @@ def MakeAndSaveExpFactors(datafile,categ,bdt_points):
         cand_charge13 = RooRealVar("cand_charge13", "charge13", -10, 10)
         cand_charge23 = RooRealVar("cand_charge23", "charge23", -10, 10)
         
-        cand_refit_tau_mass = RooRealVar("cand_refit_tau_mass", "3#mu mass", 0, 1000)
+        cand_refit_tau_mass = RooRealVar("cand_refit_tau_mass", "3#mu mass", fit_range_lo, fit_range_hi, 'GeV')
         cand_refit_tau_massE = RooRealVar("cand_refit_tau_massE", "massE", 0, 1000)
         
         year = RooRealVar("year", "year", 17, 18)
@@ -593,7 +593,7 @@ def MakeAndSaveExpFactors(datafile,categ,bdt_points):
         mcweight = RooRealVar("mcweight", "mcweight", 0, 1000)
         
         variables = ROOT.RooArgSet()
-        for var in [ cand_refit_tau_mass, cand_refit_mass12, cand_refit_mass13, cand_refit_mass23, cand_charge12, cand_charge13, cand_charge23,
+        for var in [ bdt, cand_refit_tau_mass, cand_refit_mass12, cand_refit_mass13, cand_refit_mass23, cand_charge12, cand_charge13, cand_charge23,
                             cand_refit_tau_massE, year, tau_sv_ls, weight, mcweight]:
                 variables.add(var)
         
@@ -643,13 +643,30 @@ def MakeAndSaveExpFactors(datafile,categ,bdt_points):
                 BDT_Score_Min=0.9
                 
                 DataSelector = RooFormulaVar("DataSelector", "DataSelector",
-                                              f"{common_expr} && "
-                                              f"(cand_refit_tau_mass <= {signal_range_lo} || cand_refit_tau_mass >= {signal_range_hi}) && "
-                                              f"(cand_refit_tau_mass >= {fit_range_lo} && cand_refit_tau_mass <= {fit_range_hi})",
-                                              RooArgList(variables))
+                                            f"(bdt > {bdt_cut}) & {common_expr} && "
+                                            f"(cand_refit_tau_mass <= {signal_range_lo} || cand_refit_tau_mass >= {signal_range_hi}) && "
+                                            f"(cand_refit_tau_mass >= {fit_range_lo} && cand_refit_tau_mass <= {fit_range_hi})",
+                                            RooArgList(variables))
                 fulldata = RooDataSet("data", "data", tree, variables, DataSelector)
                 
-                bdt_cv.setRange("BDT_Fit_Range", BDT_Score_Min, 1.0);
+                print("Data in dataset: ",fulldata.numEntries())
+                
+                # Create a frame for the variable you want to plot
+                if False:
+                        frame = cand_refit_tau_mass.frame(ROOT.RooFit.Title("3mu mass after selection"))
+                        
+                        # Plot the dataset onto the frame
+                        fulldata.plotOn(frame)
+                        
+                        # Draw the frame on a canvas
+                        c = ROOT.TCanvas("c", "c", 800, 600)
+                        frame.Draw()
+                        
+                        # Save to image (you can change filename or format)
+                        c.SaveAs("cand_refit_tau_mass_after_selection.png")
+                
+                
+                bdt.setRange("BDT_Fit_Range", BDT_Score_Min, 1.0)
                 
                 cand_refit_tau_mass.setRange('left' , fit_range_lo    , signal_range_lo)
                 cand_refit_tau_mass.setRange('right', signal_range_hi , fit_range_hi)
@@ -703,6 +720,7 @@ if __name__ == "__main__":
         #bdt_points = np.round(np.linspace(0.2,0.7,num_points), 2)
         
         bdt_points = np.round(np.arange(0.985, 0.998 + 0.01, 0.001), 3)
+        #bdt_points = np.round([0.985],3)
         
         Cat_No = len(categories)
         
