@@ -188,12 +188,33 @@ class makeCards:
                                            f"{common_expr} && "
                                            f"(cand_refit_tau_mass >= {signal_range_lo} && cand_refit_tau_mass <= {signal_range_hi})",
                                            RooArgList(variables))
-                self.fullmc_initial_weight = RooDataSet("mc_init", "mc_init", tree_sig, variables, self.MCSelector, "mcweight")
+                fullmc_initial_weight = RooDataSet("mc_init", "mc_init", tree_sig, variables, self.MCSelector)
                 
-                scale = ROOT.RooRealVar('scale', 'scale', MC_NORM18) 
-                dataset_vars = self.fullmc_initial_weight.get()
+                scale = ROOT.RooRealVar("scale", "scale", 0.0, 0.0, 1e6)
+                dataset_vars = ROOT.RooArgSet()
+                for var in fullmc_initial_weight.get():
+                    dataset_vars.add(var)
                 dataset_vars.add(scale)
-                self.fullmc = RooDataSet('mc', 'mc', self.fullmc_initial_weight, dataset_vars, "",'scale')
+                fullmc_scaled = ROOT.RooDataSet("mc_scaled", "mc_scaled", dataset_vars)
+                
+                for i in range(fullmc_initial_weight.numEntries()):
+                    fullmc_initial_weight.get(i)  # Load i-th entry into internal pointer
+                
+                    # Example: set a dynamic scale factor (you can customize this logic)
+                    scale_val = fullmc_initial_weight.get().getRealValue("mcweight") * MC_NORM18  # or any function of the event
+                
+                    scale.setVal(scale_val)  # set event-specific value
+                
+                    fullmc_scaled.add(dataset_vars)
+                    
+                for i in range(fullmc_scaled.numEntries()):
+                    fullmc_scaled.get(i)  # Load i-th entry into internal pointer
+                    
+                    #print("New weight:", fullmc_scaled.get().getRealValue("scale"))
+                
+                #print("After weight:", fullmc_scaled.numEntries())
+                
+                self.fullmc = RooDataSet('mc', 'mc', fullmc_scaled, fullmc_scaled.get(), "",'scale')
 
                 self.bdt.setRange("BDT_MC_Fit_Range", BDT_Score_Min, 1.0);
 
@@ -206,8 +227,9 @@ class makeCards:
                 self.BDTNorm_MC = RooRealVar("BDTNorm_MC", "BDTNorm_MC", 500.0, 0.1, 50000)
                 self.BDT_distribution_MC = RooAddPdf("BDT_distribution", "BDT_distribution",RooArgList(self.bgaus_distMC), RooArgList(self.BDTNorm_MC))
 
-                results_mcpdf = self.BDT_distribution_MC.fitTo(self.fullmc, RooFit.Range('BDT_MC_Fit_Range'), RooFit.Save())
-                results_mcpdf.Print()
+                #This fit doesn't really work
+                #results_mcpdf = self.BDT_distribution_MC.fitTo(self.fullmc, RooFit.Range('BDT_MC_Fit_Range'), RooFit.Save())
+                #results_mcpdf.Print()
 
 
                 # Plot BDT for data and MC
@@ -700,8 +722,8 @@ if __name__ == "__main__":
         # Enable batch mode
         ROOT.gROOT.SetBatch(True)
         
-        #categories = ['CatA']
-        categories = ['CatA','CatB','CatC']
+        categories = ['CatA']
+        #categories = ['CatA','CatB','CatC']
         #categories = ['combined'] # Can only be run after the other 4 categories are read and copied
         
         datafile_sig = "luca_root/signal_threeMedium_weighted_16Mar2022.root"        
@@ -719,8 +741,8 @@ if __name__ == "__main__":
         #num_points = 20
         #bdt_points = np.round(np.linspace(0.2,0.7,num_points), 2)
         
-        bdt_points = np.round(np.arange(0.985, 0.998 + 0.01, 0.001), 3)
-        #bdt_points = np.round([0.985],3)
+        #bdt_points = np.round(np.arange(0.985, 0.998 + 0.01, 0.001), 3)
+        bdt_points = np.round([0.985],3)
         
         Cat_No = len(categories)
         
@@ -745,7 +767,7 @@ if __name__ == "__main__":
                         MakeAndSaveExpFactors(datafile_bkg,categ,bdt_points)
                         BDTFit_Cat = makeCards()
                         BDTFit_Cat.FitBDT(datafile_sig,datafile_bkg,categ)
-                        #BDTFit_Cat.MakeLumiScanCards(lumi,categ,analyzed_lumi)
+                        BDTFit_Cat.MakeLumiScanCards(lumi,categ,analyzed_lumi)
                         
                 if(WhetherFitBDTandMakeCards and categ == 'combined'):
                         BDTFit_Cat = makeCards()
