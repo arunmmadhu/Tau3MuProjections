@@ -10,6 +10,7 @@ import CMS_lumi, tdrstyle
 from CMSStyle import CMS_lumi
 import os
 import re
+from array import array
 
 
 # CMS style
@@ -47,232 +48,114 @@ class makeCards:
         
         
         
-        def FitBDT(self,datafile,categ):
+        def FitBDT(self,datafile_sig,datafile_bkg,categ):
                 
                 fit_range_lo = 1.6
                 fit_range_hi = 2.0
                 
+                
+                # Luca uses 3.5 sigma for catA, 2.3 for B and 1.6 for C. Smae range for all. Is it because he uses shapes. My 2 sigma gives 1.74 and 1.81.
                 signal_range_lo = 1.74
-                signal_range_hi = 1.81
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
+                signal_range_hi = 1.82
                 
                 
                 # Constants
                 MC_NORM17 = 30541./(500e+3)*(8580+11370)*0.1138/0.1063*1E-7
                 MC_NORM18 = 59828./(492e+3)*(8580+11370)*0.1138/0.1063*1E-7
                 
+                phivetoes="(fabs(dimu_OS1 - 1.020)>0.020)&(fabs(dimu_OS2 - 1.020)>0.020)&"
+                omegavetoes="fabs(dimu_OS1 - 0.782)>0.020&fabs(dimu_OS2 - 0.782)>0.020&"
+                
+                
+                
+                # Define mass resolution cut per category.
+                cat_expr = ''
+                cat_label = ""
+                if categ == 'CatA':
+                    cat_expr = "sqrt(cand_refit_tau_massE)/cand_refit_tau_mass >= 0.000 && sqrt(cand_refit_tau_massE)/cand_refit_tau_mass < 0.007"
+                    cat_label = "Category A"
+                elif categ == 'CatB':
+                    cat_expr = "sqrt(cand_refit_tau_massE)/cand_refit_tau_mass >= 0.007 && sqrt(cand_refit_tau_massE)/cand_refit_tau_mass < 0.012"
+                    cat_label = "Category B"
+                elif categ == 'CatC':
+                    cat_expr = "sqrt(cand_refit_tau_massE)/cand_refit_tau_mass >= 0.012 && sqrt(cand_refit_tau_massE)/cand_refit_tau_mass < 9999."
+                    cat_label = "Category C"
+                
+                # Define phi and omega veto
                 phi_veto_min = 1.000
                 phi_veto_max = 1.040
                 omega_veto_min = 0.762
                 omega_veto_max = 0.802
                 
-                signal_region_min = 1.6
-                signal_region_max = 2.0
-                fit_range_lo = 1.5
-                fit_range_hi = 2.1
-                signal_peak_region_min = 1.76
-                signal_peak_region_max = 1.80
-                Loose_BDT_Cut = 0.5
-                BDT_Score_Min = -0.3
-                signalnorm = 0.00000824176
+                #mass_veto = (
+                #            f"(cand_charge12 != 0 || ((cand_refit_mass12 <= {phi_veto_min} || cand_refit_mass12 >= {phi_veto_max}) && "
+                #            f"(cand_refit_mass12 <= {omega_veto_min} || cand_refit_mass12 >= {omega_veto_max}))) && "
+                #            f"(cand_charge13 != 0 || ((cand_refit_mass13 <= {phi_veto_min} || cand_refit_mass13 >= {phi_veto_max}) && "
+                #            f"(cand_refit_mass13 <= {omega_veto_min} || cand_refit_mass13 >= {omega_veto_max}))) && "
+                #            f"(cand_charge23 != 0 || ((cand_refit_mass23 <= {phi_veto_min} || cand_refit_mass23 >= {phi_veto_max}) && "
+                #            f"(cand_refit_mass23 <= {omega_veto_min} || cand_refit_mass23 >= {omega_veto_max})))"
+                #            )
+                
+                mass_veto = (
+                            "(cand_charge12 != 0 || ((cand_refit_mass12 <= 1.000 || cand_refit_mass12 >= 1.040) && "
+                            "(cand_refit_mass12 <= 0.762 || cand_refit_mass12 >= 0.802))) && "
+                            "(cand_charge13 != 0 || ((cand_refit_mass13 <= 1.000 || cand_refit_mass13 >= 1.040) && "
+                            "(cand_refit_mass13 <= 0.762 || cand_refit_mass13 >= 0.802))) && "
+                            "(cand_charge23 != 0 || ((cand_refit_mass23 <= 1.000 || cand_refit_mass23 >= 1.040) && "
+                            "(cand_refit_mass23 <= 0.762 || cand_refit_mass23 >= 0.802)))"
+                            )
                 
                 # Load file and tree
-                MiniTreeFile = ROOT.TFile.Open("luca_root/signal_threeMedium_weighted_16Mar2022.root")
-                tree = MiniTreeFile.Get("ztautau")
+                MiniTreeFile_sig = ROOT.TFile.Open(datafile_sig)
+                tree_sig = MiniTreeFile_sig.Get("tree")
+                
+                MiniTreeFile_bkg = ROOT.TFile.Open(datafile_bkg)
+                tree_bkg = MiniTreeFile_bkg.Get("tree")
                 
                 # Define RooFit variables
-                tripletMass = RooRealVar("tripletMass", "3#mu mass", fit_range_lo, fit_range_hi, "GeV")
-                bdt_cv = RooRealVar("bdt_cv", "bdt_cv", -1, 1)
-                mass12 = RooRealVar("cand_refit_mass12", "mass12", 0, 2)
-                mass13 = RooRealVar("cand_refit_mass13", "mass13", 0, 2)
-                mass23 = RooRealVar("cand_refit_mass23", "mass23", 0, 2)
-                charge12 = RooRealVar("cand_charge12", "charge12", -1, 1)
-                charge13 = RooRealVar("cand_charge13", "charge13", -1, 1)
-                charge23 = RooRealVar("cand_charge23", "charge23", -1, 1)
-                massE = RooRealVar("cand_refit_tau_massE", "massE", 0, 1)
+                self.bdt_cv = RooRealVar("bdt_cv", "bdt_cv", -1, 1)
+                
+                cand_refit_mass12 = RooRealVar("cand_refit_mass12", "mass12", 0, 1000)
+                cand_refit_mass13 = RooRealVar("cand_refit_mass13", "mass13", 0, 1000)
+                cand_refit_mass23 = RooRealVar("cand_refit_mass23", "mass23", 0, 1000)
+                cand_charge12 = RooRealVar("cand_charge12", "charge12", -10, 10)
+                cand_charge13 = RooRealVar("cand_charge13", "charge13", -10, 10)
+                cand_charge23 = RooRealVar("cand_charge23", "charge23", -10, 10)
+                
+                cand_refit_tau_mass = RooRealVar("cand_refit_tau_mass", "3#mu mass", 0, 1000)
+                cand_refit_tau_massE = RooRealVar("cand_refit_tau_massE", "massE", 0, 1000)
+                
                 year = RooRealVar("year", "year", 17, 18)
-                tau_sv_ls = RooRealVar("tau_sv_ls", "tau_sv_ls", 0, 100)
-                isMC = RooRealVar("isMC", "isMC", 0, 1000000)
-                scale = RooRealVar("scale", "scale", signalnorm)
-                weight = RooRealVar("weight", "event_weight", 0, 5)
+                tau_sv_ls = RooRealVar("tau_sv_ls", "tau_sv_ls", 0, 1000)
+                weight = RooRealVar("weight", "event_weight", 0, 1000)
+                mcweight = RooRealVar("mcweight", "mcweight", 0, 1000)
                 
                 variables = RooArgSet()
-                for var in [tripletMass, bdt_cv, mass12, mass13, mass23, charge12, charge13, charge23,
-                            massE, year, tau_sv_ls, isMC, scale, weight]:
+                for var in [cand_refit_tau_mass, self.bdt_cv, cand_refit_mass12, cand_refit_mass13, cand_refit_mass23, cand_charge12, cand_charge13, cand_charge23,
+                            cand_refit_tau_massE, year, tau_sv_ls, weight, mcweight]:
                     variables.add(var)
                 
-                # Define mass resolution cut per category
-                if categ == 'categ1':
-                    cat_expr = "sqrt(cand_refit_tau_massE)/tripletMass >= 0.000 && sqrt(cand_refit_tau_massE)/tripletMass < 0.007"
-                elif categ == 'categ2':
-                    cat_expr = "sqrt(cand_refit_tau_massE)/tripletMass >= 0.007 && sqrt(cand_refit_tau_massE)/tripletMass < 0.012"
-                elif categ == 'categ3':
-                    cat_expr = "sqrt(cand_refit_tau_massE)/tripletMass >= 0.012 && sqrt(cand_refit_tau_massE)/tripletMass < 9999."
                 
-                # Define phi and omega veto
-                veto_expr = (
-                    f"(cand_charge12 != 0 || ((cand_refit_mass12 < {phi_veto_min} || cand_refit_mass12 > {phi_veto_max}) && "
-                    f"(cand_refit_mass12 < {omega_veto_min} || cand_refit_mass12 > {omega_veto_max}))) && "
-                    f"(cand_charge13 != 0 || ((cand_refit_mass13 < {phi_veto_min} || cand_refit_mass13 > {phi_veto_max}) && "
-                    f"(cand_refit_mass13 < {omega_veto_min} || cand_refit_mass13 > {omega_veto_max}))) && "
-                    f"(cand_charge23 != 0 || ((cand_refit_mass23 < {phi_veto_min} || cand_refit_mass23 > {phi_veto_max}) && "
-                    f"(cand_refit_mass23 < {omega_veto_min} || cand_refit_mass23 > {omega_veto_max})))"
-                )
                 
                 # Common expression
                 common_expr = (
                     f"({cat_expr}) && "
-                    f"({veto_expr}) && "
+                    f"({mass_veto}) && "
                     f"(year == 18) && (tau_sv_ls > 2.0)"
                 )
-                
-                # Signal selection (MC)
-                MCSelector = RooFormulaVar("MCSelector", "MCSelector",
-                                           f"{common_expr} && isMC != 0 && "
-                                           f"(tripletMass >= {signal_region_min} && tripletMass <= {signal_region_max})",
-                                           RooArgList(variables))
-                fullmc = RooDataSet("mc", "mc", tree, variables, MCSelector, "scale")
-                
-                # Data selection (Blinded)
-                DataSelector = RooFormulaVar("DataSelector", "DataSelector",
-                                              f"{common_expr} && isMC == 0 && "
-                                              f"(tripletMass <= {signal_peak_region_min} || tripletMass >= {signal_peak_region_max}) && "
-                                              f"(tripletMass >= {fit_range_lo} && tripletMass <= {fit_range_hi})",
-                                              RooArgList(variables))
-                fulldata = RooDataSet("data", "data", tree, variables, DataSelector)
-                
-                # Now `fullmc` and `fulldata` can be used for further plotting/fitting
-
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                MiniTreeFile = ROOT.TFile.Open(datafile)
-                MiniTreeFile.cd()
-                
-                treeName=''
-                signalnorm = 1.0
-                cat_label = ""
-                if(categ == 'taue'):
-                        treeName  = 'ztau3mutaue'
-                        signalnorm = 0.00000856928
-                        cat_label = r"$\tau_{e}$"
-                if(categ == 'taumu'):
-                        treeName = 'ztau3mutaumu'
-                        signalnorm = 0.00000822810
-                        cat_label = r"$\tau_{\mu}$"
-                if(categ == 'tauhA'):
-                        treeName = 'ztau3mutauh_A'
-                        signalnorm = 0.00000815958
-                        cat_label = r"$\tau_{h,1-prong}$"
-                if(categ == 'tauhB'):
-                        treeName = 'ztau3mutauh_B'
-                        signalnorm = 0.00000815958
-                        cat_label = r"$\tau_{h,3-prong}$"
-                if(categ == 'all'):
-                        treeName   = 'ztautau'
-                        signalnorm = 0.00000824176
-                        cat_label = "Inclusive"
-                
-                tree = MiniTreeFile.Get(treeName)
-                
-                tripletMass          = ROOT.RooRealVar('tripletMass'                , '3#mu mass'           , fit_range_lo, fit_range_hi, 'GeV')
-                self.bdt_cv          = ROOT.RooRealVar('bdt_cv'                     , 'bdt_cv'              , -1 , 1)
-                dimu_OS1             = ROOT.RooRealVar('dimu_OS1'                   , 'dimu_OS1'            ,  0 , 2)
-                dimu_OS2             = ROOT.RooRealVar('dimu_OS2'                   , 'dimu_OS2'            ,  0 , 2)
-                event_weight         = ROOT.RooRealVar('weight'                     , 'event_weight'        ,  0,  5)  # this weight includes also the scale  mc signal scale
-                category             = ROOT.RooRealVar('category'                   , 'category'            ,  0,  5)
-                isMC                 = ROOT.RooRealVar('isMC'                       , 'isMC'                ,  0,  1000000)
-                scale                = ROOT.RooRealVar('scale'                      , 'scale'               ,  signalnorm)  
-                
-                
-                
-                variables = ROOT.RooArgSet()
-                variables.add(tripletMass)
-                variables.add(self.bdt_cv)
-                variables.add(dimu_OS1)
-                variables.add(dimu_OS2)
-                variables.add(event_weight)
-                variables.add(category)
-                variables.add(isMC)
-                
-                phivetoes="(fabs(dimu_OS1 - 1.020)>0.020)&(fabs(dimu_OS2 - 1.020)>0.020)"
-                omegavetoes="&fabs(dimu_OS1 - 0.782)>0.020&fabs(dimu_OS2 - 0.782)>0.020&"
                 
                 
                 # For fitting BDT Output in Data
                 
-                BDT_Score_Min=-0.3
+                BDT_Score_Min=0.9
                 
-                BlindDataSelector = RooFormulaVar('DataSelector', 'DataSelector', phivetoes+omegavetoes+' isMC == 0 & (tripletMass<=%s || tripletMass>=%s) & (tripletMass>=%s & tripletMass<=%s) ' %(signal_range_lo,signal_range_hi,fit_range_lo,fit_range_hi) , RooArgList(variables))
-                
-                fulldata = RooDataSet('data', 'data', tree,  variables, BlindDataSelector)
+                # Data selection (Blinded)
+                DataSelector = RooFormulaVar("DataSelector", "DataSelector",
+                                              f"{common_expr} && "
+                                              f"(cand_refit_tau_mass <= {signal_range_lo} || cand_refit_tau_mass >= {signal_range_hi}) && "
+                                              f"(cand_refit_tau_mass >= {fit_range_lo} && cand_refit_tau_mass <= {fit_range_hi})",
+                                              RooArgList(variables))
+                fulldata = RooDataSet("data", "data", tree_bkg, variables, DataSelector)
                 
                 self.bdt_cv.setRange("BDT_Fit_Range", BDT_Score_Min, 1.0);
                 
@@ -299,14 +182,18 @@ class makeCards:
                 
                 # For fitting BDT Output in Signal
 
-                self.MCSelector = RooFormulaVar('MCSelector', 'MCSelector', phivetoes+omegavetoes+' isMC !=0 & (isMC == 211 | isMC == 210231 | isMC == 210232 | isMC == 210233 ) & (tripletMass>=%s & tripletMass<=%s) ' %(fit_range_lo,fit_range_hi) , RooArgList(variables))
                 
+                # Signal selection (MC)
+                self.MCSelector = RooFormulaVar("MCSelector", "MCSelector",
+                                           f"{common_expr} && "
+                                           f"(cand_refit_tau_mass >= {signal_range_lo} && cand_refit_tau_mass <= {signal_range_hi})",
+                                           RooArgList(variables))
+                fullmc_initial_weight = RooDataSet("mc_init", "mc_init", tree_sig, variables, self.MCSelector, "mcweight")
                 
-                self.fullmc_unweighted = RooDataSet('mc', 'mc', tree, variables, self.MCSelector')
-                dataset_vars = fullmc_unweighted.get()
+                scale = ROOT.RooRealVar('scale', 'scale', MC_NORM18) 
+                dataset_vars = self.fullmc_initial_weight.get()
                 dataset_vars.add(scale)
-                
-                self.fullmc = RooDataSet('mc', 'mc', self.fullmc_unweighted, dataset_vars, "",'scale')
+                self.fullmc = RooDataSet('mc', 'mc', self.fullmc_initial_weight, dataset_vars, "",'scale')
 
                 self.bdt_cv.setRange("BDT_MC_Fit_Range", -1.0, 1.0);
 
@@ -393,24 +280,7 @@ class makeCards:
                 fit_range_hi = 2.0
                 
                 signal_range_lo = 1.74
-                signal_range_hi = 1.81
-                
-                signalnorm = 1.0
-                if(categ == 'taue'):
-                        treeName  = 'ztau3mutaue'
-                        signalnorm = 0.00000856928
-                if(categ == 'taumu'):
-                        treeName = 'ztau3mutaumu'
-                        signalnorm = 0.00000822810
-                if(categ == 'tauhA'):
-                        treeName = 'ztau3mutauh_A'
-                        signalnorm = 0.00000815958
-                if(categ == 'tauhB'):
-                        treeName = 'ztau3mutauh_B'
-                        signalnorm = 0.00000815958
-                if(categ == 'all'):
-                        treeName   = 'ztautau'
-                        signalnorm = 0.00000824176
+                signal_range_hi = 1.82
                 
                 exp_fact = (signal_range_hi-signal_range_lo)/(fit_range_hi-fit_range_lo-(signal_range_hi-signal_range_lo))
                 
@@ -461,7 +331,7 @@ class makeCards:
                 
                 files_dict = {}
                 
-                sub_cats = ['taue','taumu','tauhA','tauhB']
+                sub_cats = ['CatA','CatB','CatC']
                 
                 dirs = []
                 
@@ -485,15 +355,14 @@ class makeCards:
                 
                 for number, files in files_dict.items():
                     if len(files) == len(dirs):  # Make sure all directories have this number
-                        file1 = files['taue/datacards_modified']
-                        file2 = files['taumu/datacards_modified']
-                        file3 = files['tauhA/datacards_modified']
-                        file4 = files['tauhB/datacards_modified']
+                        file1 = files['CatA/datacards_modified']
+                        file2 = files['CatB/datacards_modified']
+                        file3 = files['CatC/datacards_modified']
                         output_file = "dc_%s.txt" % str(number)
                         
                 
                 #        command = "combineCards.py %s %s %s > %s"% (str(file1) ,str(file2) ,str(file3), str(output_file))  # rm ZTT for now
-                        command = "combineCards.py %s %s %s %s > %s"% (str(file1),str(file2),str(file3) ,str(file4), str(output_file))
+                        command = "combineCards.py %s %s %s %s > %s"% (str(file1),str(file2),str(file3) , str(output_file))
                         
                         print("Running command: %s" % (command))
                         os.system(command)
@@ -563,15 +432,11 @@ def ReadAndCopyMinimumBDTCard(lumi,categories,Whether_Hybrid,bdt_points):
             cmd2 = "rm -rf {0}/datacards_modified/; mkdir {0}/datacards_modified/;".format(categ)
             os.system(cmd2)
             
-            if(categ == 'taue'):
+            if(categ == 'CatA'):
                     analyzed_lumi = 59.83
-            if(categ == 'taumu'):
+            if(categ == 'CatB'):
                     analyzed_lumi = 59.83
-            if(categ == 'tauhA'):
-                    analyzed_lumi = 59.83
-            if(categ == 'tauhB'):
-                    analyzed_lumi = 59.83
-            if(categ == 'all'):
+            if(categ == 'CatC'):
                     analyzed_lumi = 59.83
             
             text_limits=open("TextLimits_"+categ+".txt","w")
@@ -697,59 +562,77 @@ def MakeAndSaveExpFactors(datafile,categ,bdt_points):
         fit_range_hi = 2.0
         
         signal_range_lo = 1.74
-        signal_range_hi = 1.81
+        signal_range_hi = 1.82
         
-        MiniTreeFile = ROOT.TFile.Open(datafile)
-        MiniTreeFile.cd()
+        MiniTreeFile_bkg = ROOT.TFile.Open(datafile)
+        tree = MiniTreeFile_bkg.Get("tree")
         
         treeName=''
-        signalnorm = 1.0
         cat_label = ""
-        if(categ == 'taue'):
-                treeName  = 'ztau3mutaue'
-                signalnorm = 0.00000856928
-                cat_label = r"$\tau_{e}$"
-        if(categ == 'taumu'):
-                treeName = 'ztau3mutaumu'
-                signalnorm = 0.00000822810
-                cat_label = r"$\tau_{\mu}$"
-        if(categ == 'tauhA'):
-                treeName = 'ztau3mutauh_A'
-                signalnorm = 0.00000815958
-                cat_label = r"$\tau_{h,1-prong}$"
-        if(categ == 'tauhB'):
-                treeName = 'ztau3mutauh_B'
-                signalnorm = 0.00000815958
-                cat_label = r"$\tau_{h,3-prong}$"
-        if(categ == 'all'):
-                treeName   = 'ztautau'
-                signalnorm = 0.00000824176
-                cat_label = "Inclusive"
+        if(categ == 'CatA'):
+                cat_label = "Category A"
+        if(categ == 'CatA'):
+                cat_label = "Category B"
+        if(categ == 'CatA'):
+                cat_label = "Category C"
         
-        tree = MiniTreeFile.Get(treeName)
+        bdt_cv = RooRealVar("bdt_cv", "bdt_cv", -1, 1)
+        cand_refit_mass12 = RooRealVar("cand_refit_mass12", "mass12", 0, 1000)
+        cand_refit_mass13 = RooRealVar("cand_refit_mass13", "mass13", 0, 1000)
+        cand_refit_mass23 = RooRealVar("cand_refit_mass23", "mass23", 0, 1000)
+        cand_charge12 = RooRealVar("cand_charge12", "charge12", -10, 10)
+        cand_charge13 = RooRealVar("cand_charge13", "charge13", -10, 10)
+        cand_charge23 = RooRealVar("cand_charge23", "charge23", -10, 10)
         
-        tripletMass          = ROOT.RooRealVar('tripletMass'                , '3#mu mass'           , fit_range_lo, fit_range_hi, 'GeV')
-        bdt_cv               = ROOT.RooRealVar('bdt_cv'                     , 'bdt_cv'              , -1 , 1)
-        dimu_OS1             = ROOT.RooRealVar('dimu_OS1'                   , 'dimu_OS1'            ,  0 , 2)
-        dimu_OS2             = ROOT.RooRealVar('dimu_OS2'                   , 'dimu_OS2'            ,  0 , 2)
-        event_weight         = ROOT.RooRealVar('weight'                     , 'event_weight'        ,  0,  5)  # this weight includes also the scale  mc signal scale
-        category             = ROOT.RooRealVar('category'                   , 'category'            ,  0,  5)
-        isMC                 = ROOT.RooRealVar('isMC'                       , 'isMC'                ,  0,  1000000)
-        scale                = ROOT.RooRealVar('scale'                      , 'scale'               ,  signalnorm)  
+        cand_refit_tau_mass = RooRealVar("cand_refit_tau_mass", "3#mu mass", 0, 1000)
+        cand_refit_tau_massE = RooRealVar("cand_refit_tau_massE", "massE", 0, 1000)
         
-        
+        year = RooRealVar("year", "year", 17, 18)
+        tau_sv_ls = RooRealVar("tau_sv_ls", "tau_sv_ls", 0, 1000)
+        weight = RooRealVar("weight", "event_weight", 0, 1000)
+        mcweight = RooRealVar("mcweight", "mcweight", 0, 1000)
         
         variables = ROOT.RooArgSet()
-        variables.add(tripletMass)
-        variables.add(bdt_cv)
-        variables.add(dimu_OS1)
-        variables.add(dimu_OS2)
-        variables.add(event_weight)
-        variables.add(category)
-        variables.add(isMC)
+        for var in [ cand_refit_tau_mass, cand_refit_mass12, cand_refit_mass13, cand_refit_mass23, cand_charge12, cand_charge13, cand_charge23,
+                            cand_refit_tau_massE, year, tau_sv_ls, weight, mcweight]:
+                variables.add(var)
         
         phivetoes="(fabs(dimu_OS1 - 1.020)>0.020)&(fabs(dimu_OS2 - 1.020)>0.020)"
         omegavetoes="&fabs(dimu_OS1 - 0.782)>0.020&fabs(dimu_OS2 - 0.782)>0.020&"
+        
+        # Define mass resolution cut per category.
+        cat_expr = ''
+        cat_label = ""
+        if categ == 'CatA':
+            cat_expr = "sqrt(cand_refit_tau_massE)/cand_refit_tau_mass >= 0.000 && sqrt(cand_refit_tau_massE)/cand_refit_tau_mass < 0.007"
+            cat_label = "Category A"
+        elif categ == 'CatB':
+            cat_expr = "sqrt(cand_refit_tau_massE)/cand_refit_tau_mass >= 0.007 && sqrt(cand_refit_tau_massE)/cand_refit_tau_mass < 0.012"
+            cat_label = "Category B"
+        elif categ == 'CatC':
+            cat_expr = "sqrt(cand_refit_tau_massE)/cand_refit_tau_mass >= 0.012 && sqrt(cand_refit_tau_massE)/cand_refit_tau_mass < 9999."
+            cat_label = "Category C"
+        
+        # Define phi and omega veto
+        phi_veto_min = 1.000
+        phi_veto_max = 1.040
+        omega_veto_min = 0.762
+        omega_veto_max = 0.802
+        
+        mass_veto = (
+                    "(cand_charge12 != 0 || ((cand_refit_mass12 <= 1.000 || cand_refit_mass12 >= 1.040) && "
+                    "(cand_refit_mass12 <= 0.762 || cand_refit_mass12 >= 0.802))) && "
+                    "(cand_charge13 != 0 || ((cand_refit_mass13 <= 1.000 || cand_refit_mass13 >= 1.040) && "
+                    "(cand_refit_mass13 <= 0.762 || cand_refit_mass13 >= 0.802))) && "
+                    "(cand_charge23 != 0 || ((cand_refit_mass23 <= 1.000 || cand_refit_mass23 >= 1.040) && "
+                    "(cand_refit_mass23 <= 0.762 || cand_refit_mass23 >= 0.802)))"
+                    )
+        
+        common_expr = (
+            f"({cat_expr}) && "
+            f"({mass_veto}) && "
+            f"(year == 18) && (tau_sv_ls > 2.0)"
+        )
         
         
         for bdt_cut in bdt_points:
@@ -757,32 +640,34 @@ def MakeAndSaveExpFactors(datafile,categ,bdt_points):
                 
                 # For fitting BDT Output in Data
                 
-                BDT_Score_Min=-0.3
+                BDT_Score_Min=0.9
                 
-                BlindDataSelector = RooFormulaVar('DataSelector', 'DataSelector',' bdt_cv > ' + str(bdt_cut)+' & '+ phivetoes+omegavetoes+' isMC == 0 & (tripletMass<=%s || tripletMass>=%s) & (tripletMass>=%s & tripletMass<=%s) ' %(signal_range_lo,signal_range_hi,fit_range_lo,fit_range_hi) , RooArgList(variables))
-                
-                fulldata = RooDataSet('data', 'data', tree,  variables, BlindDataSelector)
+                DataSelector = RooFormulaVar("DataSelector", "DataSelector",
+                                              f"{common_expr} && "
+                                              f"(cand_refit_tau_mass <= {signal_range_lo} || cand_refit_tau_mass >= {signal_range_hi}) && "
+                                              f"(cand_refit_tau_mass >= {fit_range_lo} && cand_refit_tau_mass <= {fit_range_hi})",
+                                              RooArgList(variables))
+                fulldata = RooDataSet("data", "data", tree, variables, DataSelector)
                 
                 bdt_cv.setRange("BDT_Fit_Range", BDT_Score_Min, 1.0);
                 
+                cand_refit_tau_mass.setRange('left' , fit_range_lo    , signal_range_lo)
+                cand_refit_tau_mass.setRange('right', signal_range_hi , fit_range_hi)
+                cand_refit_tau_mass.setRange('full' , fit_range_lo    , fit_range_hi)
                 
-                tripletMass.setRange('left' , fit_range_lo    , signal_range_lo)
-                tripletMass.setRange('right', signal_range_hi , fit_range_hi)
-                tripletMass.setRange('full' , fit_range_lo    , fit_range_hi)
-                
-                tripletMass.setRange("SB1",fit_range_lo,1.75)
-                tripletMass.setRange("SB2",1.80,fit_range_hi)
-                tripletMass.setRange("fullRange",fit_range_lo,fit_range_hi)
-                tripletMass.setRange("SIG",signal_range_lo,signal_range_hi)
+                cand_refit_tau_mass.setRange("SB1",fit_range_lo,1.75)
+                cand_refit_tau_mass.setRange("SB2",1.80,fit_range_hi)
+                cand_refit_tau_mass.setRange("fullRange",fit_range_lo,fit_range_hi)
+                cand_refit_tau_mass.setRange("SIG",signal_range_lo,signal_range_hi)
                 
                 nbkg = ROOT.RooRealVar('nbkg', 'nbkg', 1000, 0, 500000)
                 slope = ROOT.RooRealVar('slope', 'slope', 1.0, -100, 100)
-                expo = ROOT.RooExponential('bkg_expo', 'bkg_expo', tripletMass, slope)
+                expo = ROOT.RooExponential('bkg_expo', 'bkg_expo', cand_refit_tau_mass, slope)
                 pdfmodel = ROOT.RooAddPdf('bkg_extended_expo', 'bkg_extended_expo', ROOT.RooArgList(expo), ROOT.RooArgList(nbkg))
                 results_pdf = pdfmodel.fitTo(fulldata, ROOT.RooFit.Range('left,right'), ROOT.RooFit.Save())
                 
-                SG_integral = pdfmodel.createIntegral(ROOT.RooArgSet(tripletMass), ROOT.RooArgSet(tripletMass), "SIG").getVal()
-                SB_integral = pdfmodel.createIntegral(ROOT.RooArgSet(tripletMass), ROOT.RooArgSet(tripletMass), "left,right").getVal()
+                SG_integral = pdfmodel.createIntegral(ROOT.RooArgSet(cand_refit_tau_mass), ROOT.RooArgSet(cand_refit_tau_mass), "SIG").getVal()
+                SB_integral = pdfmodel.createIntegral(ROOT.RooArgSet(cand_refit_tau_mass), ROOT.RooArgSet(cand_refit_tau_mass), "left,right").getVal()
                 print('>>>>>>>>>>>>>>>>>>>>> ',fulldata.numEntries())
                 with open("Slopes_%s_%s"%(categ,"unfixed_exp")+".txt", "a") as f:
                         f.write("Cut: %s nbkg: %s n_sideband: %s expected_bkg: %s SG/SB ratio: %s \n"%(bdt_cut,nbkg.getVal(),fulldata.numEntries(),nbkg.getVal()*SG_integral,SG_integral/SB_integral))
@@ -798,17 +683,18 @@ if __name__ == "__main__":
         # Enable batch mode
         ROOT.gROOT.SetBatch(True)
         
-        #categories = ['taumu']
-        categories = ['taue','taumu','tauhA','tauhB','all']
-        #categories = ['tauhA','tauhB','all']
+        categories = ['CatA']
+        #categories = ['CatA','CatB','CatC']
         #categories = ['combined'] # Can only be run after the other 4 categories are read and copied
         
-        datafile = "../../../Combine_Tree_ztau3mutau.root"        
+        datafile_sig = "luca_root/signal_threeMedium_weighted_16Mar2022.root"        
+        datafile_bkg = "luca_root/background_threeMedium-UNBLINDED.root" 
         
-        lumi = np.round(np.arange(100,4500,500), 0)
-        #lumi = np.round(np.arange(100,200,100), 0)
-        lumi = np.insert(lumi, 0 , 59.8)
-        lumi = np.append(lumi, 4500)
+        #lumi = np.round(np.arange(100,4500,500), 0)
+        #lumi = np.insert(lumi, 0 , 59.8)
+        #lumi = np.append(lumi, 4500)
+        
+        lumi = np.round([59.83])
         
         cmd1 = 'mkdir lumi_limit_scans;'
         os.system(cmd1)
@@ -816,7 +702,7 @@ if __name__ == "__main__":
         #num_points = 20
         #bdt_points = np.round(np.linspace(0.2,0.7,num_points), 2)
         
-        bdt_points = np.round(np.arange(0.2, 0.8 + 0.04, 0.04), 2)
+        bdt_points = np.round(np.arange(0.985, 0.998 + 0.01, 0.001), 3)
         
         Cat_No = len(categories)
         
@@ -827,25 +713,21 @@ if __name__ == "__main__":
                 categ = categories[cat]
                 
                 analyzed_lumi = 1.0
-                if(categ == 'taue' and WhetherFitBDTandMakeCards):
+                if(categ == 'CatA' and WhetherFitBDTandMakeCards):
                         analyzed_lumi = 59.83
-                if(categ == 'taumu'):
+                if(categ == 'CatB'):
                         analyzed_lumi = 59.83
-                if(categ == 'tauhA'):
-                        analyzed_lumi = 59.83
-                if(categ == 'tauhB'):
-                        analyzed_lumi = 59.83
-                if(categ == 'all'):
+                if(categ == 'CatC'):
                         analyzed_lumi = 59.83
                 if(categ == 'combined'):
                         analyzed_lumi = 59.83
                         
                 if(WhetherFitBDTandMakeCards and (not categ == 'combined')):
                         open("Slopes_%s_%s"%(categ,"unfixed_exp")+".txt", 'w').close()
-                        MakeAndSaveExpFactors(datafile,categ,bdt_points)
-                        BDTFit_Cat = makeCards()
-                        BDTFit_Cat.FitBDT(datafile,categ)
-                        BDTFit_Cat.MakeLumiScanCards(lumi,categ,analyzed_lumi)
+                        MakeAndSaveExpFactors(datafile_bkg,categ,bdt_points)
+                        #BDTFit_Cat = makeCards()
+                        #BDTFit_Cat.FitBDT(datafile_sig,datafile_bkg,categ)
+                        #BDTFit_Cat.MakeLumiScanCards(lumi,categ,analyzed_lumi)
                         
                 if(WhetherFitBDTandMakeCards and categ == 'combined'):
                         BDTFit_Cat = makeCards()
