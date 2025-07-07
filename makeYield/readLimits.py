@@ -182,8 +182,10 @@ def plotUpperLimits(lumi_W,lumi_HF,lumi_ZTT,analyzed_lumi_W,analyzed_lumi_HF,ana
                             subcat[cat] = ['combined']
                             subcat_label[cat] = ['ZTT']
                     else:
-                            subcat[cat] = ['combined','taue','taumu','tauhA','tauhB','all']
-                            subcat_label[cat] = ["ZTT Combined", r"$\tau_{e}$", r"$\tau_{\mu}$", r"$\tau_{h,1-prong}$", r"$\tau_{h,3-prong}$", "Inclusive"]
+                            #subcat[cat] = ['combined','taue','taumu','tauhA','tauhB','all']
+                            #subcat_label[cat] = ["ZTT Combined", r"$\tau_{e}$", r"$\tau_{\mu}$", r"$\tau_{h,1-prong}$", r"$\tau_{h,3-prong}$", "Inclusive"]
+                            subcat[cat] = ['combined','taue','taumu','tauhA','tauhB']
+                            subcat_label[cat] = ["ZTT Combined", r"$\tau_{e}$", r"$\tau_{\mu}$", r"$\tau_{h,1-prong}$", r"$\tau_{h,3-prong}$"]
                             
                     #subcat = ['taue','taumu','tauhA','tauhB','all','combined']
                     #subcat_label = [r"$\tau_{e}$", r"$\tau_{\mu}$", r"$\tau_{h,1-prong}$", r"$\tau_{h,3-prong}$", "Inclusive", "Combined"]
@@ -719,8 +721,8 @@ def main():
 
         
 #    categories = ['ZTT','W']
-    categories = ['W']
-#    categories = ['ZTT']
+#    categories = ['W']
+    categories = ['ZTT']
 #    categories = ['ZTT','HF','W']
     
     Whether_Hybrid=False
