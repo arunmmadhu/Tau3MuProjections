@@ -10,6 +10,7 @@ import CMS_lumi, tdrstyle
 from CMSStyle import CMS_lumi
 import os
 import re
+from array import array
 
 
 # CMS style
@@ -18,6 +19,12 @@ CMS_lumi.extraText = ""
 CMS_lumi.cmsTextSize = 0.65
 CMS_lumi.outOfFrame = True
 tdrstyle.setTDRStyle()
+
+W, H = 800, 600
+T = 0.08 * H
+B = 0.12 * H
+L = 0.12 * W
+R = 0.04 * W
 
 
 class makeCards:
@@ -492,6 +499,64 @@ def ReadAndCopyMinimumBDTCard(lumi,categories,Whether_Hybrid,bdt_points):
                             print("Copy command: ",command_copy_dc)
                             os.system(command_copy_dc)
                     
+                    output_dir = f"limit_scans_by_lumi/{categories[cat]}"
+                    os.makedirs(output_dir, exist_ok=True)   
+                    
+                    for i in range(N):
+                            y_vals = [limits_read_row[i] for limits_read_row in limits_read]
+                            x_vals = bdt_points
+                            
+                            graph = TGraph(len(x_vals), array('d', x_vals), array('d', y_vals))
+                            graph.SetLineColor(1)
+                            graph.SetLineWidth(2)
+                            graph.SetMarkerStyle(20)
+                            
+                            c = TCanvas(f"c_{i}", f"BDT Scan Lumi {lumi[i]}", W, H)
+                            c.SetFillColor(0)
+                            c.SetBorderMode(0)
+                            c.SetFrameFillStyle(0)
+                            c.SetFrameBorderMode(0)
+                            c.SetLeftMargin(L / W)
+                            c.SetRightMargin(R / W)
+                            c.SetTopMargin(T / H)
+                            c.SetBottomMargin(B / H)
+                            c.SetGrid()
+                            c.cd()
+                            
+                            frame = c.DrawFrame(min(x_vals), 0.0, max(x_vals)*1.1, max(y_vals)*1.2)
+                            frame.GetYaxis().SetTitle("B(#tau #rightarrow #mu#mu#mu) UL (10^{-7})")
+                            frame.GetXaxis().SetTitle("MVA cut value")
+                            frame.GetXaxis().SetTitleSize(0.05)
+                            frame.GetYaxis().SetTitleSize(0.05)
+                            frame.GetXaxis().SetLabelSize(0.04)
+                            frame.GetYaxis().SetLabelSize(0.04)
+                            frame.GetYaxis().SetTitleOffset(0.9)
+                            frame.GetXaxis().SetNdivisions(508)
+                            
+                            frame.SetMinimum(0.0)
+                            frame.SetMaximum(30.0)
+                            
+                            graph.Draw("PL same")
+                            
+                            legend = TLegend(0.15, 0.75, 0.5, 0.85)
+                            legend.SetBorderSize(0)
+                            legend.SetFillStyle(0)
+                            legend.SetTextSize(0.041)
+                            legend.SetTextFont(42)
+                            legend.AddEntry(graph, "Expected median limit", "l")
+                            legend.Draw()
+                            
+                            latex = TLatex()
+                            latex.SetNDC()
+                            latex.SetTextSize(0.04)
+                            latex.SetTextFont(42)
+                            text = f"Category: Z#rightarrow#tau#tau_{{3#mu}}, L = {lumi[i]} fb^{{-1}}"
+                            latex.DrawLatex(0.15, 0.88, text)
+                            
+                            c.Update()
+                            c.SaveAs(f"{output_dir}/limit_scan_lumi_{lumi[i]}.png")
+                            c.Close()
+                    
                     #print(min_indices)
             
             else:
@@ -531,7 +596,65 @@ def ReadAndCopyMinimumBDTCard(lumi,categories,Whether_Hybrid,bdt_points):
                             command_copy_dc = "cp  lumi_limit_scans/{0}/BDT_point_{1}/dc_{2}.txt {0}/datacards_modified/dc_{2}.txt".format(categ, str(bdt_points[bdt_index]), str(lumi[lumi_index]))
                             print("Copy command: ",command_copy_dc)
                             os.system(command_copy_dc)
+                            
+                    output_dir = f"limit_scans_by_lumi/{categories[cat]}"
+                    os.makedirs(output_dir, exist_ok=True)   
                     
+                    for i in range(N):
+                            y_vals = [limits_read_row[i] for limits_read_row in limits_read]
+                            x_vals = bdt_points
+                            
+                            graph = TGraph(len(x_vals), array('d', x_vals), array('d', y_vals))
+                            graph.SetLineColor(1)
+                            graph.SetLineWidth(2)
+                            graph.SetMarkerStyle(20)
+                            
+                            c = TCanvas(f"c_{i}", f"BDT Scan Lumi {lumi[i]}", W, H)
+                            c.SetFillColor(0)
+                            c.SetBorderMode(0)
+                            c.SetFrameFillStyle(0)
+                            c.SetFrameBorderMode(0)
+                            c.SetLeftMargin(L / W)
+                            c.SetRightMargin(R / W)
+                            c.SetTopMargin(T / H)
+                            c.SetBottomMargin(B / H)
+                            c.SetGrid()
+                            c.cd()
+                            
+                            frame = c.DrawFrame(min(x_vals), 0.0, max(x_vals)*1.1, max(y_vals)*1.2)
+                            frame.GetYaxis().SetTitle("B(#tau #rightarrow #mu#mu#mu) UL (10^{-7})")
+                            frame.GetXaxis().SetTitle("MVA cut value")
+                            frame.GetXaxis().SetTitleSize(0.05)
+                            frame.GetYaxis().SetTitleSize(0.05)
+                            frame.GetXaxis().SetLabelSize(0.04)
+                            frame.GetYaxis().SetLabelSize(0.04)
+                            frame.GetYaxis().SetTitleOffset(0.9)
+                            frame.GetXaxis().SetNdivisions(508)
+                            
+                            frame.SetMinimum(0.0)
+                            frame.SetMaximum(30.0)
+                            
+                            graph.Draw("PL same")
+                            
+                            legend = TLegend(0.15, 0.75, 0.5, 0.85)
+                            legend.SetBorderSize(0)
+                            legend.SetFillStyle(0)
+                            legend.SetTextSize(0.041)
+                            legend.SetTextFont(42)
+                            legend.AddEntry(graph, "Expected median limit", "l")
+                            legend.Draw()
+                            
+                            latex = TLatex()
+                            latex.SetNDC()
+                            latex.SetTextSize(0.04)
+                            latex.SetTextFont(42)
+                            text = f"Category: Z#rightarrow#tau#tau_{{3#mu}}, L = {lumi[i]} fb^{{-1}}"
+                            latex.DrawLatex(0.15, 0.88, text)
+                            
+                            c.Update()
+                            c.SaveAs(f"{output_dir}/limit_scan_lumi_{lumi[i]}.png")
+                            c.Close()
+                            
                     #print(min_indices)
 
 # Get Extrapolation Factor
@@ -681,9 +804,9 @@ if __name__ == "__main__":
         ROOT.gROOT.SetBatch(True)
         
         #categories = ['taumu']
-        #categories = ['taue','taumu','tauhA','tauhB','all']
+        categories = ['taue','taumu','tauhA','tauhB','all']
         #categories = ['tauhA','tauhB','all']
-        categories = ['combined'] # Can only be run after the other 4 categories are read and copied
+        #categories = ['combined'] # Can only be run after the other 4 categories are read and copied
         
         datafile_bdt_shape = "../../../../Combine_Tree_ztau3mutau_orig_PostBDT.root"
         
@@ -712,7 +835,7 @@ if __name__ == "__main__":
         Cat_No = len(categories)
         
         #To create datacards
-        WhetherFitBDTandMakeCards = True
+        WhetherFitBDTandMakeCards = False
         
         for cat in range(Cat_No):
                 categ = categories[cat]
@@ -758,7 +881,7 @@ if __name__ == "__main__":
                 
                 
         #executeDataCards_onCondor(lumi,categories,False,bdt_points)
-        #ReadAndCopyMinimumBDTCard(lumi,categories,False,bdt_points)
+        ReadAndCopyMinimumBDTCard(lumi,categories,False,bdt_points)
         
         
         
