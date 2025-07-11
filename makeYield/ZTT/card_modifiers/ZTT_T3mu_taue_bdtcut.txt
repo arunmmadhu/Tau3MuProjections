@@ -19,7 +19,6 @@ Zxs               lnN                       1.0249              -
 Br_taue            lnN                       1.0022        -
 extrap_factor_taue     gmN     2    -                   0.212121
 extrap_factor_unc_taue lnN                       -                   1.09 
-rounding_unc_taue      lnN                       -                   1.10 
 --------------------------------------------------------------------------------
 
 

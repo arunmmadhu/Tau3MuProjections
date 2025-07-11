@@ -7,18 +7,32 @@ import subprocess # to execute shell command
 import argparse
 import numpy as np
 import CMS_lumi, tdrstyle
-from CMSStyle import CMS_lumi
+#from CMSStyle import CMS_lumi
+import CMSStyle
 import os
 import re
 from array import array
 
 
 # CMS style
-CMS_lumi.cmsText = "CMS, work in progress"
-CMS_lumi.extraText = ""
-CMS_lumi.cmsTextSize = 0.65
-CMS_lumi.outOfFrame = True
+CMSStyle.cmsText = "CMS"
+CMSStyle.extraText = "       Work in progress"
+CMSStyle.relPosX = 0.070
+CMSStyle.outOfFrame = False
+CMSStyle.alignX_ = 1
+CMSStyle.relPosX    = 0.04
+#CMSStyle.relPosY    = 0.025
 tdrstyle.setTDRStyle()
+
+# references for T, B, L, R
+H_ref = 500; 
+W_ref = 700; 
+W = W_ref
+H  = H_ref
+T = 0.08*H_ref
+B = 0.18*H_ref 
+L = 0.17*W_ref
+R = 0.04*W_ref
 
 
 class makeCards:
@@ -268,7 +282,7 @@ class makeCards:
 
                 frame1.Draw()
                 ROOT.gPad.SetTicks(1,1)
-                CMS_lumi(ROOT.gPad, 5, 0)
+                CMSStyle.CMS_lumi(ROOT.gPad, 5, 0)
                 ROOT.gPad.Update()
                 frame1.Draw('sameaxis')
                 ROOT.gPad.SaveAs('bdt_fit_mc_'+categ+'.png')
@@ -278,7 +292,7 @@ class makeCards:
                 ROOT.gPad.SetLogy()
                 frame2.Draw()
                 ROOT.gPad.SetTicks(1,1)
-                CMS_lumi(ROOT.gPad, 5, 0)
+                CMSStyle.CMS_lumi(ROOT.gPad, 5, 0)
                 ROOT.gPad.Update()
                 frame2.Draw('sameaxis')
                 ROOT.gPad.SaveAs('bdt_fit_bkg_'+categ+'.png')
@@ -529,6 +543,64 @@ def ReadAndCopyMinimumBDTCard(lumi,categories,Whether_Hybrid,bdt_points):
                             print("Copy command: ",command_copy_dc)
                             os.system(command_copy_dc)
                     
+                    output_dir = f"limit_scans_by_lumi/{categories[cat]}"
+                    os.makedirs(output_dir, exist_ok=True)   
+                    
+                    for i in range(N):
+                            y_vals = [limits_read_row[i] for limits_read_row in limits_read]
+                            x_vals = bdt_points
+                            
+                            graph = TGraph(len(x_vals), array('d', x_vals), array('d', y_vals))
+                            graph.SetLineColor(1)
+                            graph.SetLineWidth(2)
+                            graph.SetMarkerStyle(20)
+                            
+                            c = TCanvas(f"c_{i}", f"BDT Scan Lumi {lumi[i]}", W, H)
+                            c.SetFillColor(0)
+                            c.SetBorderMode(0)
+                            c.SetFrameFillStyle(0)
+                            c.SetFrameBorderMode(0)
+                            c.SetLeftMargin(L / W)
+                            c.SetRightMargin(R / W)
+                            c.SetTopMargin(T / H)
+                            c.SetBottomMargin(B / H)
+                            c.SetGrid()
+                            c.cd()
+                            
+                            frame = c.DrawFrame(min(x_vals), 0.0, max(x_vals)*1.1, max(y_vals)*1.2)
+                            frame.GetYaxis().SetTitle("B(#tau #rightarrow #mu#mu#mu) UL (10^{-7})")
+                            frame.GetXaxis().SetTitle("MVA cut value")
+                            frame.GetXaxis().SetTitleSize(0.05)
+                            frame.GetYaxis().SetTitleSize(0.05)
+                            frame.GetXaxis().SetLabelSize(0.04)
+                            frame.GetYaxis().SetLabelSize(0.04)
+                            frame.GetYaxis().SetTitleOffset(0.9)
+                            frame.GetXaxis().SetNdivisions(508)
+                            
+                            frame.SetMinimum(0.0)
+                            frame.SetMaximum(30.0)
+                            
+                            graph.Draw("PL same")
+                            
+                            legend = TLegend(0.15, 0.75, 0.5, 0.85)
+                            legend.SetBorderSize(0)
+                            legend.SetFillStyle(0)
+                            legend.SetTextSize(0.041)
+                            legend.SetTextFont(42)
+                            legend.AddEntry(graph, "Expected median limit", "l")
+                            legend.Draw()
+                            
+                            latex = TLatex()
+                            latex.SetNDC()
+                            latex.SetTextSize(0.04)
+                            latex.SetTextFont(42)
+                            text = f"Category: W#rightarrow#nu#tau_{{3#mu}}, L = {lumi[i]} fb^{{-1}}"
+                            latex.DrawLatex(0.15, 0.88, text)
+                            
+                            c.Update()
+                            c.SaveAs(f"{output_dir}/limit_scan_lumi_{lumi[i]}.png")
+                            c.Close()
+                    
                     #print(min_indices)
             
             else:
@@ -569,6 +641,76 @@ def ReadAndCopyMinimumBDTCard(lumi,categories,Whether_Hybrid,bdt_points):
                             command_copy_dc = "cp  lumi_limit_scans/{0}/BDT_point_{1}/dc_{2}.txt {0}/datacards_modified/dc_{2}.txt".format(categ, str(bdt_points[bdt_index]), str(lumi[lumi_index]))
                             print("Copy command: ",command_copy_dc)
                             os.system(command_copy_dc)
+                    
+                    output_dir = f"limit_scans_by_lumi/{categories[cat]}"
+                    os.makedirs(output_dir, exist_ok=True)   
+                    
+                    for i in range(N):
+                            y_vals = [limits_read_row[i] for limits_read_row in limits_read]
+                            x_vals = bdt_points
+                            
+                            graph = TGraph(len(x_vals), array('d', x_vals), array('d', y_vals))
+                            graph.SetLineColor(1)
+                            graph.SetLineWidth(2)
+                            graph.SetMarkerStyle(20)
+                            
+                            c = TCanvas(f"c_{i}", f"BDT Scan Lumi {lumi[i]}", W, H)
+                            c.SetFillColor(0)
+                            c.SetBorderMode(0)
+                            c.SetFrameFillStyle(0)
+                            c.SetFrameBorderMode(0)
+                            c.SetLeftMargin(L / W)
+                            c.SetRightMargin(R / W)
+                            c.SetTopMargin(T / H)
+                            c.SetBottomMargin(B / H)
+                            c.SetGrid()
+                            c.cd()
+                            
+                            xmin = min(x_vals) * 0.999
+                            xmax = 1.0
+                            
+                            print("xmin: ",xmin,"xmax: ",xmax)
+                            
+                            frame = c.DrawFrame(xmin, 0.0, xmax, max(y_vals)*1.2)
+                            frame.GetYaxis().SetTitle("B(#tau #rightarrow #mu#mu#mu) UL (10^{-7})")
+                            frame.GetXaxis().SetTitle("MVA cut value")
+                            frame.GetXaxis().SetTitleSize(0.05)
+                            frame.GetYaxis().SetTitleSize(0.05)
+                            frame.GetXaxis().SetLabelSize(0.04)
+                            frame.GetYaxis().SetLabelSize(0.04)
+                            frame.GetYaxis().SetTitleOffset(0.9)
+                            frame.GetXaxis().SetNdivisions(508)
+                            
+                            #Vary the frame ymax from 30 to 5 as lumi goes from 59.83 to 3000
+                            frame_max = 7.0 + (0.5 - 7.0) * ((lumi[i] - 59.83) / (3000.0 - 59.83))
+                            
+                            if(categ == 'CatC'):
+                                    frame_max = 7.0 + (2.5 - 7.0) * ((lumi[i] - 59.83) / (3000.0 - 59.83))
+                            
+                            frame.SetMinimum(0.0)
+                            frame.SetMaximum(frame_max)
+                            
+                            graph.Draw("PL same")
+                            
+                            legend = TLegend(0.15, 0.75, 0.5, 0.85)
+                            legend.SetBorderSize(0)
+                            legend.SetFillStyle(0)
+                            legend.SetTextSize(0.041)
+                            legend.SetTextFont(42)
+                            legend.AddEntry(graph, "Expected median limit", "l")
+                            legend.Draw()
+                            
+                            latex = TLatex()
+                            latex.SetNDC()
+                            latex.SetTextSize(0.04)
+                            latex.SetTextFont(42)
+                            text = f"{categories[cat]}, L = {lumi[i]} fb^{{-1}}"
+                            latex.DrawLatex(0.18, 0.88, text)
+                            
+                            c.Update()
+                            c.SaveAs(f"{output_dir}/limit_scan_lumi_{lumi[i]}.png")
+                            c.Close()
+                    
                     
                     #print(min_indices)
 
@@ -756,8 +898,8 @@ if __name__ == "__main__":
         ROOT.gROOT.SetBatch(True)
         
         #categories = ['CatC']
-        #categories = ['CatA','CatB','CatC']
-        categories = ['combined'] # Can only be run after the other 4 categories are read and copied
+        categories = ['CatA','CatB','CatC']
+        #categories = ['combined'] # Can only be run after the other 4 categories are read and copied
         
         datafile_sig = "luca_root/signal_threeMedium_weighted_16Mar2022.root"        
         datafile_bkg = "luca_root/background_threeMedium-UNBLINDED.root" 
@@ -774,8 +916,11 @@ if __name__ == "__main__":
         
         #lumi = np.round([59.83])
         
-        lumi = np.round([  59.83,  100,  137,  400,  600, 1100, 1600, 2000, 2600, 3000, 3600, 4100, 4500],1)
+        lumi = np.round([  59.83,  97.7,  137,  400,  600, 1100, 1600, 2000, 2600, 3000, 3600, 4100, 4500],1)
         lumi = np.sort(lumi)
+        
+        #lumi = np.round([  59.83,  3000],1)
+        #lumi = np.sort(lumi)
         
         cmd1 = 'mkdir lumi_limit_scans;'
         os.system(cmd1)
@@ -783,14 +928,15 @@ if __name__ == "__main__":
         #num_points = 20
         #bdt_points = np.round(np.linspace(0.2,0.7,num_points), 2)
         
-        #bdt_points = np.round(np.arange(0.985, 0.998 + 0.001, 0.001), 3)
-        bdt_points = np.round(np.arange(0.989, 0.9995, 0.0005), 4)
+        #bdt_points = np.round(np.arange(0.989, 0.9995, 0.0005), 4)
         #bdt_points = np.round([0.985],3)
+        
+        bdt_points = np.round(np.arange(0.975, 0.9995, 0.001), 4)
         
         Cat_No = len(categories)
         
         #To create datacards
-        WhetherFitBDTandMakeCards = True
+        WhetherFitBDTandMakeCards = False
         
         for cat in range(Cat_No):
                 categ = categories[cat]
@@ -817,7 +963,7 @@ if __name__ == "__main__":
                         BDTFit_Cat.CombineSubcategories(datafile_sig,categ)
                 
                 
-        #executeDataCards_onCondor(lumi,categories,False,bdt_points)
+        executeDataCards_onCondor(lumi,categories,False,bdt_points)
         #ReadAndCopyMinimumBDTCard(lumi,categories,False,bdt_points)
         
         

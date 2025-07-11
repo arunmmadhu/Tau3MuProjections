@@ -31,19 +31,19 @@ if(categ == 'CatA'):
         linenum_actual_1 = 15
         linenum_actual_2 = 27
         linenum_actual_3 = 28
-        linenum_actual_4 = 29
+        linenum_actual_4 = 10000
 if(categ == 'CatB'):
         card_name = 'W_T3mu_catB_bdtcut'
         linenum_actual_1 = 15
         linenum_actual_2 = 27
         linenum_actual_3 = 28
-        linenum_actual_4 = 29
+        linenum_actual_4 = 10000
 if(categ == 'CatC'):
         card_name = 'W_T3mu_catC_bdtcut'
         linenum_actual_1 = 15
         linenum_actual_2 = 27
         linenum_actual_3 = 28
-        linenum_actual_4 = 29
+        linenum_actual_4 = 10000
 
 # opening the file in read mode
 file = open("card_modifiers/"+card_name+".txt", "r")

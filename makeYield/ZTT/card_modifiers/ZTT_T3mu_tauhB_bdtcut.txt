@@ -19,5 +19,4 @@ Zxs               lnN                       1.0249              -
 Br_tauhB            lnN                       1.0026        -
 extrap_factor_tauhB     gmN     2    -                   0.212121
 extrap_factor_unc_tauhB lnN                       -                   1.09 
-rounding_unc_tauhB      lnN                       -                   1.10 
 --------------------------------------------------------------------------------

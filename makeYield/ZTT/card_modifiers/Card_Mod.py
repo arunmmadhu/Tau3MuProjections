@@ -31,31 +31,31 @@ if(categ == 'taue'):
         linenum_actual_1 = 14
         linenum_actual_2 = 19
         linenum_actual_3 = 20
-        linenum_actual_4 = 21
+        linenum_actual_4 = 10000
 if(categ == 'taumu'):
         card_name = 'ZTT_T3mu_taumu_bdtcut'
         linenum_actual_1 = 14
         linenum_actual_2 = 19
         linenum_actual_3 = 20
-        linenum_actual_4 = 21
+        linenum_actual_4 = 10000
 if(categ == 'tauhA'):
         card_name = 'ZTT_T3mu_tauhA_bdtcut'
         linenum_actual_1 = 14
         linenum_actual_2 = 19
         linenum_actual_3 = 20
-        linenum_actual_4 = 21
+        linenum_actual_4 = 10000
 if(categ == 'tauhB'):
         card_name = 'ZTT_T3mu_tauhB_bdtcut'
         linenum_actual_1 = 14
         linenum_actual_2 = 19
         linenum_actual_3 = 20
-        linenum_actual_4 = 21
+        linenum_actual_4 = 10000
 if(categ == 'all'):
         card_name = 'ZTT_T3mu_all_bdtcut'
         linenum_actual_1 = 14
         linenum_actual_2 = 19
         linenum_actual_3 = 20
-        linenum_actual_4 = 21
+        linenum_actual_4 = 10000
 
 # opening the file in read mode
 file = open("card_modifiers/"+card_name+".txt", "r")

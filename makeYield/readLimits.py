@@ -42,13 +42,15 @@ analyzed_lumi = 1.0
 #lumi_W = np.append(lumi_W, 3000)
 #lumi_W = np.append(lumi_W, 4500)
 #lumi_W = np.sort(lumi_W)
-lumi_W = np.round([  59.83,  100,  137,  400,  600, 1100, 1600, 2000, 2600, 3000, 3600, 4100, 4500],1)
+lumi_W = lumi = np.round([  59.83,  97.7,  137,  400,  600, 1100, 1600, 2000, 2600, 3000, 3600, 4100, 4500],1)
 lumi_W = np.sort(lumi_W)
 analyzed_lumi_W = 59.8
 
-lumi_HF = np.round(np.arange(100,3050,100), 0)
-lumi_HF = np.insert(lumi_HF, 0 , 97.7)
-lumi_HF = np.append(lumi_HF, 4500)
+#lumi_HF = np.round(np.arange(100,3050,100), 0)
+#lumi_HF = np.insert(lumi_HF, 0 , 97.7)
+#lumi_HF = np.append(lumi_HF, 4500)
+#lumi_HF = np.sort(lumi_HF)
+lumi_HF = np.round([ 97.7,  137,  400,  600, 1100, 1600, 2000, 2600, 3000, 3600, 4100, 4500],1)
 lumi_HF = np.sort(lumi_HF)
 analyzed_lumi_HF = 97.7
 
@@ -58,7 +60,7 @@ analyzed_lumi_HF = 97.7
 #lumi_ZTT = np.append(lumi_ZTT, 3000)
 #lumi_ZTT = np.append(lumi_ZTT, 4500)
 #lumi_ZTT = np.sort(lumi_ZTT)
-lumi_ZTT = np.round([  59.83,  100,  137,  400,  600, 1100, 1600, 2000, 2600, 3000, 3600, 4100, 4500],1)
+lumi_ZTT = lumi = np.round([  59.83,  97.7,  137,  400,  600, 1100, 1600, 2000, 2600, 3000, 3600, 4100, 4500],1)
 lumi_ZTT = np.sort(lumi_ZTT)
 analyzed_lumi_ZTT = 59.8
 

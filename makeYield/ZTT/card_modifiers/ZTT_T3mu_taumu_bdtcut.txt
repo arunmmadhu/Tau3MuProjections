@@ -19,5 +19,4 @@ Zxs               lnN                       1.0249              -
 Br_taumu            lnN                       1.0023        -
 extrap_factor_taumu     gmN     3    -                   0.212121
 extrap_factor_unc_taumu lnN                       -                   1.09 
-rounding_unc_taumu      lnN                       -                   1.10 
 --------------------------------------------------------------------------------

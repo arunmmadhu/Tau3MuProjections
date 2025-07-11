@@ -7,24 +7,32 @@ import subprocess # to execute shell command
 import argparse
 import numpy as np
 import CMS_lumi, tdrstyle
-from CMSStyle import CMS_lumi
+#from CMSStyle import CMS_lumi
+import CMSStyle
 import os
 import re
 from array import array
 
 
 # CMS style
-CMS_lumi.cmsText = "CMS, work in progress"
-CMS_lumi.extraText = ""
-CMS_lumi.cmsTextSize = 0.65
-CMS_lumi.outOfFrame = True
+CMSStyle.cmsText = "CMS"
+CMSStyle.extraText = "       Work in progress"
+CMSStyle.relPosX = 0.070
+CMSStyle.outOfFrame = False
+CMSStyle.alignX_ = 1
+CMSStyle.relPosX    = 0.04
+#CMSStyle.relPosY    = 0.025
 tdrstyle.setTDRStyle()
 
-W, H = 800, 600
-T = 0.08 * H
-B = 0.12 * H
-L = 0.12 * W
-R = 0.04 * W
+# references for T, B, L, R
+H_ref = 500; 
+W_ref = 700; 
+W = W_ref
+H  = H_ref
+T = 0.08*H_ref
+B = 0.18*H_ref 
+L = 0.17*W_ref
+R = 0.04*W_ref
 
 
 class makeCards:
@@ -219,7 +227,7 @@ class makeCards:
 
                 frame1.Draw()
                 ROOT.gPad.SetTicks(1,1)
-                CMS_lumi(ROOT.gPad, 5, 0)
+                CMSStyle.CMS_lumi(ROOT.gPad, 5, 0)
                 ROOT.gPad.Update()
                 frame1.Draw('sameaxis')
                 ROOT.gPad.SaveAs('bdt_fit_mc_'+categ+'.png')
@@ -229,7 +237,7 @@ class makeCards:
                 ROOT.gPad.SetLogy()
                 frame2.Draw()
                 ROOT.gPad.SetTicks(1,1)
-                CMS_lumi(ROOT.gPad, 5, 0)
+                CMSStyle.CMS_lumi(ROOT.gPad, 5, 0)
                 ROOT.gPad.Update()
                 frame2.Draw('sameaxis')
                 ROOT.gPad.SaveAs('bdt_fit_bkg_'+categ+'.png')
@@ -536,6 +544,8 @@ def ReadAndCopyMinimumBDTCard(lumi,categories,Whether_Hybrid,bdt_points):
                             frame.SetMinimum(0.0)
                             frame.SetMaximum(30.0)
                             
+                            frame.GetXaxis().SetLimits(min(x_vals)*0.95 ,max(x_vals)*1.1)
+                            
                             graph.Draw("PL same")
                             
                             legend = TLegend(0.15, 0.75, 0.5, 0.85)
@@ -621,7 +631,7 @@ def ReadAndCopyMinimumBDTCard(lumi,categories,Whether_Hybrid,bdt_points):
                             c.SetGrid()
                             c.cd()
                             
-                            frame = c.DrawFrame(min(x_vals), 0.0, max(x_vals)*1.1, max(y_vals)*1.2)
+                            frame = c.DrawFrame(min(x_vals) * 0.95, 0.0, max(x_vals)*1.1, max(y_vals)*1.2)
                             frame.GetYaxis().SetTitle("B(#tau #rightarrow #mu#mu#mu) UL (10^{-7})")
                             frame.GetXaxis().SetTitle("MVA cut value")
                             frame.GetXaxis().SetTitleSize(0.05)
@@ -631,8 +641,11 @@ def ReadAndCopyMinimumBDTCard(lumi,categories,Whether_Hybrid,bdt_points):
                             frame.GetYaxis().SetTitleOffset(0.9)
                             frame.GetXaxis().SetNdivisions(508)
                             
+                            #Vary the frame ymax from 30 to 5 as lumi goes from 59.83 to 3000
+                            frame_max = 30.0 + (15.0 - 30.0) * ((lumi[i] - 59.83) / (3000.0 - 59.83))
+                            
                             frame.SetMinimum(0.0)
-                            frame.SetMaximum(30.0)
+                            frame.SetMaximum(frame_max)
                             
                             graph.Draw("PL same")
                             
@@ -804,7 +817,7 @@ if __name__ == "__main__":
         ROOT.gROOT.SetBatch(True)
         
         #categories = ['taumu']
-        categories = ['taue','taumu','tauhA','tauhB','all']
+        categories = ['taue','taumu','tauhA','tauhB']
         #categories = ['tauhA','tauhB','all']
         #categories = ['combined'] # Can only be run after the other 4 categories are read and copied
         
@@ -824,13 +837,18 @@ if __name__ == "__main__":
         
         #lumi = np.round([59.83],1)
         
-        lumi = np.round([  59.83,  100,  137,  400,  600, 1100, 1600, 2000, 2600, 3000, 3600, 4100, 4500],1)
+        lumi = np.round([  59.83,  97.7,  137,  400,  600, 1100, 1600, 2000, 2600, 3000, 3600, 4100, 4500],1)
         lumi = np.sort(lumi)
+        
+        #lumi = np.round([  59.83,  3000],1)
+        #lumi = np.sort(lumi)
         
         cmd1 = 'mkdir lumi_limit_scans;'
         os.system(cmd1)
         
-        bdt_points = np.round(np.arange(0.2, 0.8 + 0.04, 0.04), 2)
+        #bdt_points = np.round(np.arange(0.2, 0.8 + 0.04, 0.04), 2)
+        
+        bdt_points = np.round(np.arange(-0.1, 0.86, 0.04), 2)
         
         Cat_No = len(categories)
         
@@ -880,8 +898,8 @@ if __name__ == "__main__":
                         BDTFit_Cat.CombineSubcategories(categ)
                 
                 
-        #executeDataCards_onCondor(lumi,categories,False,bdt_points)
-        ReadAndCopyMinimumBDTCard(lumi,categories,False,bdt_points)
+        executeDataCards_onCondor(lumi,categories,False,bdt_points)
+        #ReadAndCopyMinimumBDTCard(lumi,categories,False,bdt_points)
         
         
         
