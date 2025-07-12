@@ -1,5 +1,8 @@
 #Run with python3
 
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning, module="numpy.core.getlimits")
+
 import math
 import argparse
 from scipy.stats import poisson
@@ -44,9 +47,11 @@ def calculate_cls(s_exp, b_exp):
     
     
 def find_domain_for_value(function,s_exp,b_exp):
-    range_for_s = 20.0
-    start = max(s_exp-range_for_s,0.0)
-    end=s_exp+range_for_s
+    range_for_s = 200.0
+    #start = max(s_exp-range_for_s,0.0)
+    #end=s_exp+range_for_s
+    start = 0.00
+    end = s_exp+range_for_s
     step=0.01
     
     print(f"Starting value for the s_exp_calc scan is {start}, end is {end} with a step size of {step}.")

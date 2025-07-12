@@ -424,7 +424,10 @@ def executeDataCards_onCondor(lumi,categories,Whether_Hybrid,bdt_points):
                                 
                             if(Whether_Hybrid):
                                     
-                                    command_run = "combineTool.py -M HybridNew --LHCmode LHC-limits  -n %s -d %s --rMin 0 --rMax 50 --cl 0.90 -t 5 --expectedFromGrid 0.5 --job-mode condor --sub-opts='+JobFlavour=\"workday\"'  --task-name HybridTest%s " % (str(lu)+'_'+categories[cat]+'_'+str(point),"lumi_limit_scans/{0}/BDT_point_{1}/dc_{2}.txt".format(categories[cat], str(point), str(lu)),str(lu)+'_'+categories[cat]+'_'+str(point))
+                                    #command_run = "combineTool.py -M HybridNew --LHCmode LHC-limits  -n %s -d %s --rMin 0 --rMax 50 --cl 0.90 -t 5 --expectedFromGrid 0.5 --job-mode condor --sub-opts='+JobFlavour=\"workday\"'  --task-name HybridTest%s " % (str(lu)+'_'+categories[cat]+'_'+str(point),"lumi_limit_scans/{0}/BDT_point_{1}/dc_{2}.txt".format(categories[cat], str(point), str(lu)),str(lu)+'_'+categories[cat]+'_'+str(point))
+                                    
+                                    command_run = "combineTool.py -M HybridNew --generateNuisances=1 --generateExternalMeasurements=0 --fitNuisances=1 --testStat LHC -n %s -d %s --rMin 0 --rMax 50 --cl 0.90 -T 10000 --expectedFromGrid 0.5 --job-mode condor --sub-opts='+JobFlavour=\"workday\"'  --task-name HybridTest%s " % (str(lu)+'_'+categories[cat]+'_'+str(point),"lumi_limit_scans/{0}/BDT_point_{1}/dc_{2}.txt".format(categories[cat], str(point), str(lu)),str(lu)+'_'+categories[cat]+'_'+str(point))
+                                    
                                     print("Run:   ", command_run)
                                     os.system(command_run)
                                     
@@ -467,6 +470,9 @@ def getLimits(file_name):
 def is_valid_root_file(filepath):
         if not os.path.exists(filepath):
             return False
+        file_size = os.path.getsize(filepath)
+        if file_size < 2 * 1024:
+            return False
         f = ROOT.TFile.Open(filepath)
         if not f or f.IsZombie() or f.TestBit(ROOT.TFile.kRecovered):
             return False
@@ -474,7 +480,7 @@ def is_valid_root_file(filepath):
             return False
         f.Close()
         return True
-    
+        
 # PLOT upper limits
 def ReadAndCopyMinimumBDTCard(lumi,categories,Whether_Hybrid,bdt_points):
  
@@ -507,19 +513,18 @@ def ReadAndCopyMinimumBDTCard(lumi,categories,Whether_Hybrid,bdt_points):
                     for point in bdt_points:  # For loop for bdt cuts in range [X_min;X_max]
                             limits_read_row = []
                             for i in range(N):
-                                file_name = "higgsCombine"+str(lumi[i])+'_'+categories[cat]+'_'+str(point)+".HybridNew.mH120.123456.quant0.500.root"
-                                
+                                file_name = "higgsCombine"+str(lumi[i])+'_'+categories[cat]+'_'+str(point)+".HybridNew.mH120.quant0.500.root"
                                 limit = [1000000.0,1000000.0,1000000.0,1000000.0,1000000.0]
                                 
-                                if is_valid_root_file(file_name1):
-                                        limit = getLimits(file_name1)
+                                if is_valid_root_file(file_name):
+                                        limit = getLimits(file_name)
                                         
                                         #  Check why some limits only have 1 value
-                                        if len(limit)<5:
+                                        if len(limit)<1:
                                                 limit = [1000000.0,1000000.0,1000000.0,1000000.0,1000000.0]
                                 
-                                print(" cat: ",categories[cat]," lumi: ",lumi[i]," bdt point: ",point," Limit: ",limit[2])
-                                limits_read_row.append(limit[2])
+                                print(" cat: ",categories[cat]," lumi: ",lumi[i]," bdt point: ",point," Limit: ",limit[0])
+                                limits_read_row.append(limit[0])
                                 
                             limits_read.append(limits_read_row)
                     
@@ -567,7 +572,12 @@ def ReadAndCopyMinimumBDTCard(lumi,categories,Whether_Hybrid,bdt_points):
                             c.SetGrid()
                             c.cd()
                             
-                            frame = c.DrawFrame(min(x_vals), 0.0, max(x_vals)*1.1, max(y_vals)*1.2)
+                            xmin = min(x_vals) * 0.999
+                            xmax = 1.0
+                            
+                            print("xmin: ",xmin,"xmax: ",xmax)
+                            
+                            frame = c.DrawFrame(xmin, 0.0, xmax, max(y_vals)*1.2)
                             frame.GetYaxis().SetTitle("B(#tau #rightarrow #mu#mu#mu) UL (10^{-7})")
                             frame.GetXaxis().SetTitle("MVA cut value")
                             frame.GetXaxis().SetTitleSize(0.05)
@@ -577,8 +587,14 @@ def ReadAndCopyMinimumBDTCard(lumi,categories,Whether_Hybrid,bdt_points):
                             frame.GetYaxis().SetTitleOffset(0.9)
                             frame.GetXaxis().SetNdivisions(508)
                             
+                            #Vary the frame ymax from 30 to 5 as lumi goes from 59.83 to 3000
+                            frame_max = 7.0 + (5.0 - 7.0) * ((lumi[i] - 59.83) / (3000.0 - 59.83))
+                            
+                            if(categ == 'CatC'):
+                                    frame_max = 7.0 + (5.0 - 7.0) * ((lumi[i] - 59.83) / (3000.0 - 59.83))
+                            
                             frame.SetMinimum(0.0)
-                            frame.SetMaximum(30.0)
+                            frame.SetMaximum(frame_max)
                             
                             graph.Draw("PL same")
                             
@@ -594,8 +610,8 @@ def ReadAndCopyMinimumBDTCard(lumi,categories,Whether_Hybrid,bdt_points):
                             latex.SetNDC()
                             latex.SetTextSize(0.04)
                             latex.SetTextFont(42)
-                            text = f"Category: W#rightarrow#nu#tau_{{3#mu}}, L = {lumi[i]} fb^{{-1}}"
-                            latex.DrawLatex(0.15, 0.88, text)
+                            text = f"{categories[cat]}, L = {lumi[i]} fb^{{-1}}"
+                            latex.DrawLatex(0.18, 0.88, text)
                             
                             c.Update()
                             c.SaveAs(f"{output_dir}/limit_scan_lumi_{lumi[i]}.png")
@@ -963,8 +979,11 @@ if __name__ == "__main__":
                         BDTFit_Cat.CombineSubcategories(datafile_sig,categ)
                 
                 
-        executeDataCards_onCondor(lumi,categories,False,bdt_points)
+        #executeDataCards_onCondor(lumi,categories,False,bdt_points)
         #ReadAndCopyMinimumBDTCard(lumi,categories,False,bdt_points)
+        
+        #executeDataCards_onCondor(lumi,categories,True,bdt_points)
+        ReadAndCopyMinimumBDTCard(lumi,categories,True,bdt_points)
         
         
         

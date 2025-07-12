@@ -388,7 +388,10 @@ def executeDataCards_onCondor(lumi,categories,Whether_Hybrid,bdt_points):
                                 
                             if(Whether_Hybrid):
                                     
-                                    command_run = "combineTool.py -M HybridNew --LHCmode LHC-limits  -n %s -d %s --rMin 0 --rMax 50 --cl 0.90 -t 5 --expectedFromGrid 0.5 --job-mode condor --sub-opts='+JobFlavour=\"workday\"'  --task-name HybridTest%s " % (str(lu)+'_'+categories[cat]+'_'+str(point),"lumi_limit_scans/{0}/BDT_point_{1}/dc_{2}.txt".format(categories[cat], str(point), str(lu)),str(lu)+'_'+categories[cat]+'_'+str(point))
+                                    #command_run = "combineTool.py -M HybridNew --LHCmode LHC-limits  -n %s -d %s --rMin 0 --rMax 50 --cl 0.90 -t 5 --expectedFromGrid 0.5 --job-mode condor --sub-opts='+JobFlavour=\"workday\"'  --task-name HybridTest%s " % (str(lu)+'_'+categories[cat]+'_'+str(point),"lumi_limit_scans/{0}/BDT_point_{1}/dc_{2}.txt".format(categories[cat], str(point), str(lu)),str(lu)+'_'+categories[cat]+'_'+str(point))
+                                    
+                                    command_run = "combineTool.py -M HybridNew --generateNuisances=1 --generateExternalMeasurements=0 --fitNuisances=1 --testStat LHC -n %s -d %s --rMin 0 --rMax 50 --cl 0.90 -T 10000 --expectedFromGrid 0.5 --job-mode condor --sub-opts='+JobFlavour=\"workday\"'  --task-name HybridTest%s " % (str(lu)+'_'+categories[cat]+'_'+str(point),"lumi_limit_scans/{0}/BDT_point_{1}/dc_{2}.txt".format(categories[cat], str(point), str(lu)),str(lu)+'_'+categories[cat]+'_'+str(point))
+                                    
                                     print("Run:   ", command_run)
                                     os.system(command_run)
                                     
@@ -400,6 +403,53 @@ def executeDataCards_onCondor(lumi,categories,Whether_Hybrid,bdt_points):
         
                                     print("Run:   ", command_run)
                                     os.system(command_run)
+                                    
+def CalculateUL_fromDatacard(lumi, categories, Whether_Hybrid, bdt_points):
+
+    Cat_No = len(categories)
+
+    for cat in range(Cat_No):
+        category_dir = categories[cat]
+
+        # Make sure category folder exists
+        os.makedirs(category_dir, exist_ok=True)
+
+        for lu in lumi:
+            output_file_path = f"{category_dir}/limits_lumi_{lu}.txt"
+            with open(output_file_path, 'w') as out_txt:
+
+                for point in bdt_points:
+                    print('Luminosity: ', lu)
+
+                    dc_path = f"lumi_limit_scans/{category_dir}/BDT_point_{point}/dc_{lu}.txt"
+                    if not os.path.isfile(dc_path):
+                        print(f"Missing datacard: {dc_path}")
+                        continue
+
+                    with open(dc_path, "r") as file:
+                        sig = 0.0001
+                        bkg = 0.0001
+
+                        for linenum, line in enumerate(file):
+                            if linenum == 14:
+                                x1 = line.split()
+                                sig = float(x1[1])
+                                bkg = float(x1[2])
+
+                    print("sig:", sig, "bkg:", bkg)
+
+                    cmd_ul = f"python3 ../../CLs_UL_Calculator_Efficient.py {sig} {bkg} > out_UL_Calc.txt"
+                    os.system(cmd_ul)
+
+                    limit_val = 10000
+                    with open("out_UL_Calc.txt") as f:
+                        for line in f:
+                            if "upper limit" in line:
+                                limit_val = line.split()[-1]
+                                print(f"Limit UL_Calc: {limit_val}")
+
+                    # Write result to the output file
+                    out_txt.write(f"bdt {point}   sig {sig:.6f}   bkg {bkg:.6f}   limit {limit_val}\n")
 
 # GET limits from root file
 def getLimits(file_name):
@@ -431,6 +481,9 @@ def getLimits(file_name):
 def is_valid_root_file(filepath):
         if not os.path.exists(filepath):
             return False
+        file_size = os.path.getsize(filepath)
+        if file_size < 2 * 1024:
+            return False
         f = ROOT.TFile.Open(filepath)
         if not f or f.IsZombie() or f.TestBit(ROOT.TFile.kRecovered):
             return False
@@ -438,7 +491,7 @@ def is_valid_root_file(filepath):
             return False
         f.Close()
         return True
-    
+        
 # PLOT upper limits
 def ReadAndCopyMinimumBDTCard(lumi,categories,Whether_Hybrid,bdt_points):
  
@@ -475,15 +528,18 @@ def ReadAndCopyMinimumBDTCard(lumi,categories,Whether_Hybrid,bdt_points):
                     for point in bdt_points:  # For loop for bdt cuts in range [X_min;X_max]
                             limits_read_row = []
                             for i in range(N):
-                                file_name = "higgsCombine"+str(lumi[i])+'_'+categories[cat]+'_'+str(point)+".HybridNew.mH120.123456.quant0.500.root"
-                                limit = getLimits(file_name)
+                                file_name = "higgsCombine"+str(lumi[i])+'_'+categories[cat]+'_'+str(point)+".HybridNew.mH120.quant0.500.root"
+                                limit = [1000000.0,1000000.0,1000000.0,1000000.0,1000000.0]
                                 
-                                #  Check why some limits only have 1 value
-                                if len(limit)<5:
-                                        limit = [1000000.0,1000000.0,1000000.0,1000000.0,1000000.0]
+                                if is_valid_root_file(file_name):
+                                        limit = getLimits(file_name)
+                                        
+                                        #  Check why some limits only have 1 value
+                                        if len(limit)<1:
+                                                limit = [1000000.0,1000000.0,1000000.0,1000000.0,1000000.0]
                                 
-                                print(" cat: ",categories[cat]," lumi: ",lumi[i]," bdt point: ",point," Limit: ",limit[2])
-                                limits_read_row.append(limit[2])
+                                print(" cat: ",categories[cat]," lumi: ",lumi[i]," bdt point: ",point," Limit: ",limit[0])
+                                limits_read_row.append(limit[0])
                                 
                             limits_read.append(limits_read_row)
                     
@@ -670,6 +726,149 @@ def ReadAndCopyMinimumBDTCard(lumi,categories,Whether_Hybrid,bdt_points):
                             
                     #print(min_indices)
 
+# PLOT upper limits
+def ReadAndCopyMinimumBDTCard_usingUL(lumi,categories,Whether_Hybrid,bdt_points):
+ 
+    N = len(lumi)
+    Cat_No = len(categories)
+    
+    label=[None] * Cat_No
+    
+    for cat in range(Cat_No):
+    
+            categ = categories[cat]
+            
+            # Make sure category folder exists
+            os.makedirs(categ, exist_ok=True)
+            
+            cmd2 = "rm -rf {0}/datacards_modified/; mkdir {0}/datacards_modified/;".format(categ)
+            os.system(cmd2)
+            
+            if(categ == 'taue'):
+                    analyzed_lumi = 59.83
+            if(categ == 'taumu'):
+                    analyzed_lumi = 59.83
+            if(categ == 'tauhA'):
+                    analyzed_lumi = 59.83
+            if(categ == 'tauhB'):
+                    analyzed_lumi = 59.83
+            if(categ == 'all'):
+                    analyzed_lumi = 59.83
+            
+            os.makedirs(f"{categ}/datacards_modified", exist_ok=True)
+            
+            
+            N = len(lumi)
+            M = len(bdt_points)
+        
+            limits_matrix = []  # [bdt_index][lumi_index]
+        
+            for bdt_point in bdt_points:
+                limits_row = []
+                for i in range(N):
+                    lumi_val = lumi[i]
+                    filename = f"lumi_limit_scans/{categ}/limits_{lumi_val}.txt"
+                    limit_val = 1e6
+        
+                    if os.path.isfile(filename):
+                        with open(filename) as f:
+                            for line in f:
+                                if f"bdt: {bdt_point}" in line:
+                                    try:
+                                        limit_val = float(line.strip().split("limit:")[-1])
+                                    except:
+                                        limit_val = 1e6
+                                    break
+                    else:
+                        print(f"Missing file: {filename}")
+                    
+                    limits_row.append(limit_val)
+                limits_matrix.append(limits_row)
+        
+            # Transpose: now limits[lumi_index][bdt_index]
+            transposed = list(zip(*limits_matrix))
+        
+            # Open output text file
+            text_limits = open(f"TextLimits_{categ}.txt", "w")
+        
+            for lumi_index, row in enumerate(transposed):
+                y_vals = list(row)
+                x_vals = bdt_points
+        
+                min_limit = min(y_vals)
+                bdt_index = y_vals.index(min_limit)
+                best_bdt = bdt_points[bdt_index]
+                lumi_val = lumi[lumi_index]
+        
+                print(f"Best BDT for lumi {lumi_val}: {best_bdt} with limit {min_limit}")
+        
+                # Copy best datacard
+                src = f"lumi_limit_scans/{categ}/BDT_point_{best_bdt}/dc_{lumi_val}.txt"
+                dst = f"{categ}/datacards_modified/dc_{lumi_val}.txt"
+                os.makedirs(f"{categ}/datacards_modified", exist_ok=True)
+                os.system(f"cp {src} {dst}")
+        
+                # Write to text file
+                text_limits.write("bdt %.2f   lumi %.2f     median exp %.2f\n" % (best_bdt, lumi_val, min_limit))
+                
+                graph = TGraph(len(x_vals), array('d', x_vals), array('d', y_vals))
+                graph.SetLineColor(1)
+                graph.SetLineWidth(2)
+                graph.SetMarkerStyle(20)
+                
+                c = TCanvas(f"c_{i}", f"BDT Scan Lumi {lumi[i]}", W, H)
+                c.SetFillColor(0)
+                c.SetBorderMode(0)
+                c.SetFrameFillStyle(0)
+                c.SetFrameBorderMode(0)
+                c.SetLeftMargin(L / W)
+                c.SetRightMargin(R / W)
+                c.SetTopMargin(T / H)
+                c.SetBottomMargin(B / H)
+                c.SetGrid()
+                c.cd()
+                
+                frame = c.DrawFrame(min(x_vals) * 0.95, 0.0, max(x_vals)*1.1, max(y_vals)*1.2)
+                frame.GetYaxis().SetTitle("B(#tau #rightarrow #mu#mu#mu) UL (10^{-7})")
+                frame.GetXaxis().SetTitle("MVA cut value")
+                frame.GetXaxis().SetTitleSize(0.05)
+                frame.GetYaxis().SetTitleSize(0.05)
+                frame.GetXaxis().SetLabelSize(0.04)
+                frame.GetYaxis().SetLabelSize(0.04)
+                frame.GetYaxis().SetTitleOffset(0.9)
+                frame.GetXaxis().SetNdivisions(508)
+                
+                #Vary the frame ymax from 30 to 5 as lumi goes from 59.83 to 3000
+                frame_max = 30.0 + (15.0 - 30.0) * ((lumi[i] - 59.83) / (3000.0 - 59.83))
+                
+                frame.SetMinimum(0.0)
+                frame.SetMaximum(frame_max)
+                
+                graph.Draw("PL same")
+                
+                legend = TLegend(0.15, 0.75, 0.5, 0.85)
+                legend.SetBorderSize(0)
+                legend.SetFillStyle(0)
+                legend.SetTextSize(0.041)
+                legend.SetTextFont(42)
+                legend.AddEntry(graph, "Expected median limit", "l")
+                legend.Draw()
+                
+                latex = TLatex()
+                latex.SetNDC()
+                latex.SetTextSize(0.04)
+                latex.SetTextFont(42)
+                text = f"Category: Z#rightarrow#tau#tau_{{3#mu}}, L = {lumi[i]} fb^{{-1}}"
+                latex.DrawLatex(0.15, 0.88, text)
+                
+                c.Update()
+                c.SaveAs(f"{output_dir}/limit_scan_lumi_{lumi[i]}.png")
+                c.Close()
+                
+            text_limits.close()
+            
+
+
 # Get Extrapolation Factor
 def getExtrapFactor(pdftype, categ, bdtcut):
     file_path_1 = 'Slopes_' + categ + '_' + pdftype + '.txt'
@@ -848,7 +1047,7 @@ if __name__ == "__main__":
         
         #bdt_points = np.round(np.arange(0.2, 0.8 + 0.04, 0.04), 2)
         
-        bdt_points = np.round(np.arange(-0.1, 0.86, 0.04), 2)
+        bdt_points = np.round(np.arange(-0.1, 0.82, 0.04), 2)
         
         Cat_No = len(categories)
         
@@ -898,8 +1097,16 @@ if __name__ == "__main__":
                         BDTFit_Cat.CombineSubcategories(categ)
                 
                 
-        executeDataCards_onCondor(lumi,categories,False,bdt_points)
+        #executeDataCards_onCondor(lumi,categories,False,bdt_points)
         #ReadAndCopyMinimumBDTCard(lumi,categories,False,bdt_points)
+        
+        CalculateUL_fromDatacard(lumi,categories,False,bdt_points)
+        #ReadAndCopyMinimumBDTCard_usingUL(lumi,categories,True,bdt_points)
+        
+        #executeDataCards_onCondor(lumi,categories,True,bdt_points)
+        #ReadAndCopyMinimumBDTCard(lumi,categories,True,bdt_points)
+        
+        
         
         
         

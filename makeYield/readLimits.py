@@ -97,7 +97,8 @@ def executeDataCards_onCondor(lumi_W,lumi_HF,lumi_ZTT,categories,Whether_Hybrid)
                     if(categories[cat]=="HF"):
                             subcat = ["HF"]
                     if(categories[cat]=="ZTT"):
-                            subcat = ['taue','taumu','tauhA','tauhB','all','combined']
+                            #subcat = ['taue','taumu','tauhA','tauhB','all','combined']
+                            subcat = ['taue','taumu','tauhA','tauhB','combined']
                             #subcat = ['combined']
                     if(categories[cat]=="Combo"):
                             subcat = ["Combo"]
@@ -724,7 +725,8 @@ def main():
         
 #    categories = ['ZTT','W']
 #    categories = ['W']
-    categories = ['ZTT']
+#    categories = ['ZTT']
+#    categories = ['HF']
 #    categories = ['ZTT','HF','W']
     
     Whether_Hybrid=False
