@@ -419,7 +419,7 @@ def CalculateUL_fromDatacard(lumi, categories, Whether_Hybrid, bdt_points):
             with open(output_file_path, 'w') as out_txt:
 
                 for point in bdt_points:
-                    print('Luminosity: ', lu)
+                    print('Luminosity: ', lu, ' of category: ',categories[cat])
 
                     dc_path = f"lumi_limit_scans/{category_dir}/BDT_point_{point}/dc_{lu}.txt"
                     if not os.path.isfile(dc_path):
@@ -435,6 +435,8 @@ def CalculateUL_fromDatacard(lumi, categories, Whether_Hybrid, bdt_points):
                                 x1 = line.split()
                                 sig = float(x1[1])
                                 bkg = float(x1[2])
+                                if sig < 0.0001:
+                                        sig = 0.0001
 
                     print("sig:", sig, "bkg:", bkg)
 
@@ -767,18 +769,22 @@ def ReadAndCopyMinimumBDTCard_usingUL(lumi,categories,Whether_Hybrid,bdt_points)
                 limits_row = []
                 for i in range(N):
                     lumi_val = lumi[i]
-                    filename = f"lumi_limit_scans/{categ}/limits_{lumi_val}.txt"
+                    filename = f"{categ}/limits_lumi_{lumi_val}.txt"
                     limit_val = 1e6
         
                     if os.path.isfile(filename):
                         with open(filename) as f:
                             for line in f:
-                                if f"bdt: {bdt_point}" in line:
+                                    tokens = line.strip().split()
+                                    if len(tokens) < 8:
+                                        continue
                                     try:
-                                        limit_val = float(line.strip().split("limit:")[-1])
+                                        bdt_val = float(tokens[1])
+                                        if abs(bdt_val - bdt_point) < 1e-5:
+                                            limit_val = float(tokens[-1])
+                                            break
                                     except:
-                                        limit_val = 1e6
-                                    break
+                                        continue
                     else:
                         print(f"Missing file: {filename}")
                     
@@ -790,6 +796,9 @@ def ReadAndCopyMinimumBDTCard_usingUL(lumi,categories,Whether_Hybrid,bdt_points)
         
             # Open output text file
             text_limits = open(f"TextLimits_{categ}.txt", "w")
+            
+            output_dir = f"limit_scans_by_lumi_ZTT_UL/{categories[cat]}"
+            os.makedirs(output_dir, exist_ok=True)  
         
             for lumi_index, row in enumerate(transposed):
                 y_vals = list(row)
@@ -816,7 +825,7 @@ def ReadAndCopyMinimumBDTCard_usingUL(lumi,categories,Whether_Hybrid,bdt_points)
                 graph.SetLineWidth(2)
                 graph.SetMarkerStyle(20)
                 
-                c = TCanvas(f"c_{i}", f"BDT Scan Lumi {lumi[i]}", W, H)
+                c = TCanvas(f"c_{i}", f"BDT Scan Lumi {lumi[lumi_index]}", W, H)
                 c.SetFillColor(0)
                 c.SetBorderMode(0)
                 c.SetFrameFillStyle(0)
@@ -839,7 +848,7 @@ def ReadAndCopyMinimumBDTCard_usingUL(lumi,categories,Whether_Hybrid,bdt_points)
                 frame.GetXaxis().SetNdivisions(508)
                 
                 #Vary the frame ymax from 30 to 5 as lumi goes from 59.83 to 3000
-                frame_max = 30.0 + (15.0 - 30.0) * ((lumi[i] - 59.83) / (3000.0 - 59.83))
+                frame_max = 30.0 + (15.0 - 30.0) * ((lumi[lumi_index] - 59.83) / (3000.0 - 59.83))
                 
                 frame.SetMinimum(0.0)
                 frame.SetMaximum(frame_max)
@@ -858,11 +867,11 @@ def ReadAndCopyMinimumBDTCard_usingUL(lumi,categories,Whether_Hybrid,bdt_points)
                 latex.SetNDC()
                 latex.SetTextSize(0.04)
                 latex.SetTextFont(42)
-                text = f"Category: Z#rightarrow#tau#tau_{{3#mu}}, L = {lumi[i]} fb^{{-1}}"
+                text = f"Category: Z#rightarrow#tau#tau_{{3#mu}}, L = {lumi[lumi_index]} fb^{{-1}}"
                 latex.DrawLatex(0.15, 0.88, text)
                 
                 c.Update()
-                c.SaveAs(f"{output_dir}/limit_scan_lumi_{lumi[i]}.png")
+                c.SaveAs(f"{output_dir}/limit_scan_lumi_{lumi[lumi_index]}.png")
                 c.Close()
                 
             text_limits.close()
@@ -1016,9 +1025,9 @@ if __name__ == "__main__":
         ROOT.gROOT.SetBatch(True)
         
         #categories = ['taumu']
-        categories = ['taue','taumu','tauhA','tauhB']
+        #categories = ['taue','taumu','tauhA','tauhB']
         #categories = ['tauhA','tauhB','all']
-        #categories = ['combined'] # Can only be run after the other 4 categories are read and copied
+        categories = ['combined'] # Can only be run after the other 4 categories are read and copied
         
         datafile_bdt_shape = "../../../../Combine_Tree_ztau3mutau_orig_PostBDT.root"
         
@@ -1047,12 +1056,14 @@ if __name__ == "__main__":
         
         #bdt_points = np.round(np.arange(0.2, 0.8 + 0.04, 0.04), 2)
         
-        bdt_points = np.round(np.arange(-0.1, 0.82, 0.04), 2)
+        #bdt_points = np.round(np.arange(-0.1, 0.82, 0.04), 2)
+        
+        bdt_points = np.round(np.arange(-0.24, 0.82, 0.04), 2)
         
         Cat_No = len(categories)
         
         #To create datacards
-        WhetherFitBDTandMakeCards = False
+        WhetherFitBDTandMakeCards = True
         
         for cat in range(Cat_No):
                 categ = categories[cat]
@@ -1100,7 +1111,7 @@ if __name__ == "__main__":
         #executeDataCards_onCondor(lumi,categories,False,bdt_points)
         #ReadAndCopyMinimumBDTCard(lumi,categories,False,bdt_points)
         
-        CalculateUL_fromDatacard(lumi,categories,False,bdt_points)
+        #CalculateUL_fromDatacard(lumi,categories,False,bdt_points)
         #ReadAndCopyMinimumBDTCard_usingUL(lumi,categories,True,bdt_points)
         
         #executeDataCards_onCondor(lumi,categories,True,bdt_points)
