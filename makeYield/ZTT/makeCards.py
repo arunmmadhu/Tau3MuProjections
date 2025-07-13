@@ -59,6 +59,11 @@ class makeCards:
                 self.expModel = None
                 self.BDTNorm = None
                 self.BDT_distribution_MC = None
+                
+                self.results_pdf = None
+                self.results_mcpdf = None
+                
+                self.bkg_PFcut_norm = None
         
         
         
@@ -136,10 +141,13 @@ class makeCards:
                 fulldata_norm = RooDataSet('fulldata_norm', 'fulldata_norm', tree_norm,  variables, BlindDataSelector)
                 #print("shape tree norm: ",fulldata_shape.numEntries()," and main tree norm: ",fulldata_norm.numEntries())
                 data_scale = ROOT.RooRealVar('data_scale', 'data_scale', 1.0*fulldata_norm.numEntries()/fulldata_shape.numEntries())
-                dataset_vars_data = fulldata_shape.get()
-                dataset_vars_data.add(data_scale)
+                self.bkg_PFcut_norm = 1.0*fulldata_norm.numEntries()/fulldata_shape.numEntries()
+                #dataset_vars_data = fulldata_shape.get()
+                #dataset_vars_data.add(data_scale)
                 
-                fulldata = RooDataSet('fulldata', 'fulldata', fulldata_shape,  dataset_vars_data, "",'data_scale')
+                fulldata = fulldata_shape
+                
+                #fulldata = RooDataSet('fulldata', 'fulldata', fulldata_shape,  dataset_vars_data, "",'data_scale')
                 
                 self.bdt_cv.setRange("BDT_Fit_Range", BDT_Score_Min, 1.0);
                 
@@ -158,9 +166,8 @@ class makeCards:
                 self.BDT_distribution = RooAddPdf("BDT_distribution", "BDT_distribution",RooArgList(self.expModel), RooArgList(self.BDTNorm))
                 #BDT_distribution = RooAddPdf("BDT_distribution", "BDT_distribution",RooArgList(quadratic), RooArgList(BDTNorm))
                 
-                results_pdf = self.BDT_distribution.fitTo(fulldata, RooFit.Range('BDT_Fit_Range'), RooFit.Save())
-                results_pdf.Print()
-        
+                self.results_pdf = self.BDT_distribution.fitTo(fulldata, RooFit.Range('BDT_Fit_Range'), RooFit.Save())
+                
                 
                 
                 
@@ -186,8 +193,8 @@ class makeCards:
                 self.BDTNorm_MC = RooRealVar("BDTNorm_MC", "BDTNorm_MC", 500.0, 0.1, 50000)
                 self.BDT_distribution_MC = RooAddPdf("BDT_distribution", "BDT_distribution",RooArgList(self.bgaus_distMC), RooArgList(self.BDTNorm_MC))
 
-                results_mcpdf = self.BDT_distribution_MC.fitTo(self.fullmc, RooFit.Range('BDT_MC_Fit_Range'), RooFit.Save())
-                results_mcpdf.Print()
+                self.results_mcpdf = self.BDT_distribution_MC.fitTo(self.fullmc, RooFit.Range('BDT_MC_Fit_Range'), RooFit.Save())
+                #results_mcpdf.Print()
 
 
                 # Plot BDT for data and MC
@@ -302,19 +309,36 @@ class makeCards:
                         #sig_est = self.BDTNorm_MC.getVal() * (self.BDT_distribution_MC.createIntegral(ROOT.RooArgSet(self.bdt_cv), ROOT.RooArgSet(self.bdt_cv), "Integral_Range").getVal() ) * lu/analyzed_lumi
                         #bkg_est =bkg in signal region; sb_est = bkg in sideband
                         
-                        bkg_est = exp_fact * self.BDTNorm.getVal() * (self.BDT_distribution.createIntegral(ROOT.RooArgSet(self.bdt_cv), ROOT.RooArgSet(self.bdt_cv), "Integral_Range").getVal() ) * lu/analyzed_lumi
-                        sb_est = self.BDTNorm.getVal() * (self.BDT_distribution.createIntegral(ROOT.RooArgSet(self.bdt_cv), ROOT.RooArgSet(self.bdt_cv), "Integral_Range").getVal() ) * lu/analyzed_lumi
+                        bkg_est = self.bkg_PFcut_norm * exp_fact * self.BDTNorm.getVal() * (self.BDT_distribution.createIntegral(ROOT.RooArgSet(self.bdt_cv), ROOT.RooArgSet(self.bdt_cv), "Integral_Range").getVal() ) * lu/analyzed_lumi
+                        
+                        sb_est = self.bkg_PFcut_norm * self.BDTNorm.getVal() * (self.BDT_distribution.createIntegral(ROOT.RooArgSet(self.bdt_cv), ROOT.RooArgSet(self.bdt_cv), "Integral_Range").getVal() ) * lu/analyzed_lumi
+                        
+                        exp_fact_var = ROOT.RooRealVar("exp_fact_var", "exp_fact_var", exp_fact)
+                        bdt_norm_var = ROOT.RooRealVar("bdt_norm_var", "bdt_norm_var", self.BDTNorm.getVal())
+                        lumi_ratio = ROOT.RooRealVar("lumi_ratio", "lumi_ratio", lu / analyzed_lumi)
+                        bkg_PF_normal_ratio = ROOT.RooRealVar("bkg_PF_normal_ratio", "bkg_PF_normal_ratio", self.bkg_PFcut_norm)
+                        combined_norm_bkg = ROOT.RooProduct("combined_norm", "combined_norm", ROOT.RooArgList(exp_fact_var, bdt_norm_var, lumi_ratio, bkg_PF_normal_ratio))
+                        bdt_integral_bkg = self.BDT_distribution.createIntegral(ROOT.RooArgSet(self.bdt_cv), ROOT.RooArgSet(self.bdt_cv), "Integral_Range")
+                        bkg_est_var_withNorm = ROOT.RooProduct("bkg_est_var_withNorm", "bkg_est_var_withNorm", ROOT.RooArgList(combined_norm_bkg, bdt_integral_bkg))
+                        
+                        mc_sum = MC_dataset_with_BDT_cut.sumEntries()
+                        mc_sum_var = ROOT.RooRealVar("mc_sum_var", "mc_sum_var", mc_sum)
+                        sig_est_var_withNorm = ROOT.RooProduct("sig_est_var_withNorm", "sig_est_var_withNorm", ROOT.RooArgList(lumi_ratio, mc_sum_var))
+                        
+                        print( "bdt point: ", point," sig_est: ", sig_est, " bkg_est: ", bkg_est, " bkg_est_var_withNorm: ", bkg_est_var_withNorm.getVal(), " bkg_est_var_withNorm error: ", bkg_est_var_withNorm.getPropagatedError(self.results_pdf), " sig_est_var_withNorm ", sig_est_var_withNorm.getVal() )
+                        
+                        self.results_pdf.floatParsFinal().Print()
                         
                         exp_fact = (signal_range_hi-signal_range_lo)/(fit_range_hi-fit_range_lo-(signal_range_hi-signal_range_lo))
-                        print('   exp_fact   ', exp_fact)
+                        #print('   exp_fact   ', exp_fact)
                         exp_fact_different_pdf = getExtrapFactor('unfixed_exp', categ, point)
-                        print('   exp_fact_different_pdf   ', exp_fact_different_pdf )
+                        #print('   exp_fact_different_pdf   ', exp_fact_different_pdf )
                         
                         exp_uncert = 1.0 + abs(exp_fact_different_pdf-exp_fact)/exp_fact
                         
-                        print("bdt point: ", point," sig_est: ", sig_est, " bkg_est: ", bkg_est, " sb_est: ", sb_est, " exp_uncert: ", exp_uncert)
+                        #print("bdt point: ", point," sig_est: ", sig_est, " bkg_est: ", bkg_est, " sb_est: ", sb_est, " exp_uncert: ", exp_uncert)
                         
-                        command_mod_card = "python3 card_modifiers/Card_Mod.py --categ " + str(categ) + " --sig_exp " + str(sig_est) + " --bkg_exp " + str(bkg_est) + " --sb_exp " + str(sb_est) + " --ext_unc " + str(exp_uncert) 
+                        command_mod_card = "python3 card_modifiers/Card_Mod.py --categ " + str(categ) + " --sig_exp " + str(sig_est) + " --bkg_exp " + str(bkg_est) + " --sb_exp " + str(sb_est) + " --ext_unc " + str(exp_uncert) + " --bkg_exp_err " + str(bkg_est_var_withNorm.getPropagatedError(self.results_pdf))
                         
                         
                         os.system(command_mod_card)
@@ -429,6 +453,7 @@ def CalculateUL_fromDatacard(lumi, categories, Whether_Hybrid, bdt_points):
                     with open(dc_path, "r") as file:
                         sig = 0.0001
                         bkg = 0.0001
+                        bkg_err = 0.0000
 
                         for linenum, line in enumerate(file):
                             if linenum == 14:
@@ -437,7 +462,11 @@ def CalculateUL_fromDatacard(lumi, categories, Whether_Hybrid, bdt_points):
                                 bkg = float(x1[2])
                                 if sig < 0.0001:
                                         sig = 0.0001
-
+                            
+                            if linenum == 0:
+                                x1 = line.split()
+                                bkg_err = float(x1[2])
+                            
                     print("sig:", sig, "bkg:", bkg)
 
                     cmd_ul = f"python3 ../../CLs_UL_Calculator_Efficient.py {sig} {bkg} > out_UL_Calc.txt"
@@ -451,7 +480,7 @@ def CalculateUL_fromDatacard(lumi, categories, Whether_Hybrid, bdt_points):
                                 print(f"Limit UL_Calc: {limit_val}")
 
                     # Write result to the output file
-                    out_txt.write(f"bdt {point}   sig {sig:.6f}   bkg {bkg:.6f}   limit {limit_val}\n")
+                    out_txt.write(f"bdt {point}   sig {sig:.6f}   bkg {bkg:.6f}   limit {limit_val}  bkg_err {bkg_err}\n")
 
 # GET limits from root file
 def getLimits(file_name):
@@ -776,12 +805,12 @@ def ReadAndCopyMinimumBDTCard_usingUL(lumi,categories,Whether_Hybrid,bdt_points)
                         with open(filename) as f:
                             for line in f:
                                     tokens = line.strip().split()
-                                    if len(tokens) < 8:
+                                    if len(tokens) < 10:
                                         continue
                                     try:
                                         bdt_val = float(tokens[1])
                                         if abs(bdt_val - bdt_point) < 1e-5:
-                                            limit_val = float(tokens[-1])
+                                            limit_val = float(tokens[-3])
                                             break
                                     except:
                                         continue
@@ -816,9 +845,31 @@ def ReadAndCopyMinimumBDTCard_usingUL(lumi,categories,Whether_Hybrid,bdt_points)
                 dst = f"{categ}/datacards_modified/dc_{lumi_val}.txt"
                 os.makedirs(f"{categ}/datacards_modified", exist_ok=True)
                 os.system(f"cp {src} {dst}")
-        
+                
+                # Step 4: Read sig, bkg, bkg_err from line with best_bdt
+                sig_val = bkg_val = bkg_err_val = -1.0
+                filename = f"{categ}/limits_lumi_{lumi_val}.txt"
+                if os.path.isfile(filename):
+                        with open(filename) as f:
+                            for line in f:
+                                tokens = line.strip().split()
+                                if len(tokens) < 10:
+                                    continue
+                                try:
+                                    bdt_val = float(tokens[1])
+                                    if abs(bdt_val - best_bdt) < 1e-5:
+                                        sig_val = float(tokens[3])
+                                        bkg_val = float(tokens[5])
+                                        limit_val = float(tokens[7])
+                                        bkg_err_val = float(tokens[9])
+                                        break
+                                except:
+                                    continue
+                
+                
+                
                 # Write to text file
-                text_limits.write("bdt %.2f   lumi %.2f     median exp %.2f\n" % (best_bdt, lumi_val, min_limit))
+                text_limits.write("bdt %.4f   lumi %.2f   median_exp %.3f   sig %.4f   bkg %.4f   bkg_err %.4f\n" %(best_bdt, lumi_val, min_limit, sig_val, bkg_val, bkg_err_val))
                 
                 graph = TGraph(len(x_vals), array('d', x_vals), array('d', y_vals))
                 graph.SetLineColor(1)
@@ -1024,10 +1075,10 @@ if __name__ == "__main__":
         # Enable batch mode
         ROOT.gROOT.SetBatch(True)
         
-        #categories = ['taumu']
+        categories = ['tauhA']
         #categories = ['taue','taumu','tauhA','tauhB']
         #categories = ['tauhA','tauhB','all']
-        categories = ['combined'] # Can only be run after the other 4 categories are read and copied
+        #categories = ['combined'] # Can only be run after the other 4 categories are read and copied
         
         datafile_bdt_shape = "../../../../Combine_Tree_ztau3mutau_orig_PostBDT.root"
         
@@ -1045,10 +1096,11 @@ if __name__ == "__main__":
         
         #lumi = np.round([59.83],1)
         
-        lumi = np.round([  59.83,  97.7,  137,  400,  600, 1100, 1600, 2000, 2600, 3000, 3600, 4100, 4500],1)
-        lumi = np.sort(lumi)
+        #lumi = np.round([  59.83,  97.7,  137,  400,  600, 1100, 1600, 2000, 2600, 3000, 3600, 4100, 4500],1)
+        #lumi = np.sort(lumi)
         
         #lumi = np.round([  59.83,  3000],1)
+        lumi = np.round([  3000.0],1)
         #lumi = np.sort(lumi)
         
         cmd1 = 'mkdir lumi_limit_scans;'

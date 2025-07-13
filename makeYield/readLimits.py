@@ -723,7 +723,7 @@ def main():
 
 
         
-#    categories = ['ZTT','W']
+    categories = ['ZTT','W']
 #    categories = ['W']
 #    categories = ['ZTT']
 #    categories = ['HF']

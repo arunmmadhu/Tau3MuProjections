@@ -10,6 +10,7 @@ parser.add_argument('--sig_exp', action='store', default=1.0, help="Signal yield
 parser.add_argument('--bkg_exp', action='store', default=1.0, help="bkg yield\n DEFAULT: 1.0")
 parser.add_argument('--sb_exp', action='store', default=1.0, help="sideband yield\n DEFAULT: 1.0")
 parser.add_argument('--ext_unc', action='store', default=1.10, help="extrapolation factor uncertainty\n DEFAULT: 1.10")
+parser.add_argument('--bkg_exp_err', action='store', default=1.0, help="bkg yield error \n DEFAULT: 1.0")
 
 args = parser.parse_args()
 categ = args.categ
@@ -25,6 +26,7 @@ linenum_actual_1 = 10
 linenum_actual_2 = 10
 linenum_actual_3 = 10
 linenum_actual_4 = 10
+linenum_actual_5 = 10
 
 if(categ == 'CatA'):
         card_name = 'W_T3mu_catA_bdtcut'
@@ -32,18 +34,21 @@ if(categ == 'CatA'):
         linenum_actual_2 = 27
         linenum_actual_3 = 28
         linenum_actual_4 = 10000
+        linenum_actual_5 = 0
 if(categ == 'CatB'):
         card_name = 'W_T3mu_catB_bdtcut'
         linenum_actual_1 = 15
         linenum_actual_2 = 27
         linenum_actual_3 = 28
         linenum_actual_4 = 10000
+        linenum_actual_5 = 0
 if(categ == 'CatC'):
         card_name = 'W_T3mu_catC_bdtcut'
         linenum_actual_1 = 15
         linenum_actual_2 = 27
         linenum_actual_3 = 28
         linenum_actual_4 = 10000
+        linenum_actual_5 = 0
 
 # opening the file in read mode
 file = open("card_modifiers/"+card_name+".txt", "r")
@@ -88,6 +93,12 @@ for linenum, line in enumerate(file):
         line_mod=line_mod.replace(' '+x1[3]+' ', ' '+res1+' ')
                 
         replacement = replacement + line_mod
+        
+    elif(linenum==linenum_actual_5):
+        #print(line)
+        line_mod=line
+        
+        replacement = replacement + "# bkgErr: {:.3f} \n".format(float(args.bkg_exp_err))
     
     else:
         replacement = replacement + line
