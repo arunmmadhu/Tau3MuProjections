@@ -16,7 +16,7 @@ from array import array
 
 # CMS style
 CMSStyle.cmsText = "CMS"
-CMSStyle.extraText = "       Work in progress"
+CMSStyle.extraText = "        Work in progress"
 CMSStyle.relPosX = 0.070
 CMSStyle.outOfFrame = False
 CMSStyle.alignX_ = 1
@@ -25,13 +25,13 @@ CMSStyle.relPosX    = 0.04
 tdrstyle.setTDRStyle()
 
 # references for T, B, L, R
-H_ref = 500; 
-W_ref = 700; 
+H_ref = 800; 
+W_ref = 800; 
 W = W_ref
 H  = H_ref
 T = 0.08*H_ref
 B = 0.18*H_ref 
-L = 0.17*W_ref
+L = 0.15*W_ref
 R = 0.04*W_ref
 
 
@@ -283,7 +283,7 @@ class makeCards:
 
                 frame1.Draw()
                 ROOT.gPad.SetTicks(1,1)
-                CMSStyle.CMS_lumi(ROOT.gPad, 5, 0)
+                latex.DrawLatex(0.15, 0.88, text)
                 ROOT.gPad.Update()
                 frame1.Draw('sameaxis')
                 ROOT.gPad.SaveAs('bdt_fit_mc_'+categ+'.png')
@@ -491,13 +491,13 @@ def CalculateUL_fromDatacard(lumi, categories, Whether_Hybrid, bdt_points):
 
                     print("sig:", sig, "bkg:", bkg)
 
-                    cmd_ul = f"python3 ../../CLs_UL_Calculator_Efficient.py {sig} {bkg} > out_UL_Calc.txt"
+                    cmd_ul = f"python3 ../../CLs_UL_Calculator_Integral.py {sig} {bkg} > out_UL_Calc.txt"
                     os.system(cmd_ul)
 
                     limit_val = 10000
                     with open("out_UL_Calc.txt") as f:
                         for line in f:
-                            if "upper limit" in line:
+                            if "r_val" in line:
                                 limit_val = line.split()[-1]
                                 print(f"Limit UL_Calc: {limit_val}")
 
@@ -939,7 +939,7 @@ def ReadAndCopyMinimumBDTCard_usingUL(lumi,categories,Whether_Hybrid,bdt_points)
                 frame.GetYaxis().SetTitleSize(0.05)
                 frame.GetXaxis().SetLabelSize(0.04)
                 frame.GetYaxis().SetLabelSize(0.04)
-                frame.GetYaxis().SetTitleOffset(0.9)
+                frame.GetYaxis().SetTitleOffset(1.2)
                 frame.GetXaxis().SetNdivisions(508)
                 
                 #Vary the frame ymax from 30 to 5 as lumi goes from 59.83 to 3000
@@ -953,7 +953,7 @@ def ReadAndCopyMinimumBDTCard_usingUL(lumi,categories,Whether_Hybrid,bdt_points)
                 
                 graph.Draw("PL same")
                 
-                legend = TLegend(0.15, 0.75, 0.5, 0.85)
+                legend = TLegend(0.19, 0.75, 0.5, 0.85)
                 legend.SetBorderSize(0)
                 legend.SetFillStyle(0)
                 legend.SetTextSize(0.041)
@@ -966,7 +966,9 @@ def ReadAndCopyMinimumBDTCard_usingUL(lumi,categories,Whether_Hybrid,bdt_points)
                 latex.SetTextSize(0.04)
                 latex.SetTextFont(42)
                 text = f"{categories[cat]}, L = {lumi[lumi_index]} fb^{{-1}}"
-                latex.DrawLatex(0.18, 0.88, text)
+                latex.DrawLatex(0.19, 0.86, text)
+                
+                CMSStyle.CMS_lumi(c, 5, 0)
                 
                 c.Update()
                 c.SaveAs(f"{output_dir}/limit_scan_lumi_{lumi[lumi_index]}.png")
@@ -1182,6 +1184,8 @@ if __name__ == "__main__":
         lumi = np.sort(lumi)
         
         #lumi = np.round([  59.83,  3000],1)
+        #lumi = np.round([  3000.0],1)
+        #lumi = np.round([  59.83],1)
         #lumi = np.sort(lumi)
         
         cmd1 = 'mkdir lumi_limit_scans;'

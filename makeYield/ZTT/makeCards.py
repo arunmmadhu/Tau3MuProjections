@@ -16,7 +16,7 @@ from array import array
 
 # CMS style
 CMSStyle.cmsText = "CMS"
-CMSStyle.extraText = "       Work in progress"
+CMSStyle.extraText = "        Work in progress"
 CMSStyle.relPosX = 0.070
 CMSStyle.outOfFrame = False
 CMSStyle.alignX_ = 1
@@ -25,13 +25,13 @@ CMSStyle.relPosX    = 0.04
 tdrstyle.setTDRStyle()
 
 # references for T, B, L, R
-H_ref = 500; 
-W_ref = 700; 
+H_ref = 800; 
+W_ref = 800; 
 W = W_ref
 H  = H_ref
 T = 0.08*H_ref
 B = 0.18*H_ref 
-L = 0.17*W_ref
+L = 0.15*W_ref
 R = 0.04*W_ref
 
 
@@ -198,57 +198,62 @@ class makeCards:
 
 
                 # Plot BDT for data and MC
-
+                
                 frame1 = self.bdt_cv.frame()
                 frame1.SetTitle('')
-                frame1.GetXaxis().SetTitle("BDT score, "+cat_label)
-
+                frame1.GetXaxis().SetTitle("BDT score, " + cat_label)
+                
                 frame2 = self.bdt_cv.frame()
                 frame2.SetTitle('')
-                frame2.GetXaxis().SetTitle("BDT score, "+cat_label)
-
+                frame2.GetXaxis().SetTitle("BDT score, " + cat_label)
+                
                 nbins = 100
-
+                
                 self.fullmc.plotOn(frame1, 
                               ROOT.RooFit.Binning(nbins), 
                               ROOT.RooFit.XErrorSize(0), 
                               ROOT.RooFit.LineWidth(2),
                               ROOT.RooFit.MarkerStyle(6),
-                              ROOT.RooFit.MarkerColor(ROOT.kRed ),
+                              ROOT.RooFit.MarkerColor(ROOT.kRed),
                               ROOT.RooFit.MarkerSize(0.75),
-                              ROOT.RooFit.FillColor(ROOT.kCyan  + 2)
+                              ROOT.RooFit.FillColor(ROOT.kCyan + 2)
                 )
-                #self.BDT_distribution_MC.plotOn(frame1, ROOT.RooFit.LineColor(ROOT.kRed ))
-
-
                 fulldata.plotOn(frame2, 
                         ROOT.RooFit.Binning(nbins),
                         ROOT.RooFit.MarkerStyle(20),
                         ROOT.RooFit.MarkerColor(ROOT.kBlack), 
                         ROOT.RooFit.MarkerSize(0.75))
-
-                #BDT_distribution.plotOn(frame2,  ROOT.RooFit.LineColor(ROOT.kBlue) , ROOT.RooFit.Normalization(fulldata.sumEntries("1", "BDT_Fit_Range"), ROOT.RooAbsReal.NumEvent), ROOT.RooFit.ProjectionRange('BDT_Fit_Range') )
-                #BDT_distribution.plotOn(frame2,  ROOT.RooFit.LineColor(ROOT.kBlue) , ROOT.RooFit.Normalization(BDTNorm.getVal()*BDT_distribution.createIntegral(ROOT.RooArgSet(self.bdt_cv), ROOT.RooArgSet(self.bdt_cv), "BDT_Fit_Range").getVal(), ROOT.RooAbsReal.NumEvent), ROOT.RooFit.ProjectionRange('BDT_Fit_Range') )
-
-                self.BDT_distribution.plotOn(frame2,  ROOT.RooFit.LineColor(ROOT.kBlue) )
-
+                
+                self.BDT_distribution.plotOn(frame2, ROOT.RooFit.LineColor(ROOT.kBlue))
+                
+                # Create canvas
+                canvas = ROOT.TCanvas("bdt_canvas", "BDT Canvas", 800, 800)
+                canvas.cd()
+                canvas.SetLeftMargin(L / W)
+                canvas.SetRightMargin(R / W)
+                canvas.SetTopMargin(T / H)
+                canvas.SetBottomMargin(B / H)
+                
+                # Plot MC
                 frame1.Draw()
-                ROOT.gPad.SetTicks(1,1)
-                CMSStyle.CMS_lumi(ROOT.gPad, 5, 0)
-                ROOT.gPad.Update()
+                canvas.SetTicks(1, 1)
+                CMSStyle.CMS_lumi(canvas, 5, 0)
+                canvas.Update()
                 frame1.Draw('sameaxis')
-                ROOT.gPad.SaveAs('bdt_fit_mc_'+categ+'.png')
-                ROOT.gPad.Clear()
-
+                canvas.SaveAs('bdt_fit_mc_' + categ + '.png')
+                canvas.Clear()
+                
+                # Plot data + model (log scale)
+                canvas.SetLogy()
                 frame2.SetMinimum(1e-2)
-                ROOT.gPad.SetLogy()
                 frame2.Draw()
-                ROOT.gPad.SetTicks(1,1)
-                CMSStyle.CMS_lumi(ROOT.gPad, 5, 0)
-                ROOT.gPad.Update()
+                canvas.SetTicks(1, 1)
+                CMSStyle.CMS_lumi(canvas, 5, 0)
+                canvas.Update()
                 frame2.Draw('sameaxis')
-                ROOT.gPad.SaveAs('bdt_fit_bkg_'+categ+'.png')
-                ROOT.gPad.SetLogy(0)
+                canvas.SaveAs('bdt_fit_bkg_' + categ + '.png')
+                canvas.SetLogy(0)
+
 
 
                 #print("Certain BDT cut: ", self.fullmc.reduce('bdt_cv > 0.5').sumEntries())
@@ -469,13 +474,13 @@ def CalculateUL_fromDatacard(lumi, categories, Whether_Hybrid, bdt_points):
                             
                     print("sig:", sig, "bkg:", bkg)
 
-                    cmd_ul = f"python3 ../../CLs_UL_Calculator_Efficient.py {sig} {bkg} > out_UL_Calc.txt"
+                    cmd_ul = f"python3 ../../CLs_UL_Calculator_Integral.py {sig} {bkg} > out_UL_Calc.txt"
                     os.system(cmd_ul)
 
                     limit_val = 10000
                     with open("out_UL_Calc.txt") as f:
                         for line in f:
-                            if "upper limit" in line:
+                            if "r_val" in line:
                                 limit_val = line.split()[-1]
                                 print(f"Limit UL_Calc: {limit_val}")
 
@@ -895,7 +900,7 @@ def ReadAndCopyMinimumBDTCard_usingUL(lumi,categories,Whether_Hybrid,bdt_points)
                 frame.GetYaxis().SetTitleSize(0.05)
                 frame.GetXaxis().SetLabelSize(0.04)
                 frame.GetYaxis().SetLabelSize(0.04)
-                frame.GetYaxis().SetTitleOffset(0.9)
+                frame.GetYaxis().SetTitleOffset(1.2)
                 frame.GetXaxis().SetNdivisions(508)
                 
                 #Vary the frame ymax from 30 to 5 as lumi goes from 59.83 to 3000
@@ -906,7 +911,7 @@ def ReadAndCopyMinimumBDTCard_usingUL(lumi,categories,Whether_Hybrid,bdt_points)
                 
                 graph.Draw("PL same")
                 
-                legend = TLegend(0.15, 0.75, 0.5, 0.85)
+                legend = TLegend(0.19, 0.75, 0.5, 0.85)
                 legend.SetBorderSize(0)
                 legend.SetFillStyle(0)
                 legend.SetTextSize(0.041)
@@ -919,7 +924,9 @@ def ReadAndCopyMinimumBDTCard_usingUL(lumi,categories,Whether_Hybrid,bdt_points)
                 latex.SetTextSize(0.04)
                 latex.SetTextFont(42)
                 text = f"Category: Z#rightarrow#tau#tau_{{3#mu}}, L = {lumi[lumi_index]} fb^{{-1}}"
-                latex.DrawLatex(0.15, 0.88, text)
+                latex.DrawLatex(0.19, 0.86, text)
+                
+                CMSStyle.CMS_lumi(c, 5, 0)
                 
                 c.Update()
                 c.SaveAs(f"{output_dir}/limit_scan_lumi_{lumi[lumi_index]}.png")
@@ -1075,8 +1082,8 @@ if __name__ == "__main__":
         # Enable batch mode
         ROOT.gROOT.SetBatch(True)
         
-        categories = ['tauhA']
-        #categories = ['taue','taumu','tauhA','tauhB']
+        #categories = ['tauhA']
+        categories = ['taue','taumu','tauhA','tauhB']
         #categories = ['tauhA','tauhB','all']
         #categories = ['combined'] # Can only be run after the other 4 categories are read and copied
         
@@ -1096,11 +1103,12 @@ if __name__ == "__main__":
         
         #lumi = np.round([59.83],1)
         
-        #lumi = np.round([  59.83,  97.7,  137,  400,  600, 1100, 1600, 2000, 2600, 3000, 3600, 4100, 4500],1)
-        #lumi = np.sort(lumi)
+        lumi = np.round([  59.83,  97.7,  137,  400,  600, 1100, 1600, 2000, 2600, 3000, 3600, 4100, 4500],1)
+        lumi = np.sort(lumi)
         
         #lumi = np.round([  59.83,  3000],1)
-        lumi = np.round([  3000.0],1)
+        #lumi = np.round([  3000.0],1)
+        #lumi = np.round([  59.83],1)
         #lumi = np.sort(lumi)
         
         cmd1 = 'mkdir lumi_limit_scans;'
@@ -1115,7 +1123,7 @@ if __name__ == "__main__":
         Cat_No = len(categories)
         
         #To create datacards
-        WhetherFitBDTandMakeCards = True
+        WhetherFitBDTandMakeCards = False
         
         for cat in range(Cat_No):
                 categ = categories[cat]
@@ -1164,12 +1172,10 @@ if __name__ == "__main__":
         #ReadAndCopyMinimumBDTCard(lumi,categories,False,bdt_points)
         
         #CalculateUL_fromDatacard(lumi,categories,False,bdt_points)
-        #ReadAndCopyMinimumBDTCard_usingUL(lumi,categories,True,bdt_points)
+        ReadAndCopyMinimumBDTCard_usingUL(lumi,categories,True,bdt_points)
         
         #executeDataCards_onCondor(lumi,categories,True,bdt_points)
         #ReadAndCopyMinimumBDTCard(lumi,categories,True,bdt_points)
-        
-        
         
         
         

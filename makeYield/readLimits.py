@@ -176,7 +176,7 @@ def plotUpperLimits(lumi_W,lumi_HF,lumi_ZTT,analyzed_lumi_W,analyzed_lumi_HF,ana
     
     for cat in range(Cat_No):
             if categories[cat]=='HF':
-                    label[cat] = 'Heavy Flavor'
+                    label[cat] = 'HF'
                     subcat[cat] = ["HF"]
                     subcat_label[cat] = ["HF"]
             if categories[cat]=='ZTT':
@@ -285,10 +285,13 @@ def plotUpperLimits(lumi_W,lumi_HF,lumi_ZTT,analyzed_lumi_W,analyzed_lumi_HF,ana
             
             if categories[cat]=='HF':
                     lumi = lumi_HF
+                    analyzed_lumi = analyzed_lumi_HF
             if categories[cat]=='ZTT':
                     lumi = lumi_ZTT
+                    analyzed_lumi = analyzed_lumi_ZTT
             if categories[cat]=='W':
                     lumi = lumi_W
+                    analyzed_lumi = analyzed_lumi_W
             
             W = 800
             H  = 600
@@ -400,7 +403,36 @@ def plotUpperLimits(lumi_W,lumi_HF,lumi_ZTT,analyzed_lumi_W,analyzed_lumi_HF,ana
         #    CMS_lumi(ROOT.gPad, 5, 0)
             ROOT.gPad.Update()
             frame.Draw('sameaxis')
-         
+            
+            
+            if categories[cat] == 'HF':
+                    x, y = ctypes.c_double(0), ctypes.c_double(0)  # Create c_double variables for x and y
+                    median[0][0].GetPoint(0, x, y)  # Get the point at index i
+                    # Convert ctypes values to Python floats
+                    x_val = x.value
+                    y_val = y.value
+                    
+                    # Create and draw the scaled 1/sqrt(L) line
+                    y_values = [y_val*math.sqrt(analyzed_lumi / l) if l > 0 else 0 for l in lumi]
+                    y_values_L = [y_val*(analyzed_lumi / l) if l > 0 else 0 for l in lumi]
+                    scaled_graph = ROOT.TGraph(len(lumi))
+                    scaled_graph_L = ROOT.TGraph(len(lumi))
+                    for i, (lx, ly) in enumerate(zip(lumi, y_values)):
+                        scaled_graph.SetPoint(i, lx, ly)
+                    for i, (lx, ly) in enumerate(zip(lumi, y_values_L)):
+                        scaled_graph_L.SetPoint(i, lx, ly)
+                
+                    scaled_graph.SetLineColor(ROOT.kBlue)
+                    scaled_graph.SetLineWidth(2)
+                    scaled_graph.SetLineStyle(3)  # Dashed line
+                    scaled_graph.Draw("Lsame")
+                    
+                    scaled_graph_L.SetLineColor(ROOT.kRed)
+                    scaled_graph_L.SetLineWidth(2)
+                    scaled_graph_L.SetLineStyle(3)  # Dashed line
+                    scaled_graph_L.Draw("Lsame")
+                    
+            
             x1 = 0.65
             x2 = x1 + 0.24
             y2 = 0.86
@@ -413,6 +445,10 @@ def plotUpperLimits(lumi_W,lumi_HF,lumi_ZTT,analyzed_lumi_W,analyzed_lumi_HF,ana
             
             for cat_sub in range(Cat_No_sub[cat]):
                     legend.AddEntry(median[0][cat_sub], subcat_label[0][cat_sub],'L')
+            
+            if categories[cat] == 'HF':
+                    legend.AddEntry(scaled_graph, "sqrt(1/L)", 'L')
+                    legend.AddEntry(scaled_graph_L, "(1/L)", 'L')
             
         #    legend.AddEntry(median[cat], "HybridNew CL_{s} expected upper limit",'L')
         #    legend.AddEntry(green[cat], "#pm 1 std. deviation",'f')
@@ -441,9 +477,75 @@ def plotUpperLimits(lumi_W,lumi_HF,lumi_ZTT,analyzed_lumi_W,analyzed_lumi_HF,ana
             
             
             
-    
-    
-    
+            
+            
+            
+            
+            for cat in range(Cat_No):
+                    if categories[cat] == 'HF':
+                        lumi_vals = lumi_HF
+                    elif categories[cat] == 'ZTT':
+                        lumi_vals = lumi_ZTT
+                    elif categories[cat] == 'W':
+                        lumi_vals = lumi_W
+                    else:
+                        lumi_vals = lumi
+                
+                    if categories[cat] in ['ZTT', 'W']:
+                        for cat_sub in range(Cat_No_sub[cat]):
+                            graph_med = median[cat][cat_sub]
+                            graph_1s = green[cat][cat_sub]
+                            graph_2s = yellow[cat][cat_sub]
+                
+                            N = graph_med.GetN()
+                            if N * 2 != graph_1s.GetN() or N * 2 != graph_2s.GetN():
+                                print(f"Warning: Mismatch in points for {categories[cat]}_{subcat_label[cat][cat_sub]}")
+                                continue
+                
+                            output_filename = f"median_limits_{categories[cat]}_{subcat_label[cat][cat_sub]}.txt"
+                            with open(output_filename, "w") as f:
+                                f.write("# lumi [fb^-1]   expected_limit (10^-7)   -2sigma   -1sigma   +1sigma   +2sigma\n")
+                                for i in range(N):
+                                    lumi_val = graph_med.GetX()[i]
+                                    med = graph_med.GetY()[i]
+                
+                                    plus1sigma = graph_1s.GetY()[i]
+                                    minus1sigma = graph_1s.GetY()[2*N - 1 - i]
+                
+                                    plus2sigma = graph_2s.GetY()[i]
+                                    minus2sigma = graph_2s.GetY()[2*N - 1 - i]
+                
+                                    f.write(f"{lumi_val:.4f}   {med:.6f}   {minus2sigma:.6f}   {minus1sigma:.6f}   {plus1sigma:.6f}   {plus2sigma:.6f}\n")
+                
+                    else:
+                        graph_med = median[cat][0]
+                        graph_1s = green[cat][0]
+                        graph_2s = yellow[cat][0]
+                
+                        N = graph_med.GetN()
+                        if N * 2 != graph_1s.GetN() or N * 2 != graph_2s.GetN():
+                            print(f"Warning: Mismatch in points for {categories[cat]}")
+                            continue
+                
+                        output_filename = f"median_limits_{categories[cat]}.txt"
+                        with open(output_filename, "w") as f:
+                            f.write("# lumi [fb^-1]   expected_limit (10^-7)   -2sigma   -1sigma   +1sigma   +2sigma\n")
+                            for i in range(N):
+                                lumi_val = graph_med.GetX()[i]
+                                med = graph_med.GetY()[i]
+                
+                                plus1sigma = graph_1s.GetY()[i]
+                                minus1sigma = graph_1s.GetY()[2*N - 1 - i]
+                
+                                plus2sigma = graph_2s.GetY()[i]
+                                minus2sigma = graph_2s.GetY()[2*N - 1 - i]
+                
+                                f.write(f"{lumi_val:.4f}   {med:.6f}   {minus2sigma:.6f}   {minus1sigma:.6f}   {plus1sigma:.6f}   {plus2sigma:.6f}\n")
+            
+            
+            
+            
+            
     
     #To plot multiple sub-categories separately as separate images
     if((not WhetherMultipleBroadCategories) and WhetherMultipleSmallCategories and WhetherIndividualPlots):
@@ -607,7 +709,7 @@ def plotUpperLimits(lumi_W,lumi_HF,lumi_ZTT,analyzed_lumi_W,analyzed_lumi_HF,ana
             print("WhetherMultipleBroadCategories 2: ",WhetherMultipleBroadCategories)
             
             W = 800
-            H  = 600
+            H  = 800
             T = 0.08*H
             B = 0.12*H
             L = 0.12*W
@@ -711,10 +813,21 @@ def plotUpperLimits(lumi_W,lumi_HF,lumi_ZTT,analyzed_lumi_W,analyzed_lumi_HF,ana
             print(" ")
             c.SaveAs("Limit_scan.png")
             c.Close()
-    
-    
-    
-
+            
+            
+            for cat in range(Cat_No):
+                    graph = median[cat][0]
+                    N = graph.GetN()
+                    x_vals = graph.GetX()
+                    y_vals = graph.GetY()
+                    
+                    # Save to a text file named after the category
+                    output_filename = f"median_limits_cat_{label[cat]}.txt"
+                    with open(output_filename, "w") as f:
+                        f.write("# lumi [fb^-1]   expected_limit (10^-7)\n")
+                        for i in range(N):
+                            f.write(f"{x_vals[i]:.4f}   {y_vals[i]:.6f}\n")
+            
         
 
 
@@ -723,10 +836,10 @@ def main():
 
 
         
-    categories = ['ZTT','W']
+#    categories = ['ZTT','W']
 #    categories = ['W']
 #    categories = ['ZTT']
-#    categories = ['HF']
+    categories = ['HF']
 #    categories = ['ZTT','HF','W']
     
     Whether_Hybrid=False

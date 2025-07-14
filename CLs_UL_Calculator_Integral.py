@@ -15,7 +15,8 @@ def poisson_likelihood(n_obs, mu):
     """
     Generalized Poisson PMF that supports non-integer n_obs.
     """
-    return (mu ** n_obs) * np.exp(-mu) / np.exp(gammaln(n_obs + 1))
+    log_p = n_obs * np.log(mu) - mu - gammaln(n_obs + 1)
+    return np.exp(log_p)
 
 def posterior_pdf(r, n_obs, b, s0):
     mu = b + r * s0
@@ -58,7 +59,7 @@ def main():
 
     print(f"\nBayesian Upper Limit at 90% CL (alpha = 0.1):")
     print(f"  n_obs (set equal to b) = {n_obs}")
-    print(f"  r < {r_lim:.4f}")
+    print(f"  r_val < {r_lim:.4f}")
     print(f"  s < {s_lim:.4f} (s0 = {args.s0})\n")
 
 if __name__ == "__main__":
