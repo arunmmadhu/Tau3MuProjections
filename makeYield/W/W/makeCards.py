@@ -10,9 +10,8 @@ import numpy as np
 #lumi = [97.7,129.0,150,377.0,500.0,700.0,1000.0, 1200.0, 1500.0, 1700.0, 2000.0, 2750.0]
 #lumi = [59.0,97.7, 129.0]
 
-lumi = np.round(np.arange(100,3050,100), 0)
-lumi = np.insert(lumi, 0 , 97.7)
-lumi = np.append(lumi, 4500)
+lumi = np.round([  97.7,  137,  400,  600, 1100, 1600, 2000, 2600, 3000, 3600, 4100, 4500],1)
+lumi = np.sort(lumi)
 
 print('Lumi points:  ', lumi)
 

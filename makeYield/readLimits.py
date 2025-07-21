@@ -2,11 +2,12 @@
 
 import ROOT
 from ROOT import TFile, TTree, TCanvas, TGraph, TMultiGraph, TGraphErrors, TLegend, TPaveLabel, TPaveText, TLatex
-import CMS_lumi, tdrstyle
 import subprocess # to execute shell command
 import argparse
 import numpy as np
-from CMSStyle import CMS_lumi
+import tdrstyle
+#from CMSStyle import CMS_lumi
+import CMSStyle
 import os
 import ctypes
 import math
@@ -24,11 +25,24 @@ args = parser.parse_args()
 ROOT.gROOT.SetBatch(ROOT.kTRUE)
 
 # CMS style
-CMS_lumi.cmsText = "CMS, work in progress"
-CMS_lumi.extraText = ""
-CMS_lumi.cmsTextSize = 0.65
-CMS_lumi.outOfFrame = True
+CMSStyle.cmsText = "CMS"
+CMSStyle.extraText = "        Work in progress"
+CMSStyle.relPosX = 0.070
+CMSStyle.outOfFrame = False
+CMSStyle.alignX_ = 1
+CMSStyle.relPosX    = 0.04
+#CMSStyle.relPosY    = 0.025
 tdrstyle.setTDRStyle()
+
+# references for T, B, L, R
+H_ref = 800; 
+W_ref = 800; 
+W = W_ref
+H  = H_ref
+T = 0.08*H_ref
+B = 0.18*H_ref 
+L = 0.15*W_ref
+R = 0.04*W_ref
 
 
 #lumi = [97.7,129.0,150,377.0,500.0,700.0,1000.0, 1200.0, 1500.0, 1700.0, 2000.0, 2250.0, 2500.0, 2750.0, 3000.0 ]
@@ -162,7 +176,7 @@ def plotUpperLimits(lumi_W,lumi_HF,lumi_ZTT,analyzed_lumi_W,analyzed_lumi_HF,ana
     Cat_No = len(categories)
     
     # Whether to make individual plots
-    WhetherIndividualPlots = False
+    WhetherIndividualPlots = True
     
     WhetherMultipleBroadCategories = False
     if (Cat_No>1):
@@ -293,13 +307,7 @@ def plotUpperLimits(lumi_W,lumi_HF,lumi_ZTT,analyzed_lumi_W,analyzed_lumi_HF,ana
                     lumi = lumi_W
                     analyzed_lumi = analyzed_lumi_W
             
-            W = 800
-            H  = 600
-            T = 0.08*H
-            B = 0.12*H
-            L = 0.12*W
-            R = 0.04*W
-            c = TCanvas("c","c",100,100,W,H)
+            c = TCanvas("c","c",100,100,W_ref,H_ref)
             c.SetFillColor(0)
             c.SetBorderMode(0)
             c.SetFrameFillStyle(0)
@@ -312,6 +320,7 @@ def plotUpperLimits(lumi_W,lumi_HF,lumi_ZTT,analyzed_lumi_W,analyzed_lumi_HF,ana
             c.SetFrameLineWidth(2);
             c.SetTickx();
             c.SetTicky();
+            
             #
             c.SetLogy();
             c.cd()
@@ -323,7 +332,7 @@ def plotUpperLimits(lumi_W,lumi_HF,lumi_ZTT,analyzed_lumi_W,analyzed_lumi_HF,ana
             frame.GetXaxis().SetTitleSize(0.05)
             frame.GetXaxis().SetLabelSize(0.04)
             frame.GetYaxis().SetLabelSize(0.04)
-            frame.GetYaxis().SetTitleOffset(0.9)
+            frame.GetYaxis().SetTitleOffset(1.1)
             frame.GetXaxis().SetNdivisions(508)
             frame.GetYaxis().CenterTitle(False)
             frame.GetYaxis().SetTitle("Expected Limit (10^{-7})")
@@ -463,6 +472,7 @@ def plotUpperLimits(lumi_W,lumi_HF,lumi_ZTT,analyzed_lumi_W,analyzed_lumi_HF,ana
             latex.SetTextAlign(31)
             Text = 'Projected Expected UL'
             
+            CMSStyle.CMS_lumi(c, 5, 0)
         
             latex.SetTextAlign(1)
             latex.DrawLatex(0.15, 0.85, Text)
@@ -562,13 +572,7 @@ def plotUpperLimits(lumi_W,lumi_HF,lumi_ZTT,analyzed_lumi_W,analyzed_lumi_HF,ana
             
             for cat_sub in range(Cat_No_sub[0]):
             
-                    W = 800
-                    H  = 600
-                    T = 0.08*H
-                    B = 0.12*H
-                    L = 0.12*W
-                    R = 0.04*W
-                    c = TCanvas("c","c",100,100,W,H)
+                    c = TCanvas("c","c",100,100,W_ref,H_ref)
                     c.SetFillColor(0)
                     c.SetBorderMode(0)
                     c.SetFrameFillStyle(0)
@@ -591,7 +595,7 @@ def plotUpperLimits(lumi_W,lumi_HF,lumi_ZTT,analyzed_lumi_W,analyzed_lumi_HF,ana
                     frame.GetXaxis().SetTitleSize(0.05)
                     frame.GetXaxis().SetLabelSize(0.04)
                     frame.GetYaxis().SetLabelSize(0.04)
-                    frame.GetYaxis().SetTitleOffset(0.9)
+                    frame.GetYaxis().SetTitleOffset(1.1)
                     frame.GetXaxis().SetNdivisions(508)
                     frame.GetYaxis().CenterTitle(False)
                     frame.GetYaxis().SetTitle("Expected Limit (10^{-7})")
@@ -690,6 +694,7 @@ def plotUpperLimits(lumi_W,lumi_HF,lumi_ZTT,analyzed_lumi_W,analyzed_lumi_HF,ana
                     latex.SetTextAlign(31)
                     Text = 'Projected Expected UL'
                     
+                    CMSStyle.CMS_lumi(c, 5, 0)
                 
                     latex.SetTextAlign(1)
                     latex.DrawLatex(0.15, 0.85, Text)
@@ -708,13 +713,7 @@ def plotUpperLimits(lumi_W,lumi_HF,lumi_ZTT,analyzed_lumi_W,analyzed_lumi_HF,ana
             
             print("WhetherMultipleBroadCategories 2: ",WhetherMultipleBroadCategories)
             
-            W = 800
-            H  = 800
-            T = 0.08*H
-            B = 0.12*H
-            L = 0.12*W
-            R = 0.04*W
-            c = TCanvas("c","c",100,100,W,H)
+            c = TCanvas("c","c",100,100,W_ref,H_ref)
             c.SetFillColor(0)
             c.SetBorderMode(0)
             c.SetFrameFillStyle(0)
@@ -737,7 +736,7 @@ def plotUpperLimits(lumi_W,lumi_HF,lumi_ZTT,analyzed_lumi_W,analyzed_lumi_HF,ana
             frame.GetXaxis().SetTitleSize(0.05)
             frame.GetXaxis().SetLabelSize(0.04)
             frame.GetYaxis().SetLabelSize(0.04)
-            frame.GetYaxis().SetTitleOffset(0.9)
+            frame.GetYaxis().SetTitleOffset(1.1)
             frame.GetXaxis().SetNdivisions(508)
             frame.GetYaxis().CenterTitle(False)
             frame.GetYaxis().SetTitle("Expected Limit (10^{-7})")
@@ -806,6 +805,7 @@ def plotUpperLimits(lumi_W,lumi_HF,lumi_ZTT,analyzed_lumi_W,analyzed_lumi_HF,ana
             latex.SetTextAlign(31)
             Text = 'Projected Expected UL'
             
+            CMSStyle.CMS_lumi(c, 5, 0)
         
             latex.SetTextAlign(1)
             latex.DrawLatex(0.15, 0.85, Text)
@@ -838,8 +838,8 @@ def main():
         
 #    categories = ['ZTT','W']
 #    categories = ['W']
-#    categories = ['ZTT']
-    categories = ['HF']
+    categories = ['ZTT']
+#    categories = ['HF']
 #    categories = ['ZTT','HF','W']
     
     Whether_Hybrid=False

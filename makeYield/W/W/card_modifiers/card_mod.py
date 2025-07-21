@@ -7,12 +7,12 @@ parser.add_argument('--luminosity', action='store', default=97.7, help="Lumi sca
 args = parser.parse_args()
 
 # opening the file in read mode
-file = open("card_modifiers/W_combined.txt", "r")
+file = open("card_modifiers/w_2017_2018.txt", "r")
 replacement = ""
 # using the for loop
 for linenum, line in enumerate(file):
     #print(linenum)
-    if(linenum==30):
+    if(linenum==29):
         line_mod=line
         x1 = line.split()
         x1 = x1[1:]

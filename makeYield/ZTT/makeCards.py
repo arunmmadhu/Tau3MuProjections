@@ -1083,9 +1083,9 @@ if __name__ == "__main__":
         ROOT.gROOT.SetBatch(True)
         
         #categories = ['tauhA']
-        categories = ['taue','taumu','tauhA','tauhB']
+        #categories = ['taue','taumu','tauhA','tauhB']
         #categories = ['tauhA','tauhB','all']
-        #categories = ['combined'] # Can only be run after the other 4 categories are read and copied
+        categories = ['combined'] # Can only be run after the other 4 categories are read and copied
         
         datafile_bdt_shape = "../../../../Combine_Tree_ztau3mutau_orig_PostBDT.root"
         
@@ -1123,7 +1123,7 @@ if __name__ == "__main__":
         Cat_No = len(categories)
         
         #To create datacards
-        WhetherFitBDTandMakeCards = False
+        WhetherFitBDTandMakeCards = True
         
         for cat in range(Cat_No):
                 categ = categories[cat]
@@ -1172,7 +1172,7 @@ if __name__ == "__main__":
         #ReadAndCopyMinimumBDTCard(lumi,categories,False,bdt_points)
         
         #CalculateUL_fromDatacard(lumi,categories,False,bdt_points)
-        ReadAndCopyMinimumBDTCard_usingUL(lumi,categories,True,bdt_points)
+        #ReadAndCopyMinimumBDTCard_usingUL(lumi,categories,True,bdt_points)
         
         #executeDataCards_onCondor(lumi,categories,True,bdt_points)
         #ReadAndCopyMinimumBDTCard(lumi,categories,True,bdt_points)

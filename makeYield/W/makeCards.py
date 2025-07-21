@@ -31,7 +31,7 @@ W = W_ref
 H  = H_ref
 T = 0.08*H_ref
 B = 0.18*H_ref 
-L = 0.15*W_ref
+L = 0.17*W_ref
 R = 0.04*W_ref
 
 
@@ -280,24 +280,36 @@ class makeCards:
                 #BDT_distribution.plotOn(frame2,  ROOT.RooFit.LineColor(ROOT.kBlue) , ROOT.RooFit.Normalization(BDTNorm.getVal()*BDT_distribution.createIntegral(ROOT.RooArgSet(self.bdt), ROOT.RooArgSet(self.bdt), "BDT_Fit_Range").getVal(), ROOT.RooAbsReal.NumEvent), ROOT.RooFit.ProjectionRange('BDT_Fit_Range') )
 
                 self.BDT_distribution.plotOn(frame2,  ROOT.RooFit.LineColor(ROOT.kBlue) )
+                
+                # Create canvas
+                canvas = ROOT.TCanvas("bdt_canvas", "BDT Canvas", 800, 800)
+                canvas.cd()
+                canvas.SetLeftMargin(L / W)
+                canvas.SetRightMargin(R / W)
+                canvas.SetTopMargin(T / H)
+                canvas.SetBottomMargin(B / H)
 
+                frame1.GetYaxis().SetTitleOffset(1.25)
+                frame1.GetXaxis().SetNdivisions(508)
                 frame1.Draw()
-                ROOT.gPad.SetTicks(1,1)
-                latex.DrawLatex(0.15, 0.88, text)
-                ROOT.gPad.Update()
+                canvas.SetTicks(1,1)
+                #latex.DrawLatex(0.15, 0.88, text)
+                CMSStyle.CMS_lumi(canvas, 5, 0)
+                canvas.Update()
                 frame1.Draw('sameaxis')
-                ROOT.gPad.SaveAs('bdt_fit_mc_'+categ+'.png')
-                ROOT.gPad.Clear()
+                canvas.SaveAs('bdt_fit_mc_'+categ+'.png')
+                canvas.Clear()
 
+                frame2.GetXaxis().SetNdivisions(508)
                 frame2.SetMinimum(1e-1)
-                ROOT.gPad.SetLogy()
+                canvas.SetLogy()
                 frame2.Draw()
-                ROOT.gPad.SetTicks(1,1)
-                CMSStyle.CMS_lumi(ROOT.gPad, 5, 0)
-                ROOT.gPad.Update()
+                canvas.SetTicks(1,1)
+                CMSStyle.CMS_lumi(canvas, 5, 0)
+                canvas.Update()
                 frame2.Draw('sameaxis')
-                ROOT.gPad.SaveAs('bdt_fit_bkg_'+categ+'.png')
-                ROOT.gPad.SetLogy(0)
+                canvas.SaveAs('bdt_fit_bkg_'+categ+'.png')
+                canvas.SetLogy(0)
 
 
                 #print("Certain BDT cut: ", self.fullmc.reduce('bdt > 0.5').sumEntries())
@@ -1202,7 +1214,7 @@ if __name__ == "__main__":
         Cat_No = len(categories)
         
         #To create datacards
-        WhetherFitBDTandMakeCards = False
+        WhetherFitBDTandMakeCards = True
         
         for cat in range(Cat_No):
                 categ = categories[cat]
@@ -1222,7 +1234,7 @@ if __name__ == "__main__":
                         MakeAndSaveExpFactors(datafile_bkg,categ,bdt_points)
                         BDTFit_Cat = makeCards()
                         BDTFit_Cat.FitBDT(datafile_sig,datafile_bkg,categ)
-                        BDTFit_Cat.MakeLumiScanCards(lumi,categ,analyzed_lumi)
+                        #BDTFit_Cat.MakeLumiScanCards(lumi,categ,analyzed_lumi)
                         
                 if(WhetherFitBDTandMakeCards and categ == 'combined'):
                         BDTFit_Cat = makeCards()
@@ -1233,7 +1245,7 @@ if __name__ == "__main__":
         #ReadAndCopyMinimumBDTCard(lumi,categories,False,bdt_points)
         
         #CalculateUL_fromDatacard(lumi,categories,False,bdt_points)
-        ReadAndCopyMinimumBDTCard_usingUL(lumi,categories,True,bdt_points)
+        #ReadAndCopyMinimumBDTCard_usingUL(lumi,categories,True,bdt_points)
         
         #executeDataCards_onCondor(lumi,categories,True,bdt_points)
         #ReadAndCopyMinimumBDTCard(lumi,categories,True,bdt_points)
