@@ -44,6 +44,9 @@ B = 0.18*H_ref
 L = 0.15*W_ref
 R = 0.04*W_ref
 
+brazil_yellow = ROOT.TColor.GetColor(245, 187, 84)
+brazil_green  = ROOT.TColor.GetColor(96, 118, 65)
+
 
 #lumi = [97.7,129.0,150,377.0,500.0,700.0,1000.0, 1200.0, 1500.0, 1700.0, 2000.0, 2250.0, 2500.0, 2750.0, 3000.0 ]
 #lumi = [59.0,97.7, 129.0, 377.0, 700.0, 1500.0, 2250.0, 3000.0, 3750.0, 4500.0]
@@ -175,8 +178,10 @@ def plotUpperLimits(lumi_W,lumi_HF,lumi_ZTT,analyzed_lumi_W,analyzed_lumi_HF,ana
     N3 = len(lumi_W)
     Cat_No = len(categories)
     
+    CMSStyle.lumi_13TeV = ""
+    
     # Whether to make individual plots
-    WhetherIndividualPlots = True
+    WhetherIndividualPlots = False
     
     WhetherMultipleBroadCategories = False
     if (Cat_No>1):
@@ -352,19 +357,19 @@ def plotUpperLimits(lumi_W,lumi_HF,lumi_ZTT,analyzed_lumi_W,analyzed_lumi_HF,ana
             c.SetLogx();
             c.cd()
             
-            possible_colors = [1,2,4,6,800,880,416,9]
+            possible_colors = [1,2,4,6,416,880,800,9]
             
             #for cat in range(Cat_No):
             if categories[0]=='ZTT' or categories[0]=='W':
                     for cat_sub in range(Cat_No_sub[cat]):
                             if subcat[cat][cat_sub] == 'combined':
-                                    yellow[cat][cat_sub].SetFillColor(ROOT.kOrange)
-                                    yellow[cat][cat_sub].SetLineColor(ROOT.kOrange)
+                                    yellow[cat][cat_sub].SetFillColor(brazil_yellow)
+                                    yellow[cat][cat_sub].SetLineColor(brazil_yellow)
                                     yellow[cat][cat_sub].SetFillStyle(1001)
                                     yellow[cat][cat_sub].Draw('F')
                                  
-                                    green[cat][cat_sub].SetFillColor(ROOT.kGreen+1)
-                                    green[cat][cat_sub].SetLineColor(ROOT.kGreen+1)
+                                    green[cat][cat_sub].SetFillColor(brazil_green)
+                                    green[cat][cat_sub].SetLineColor(brazil_green)
                                     green[cat][cat_sub].SetFillStyle(1001)
                                     green[cat][cat_sub].Draw('Fsame')
                                  
@@ -374,13 +379,13 @@ def plotUpperLimits(lumi_W,lumi_HF,lumi_ZTT,analyzed_lumi_W,analyzed_lumi_HF,ana
                                     median[cat][cat_sub].Draw('Lsame')
                                     median[cat][cat_sub].Draw()
                             else:
-                                    #yellow[cat][cat_sub].SetFillColor(ROOT.kOrange)
-                                    #yellow[cat][cat_sub].SetLineColor(ROOT.kOrange)
+                                    #yellow[cat][cat_sub].SetFillColor(brazil_yellow)
+                                    #yellow[cat][cat_sub].SetLineColor(brazil_yellow)
                                     #yellow[cat][cat_sub].SetFillStyle(1001)
                                     #yellow[cat][cat_sub].Draw('F')
                                  
-                                    #green[cat][cat_sub].SetFillColor(ROOT.kGreen+1)
-                                    #green[cat][cat_sub].SetLineColor(ROOT.kGreen+1)
+                                    #green[cat][cat_sub].SetFillColor(brazil_green)
+                                    #green[cat][cat_sub].SetLineColor(brazil_green)
                                     #green[cat][cat_sub].SetFillStyle(1001)
                                     #green[cat][cat_sub].Draw('Fsame')
                                  
@@ -391,13 +396,13 @@ def plotUpperLimits(lumi_W,lumi_HF,lumi_ZTT,analyzed_lumi_W,analyzed_lumi_HF,ana
                                     median[cat][cat_sub].Draw()
             else:
                     for cat_sub in range(Cat_No_sub[cat]):
-                            yellow[cat][cat_sub].SetFillColor(ROOT.kOrange)
-                            yellow[cat][cat_sub].SetLineColor(ROOT.kOrange)
+                            yellow[cat][cat_sub].SetFillColor(brazil_yellow)
+                            yellow[cat][cat_sub].SetLineColor(brazil_yellow)
                             yellow[cat][cat_sub].SetFillStyle(1001)
                             yellow[cat][cat_sub].Draw('F')
                          
-                            green[cat][cat_sub].SetFillColor(ROOT.kGreen+1)
-                            green[cat][cat_sub].SetLineColor(ROOT.kGreen+1)
+                            green[cat][cat_sub].SetFillColor(brazil_green)
+                            green[cat][cat_sub].SetLineColor(brazil_green)
                             green[cat][cat_sub].SetFillStyle(1001)
                             green[cat][cat_sub].Draw('Fsame')
                          
@@ -616,13 +621,13 @@ def plotUpperLimits(lumi_W,lumi_HF,lumi_ZTT,analyzed_lumi_W,analyzed_lumi_HF,ana
                 
                 
                     #for cat in range(Cat_No):
-                    yellow[cat][cat_sub].SetFillColor(ROOT.kOrange)
-                    yellow[cat][cat_sub].SetLineColor(ROOT.kOrange)
+                    yellow[cat][cat_sub].SetFillColor(brazil_yellow)
+                    yellow[cat][cat_sub].SetLineColor(brazil_yellow)
                     yellow[cat][cat_sub].SetFillStyle(1001)
                     yellow[cat][cat_sub].Draw('F')
                  
-                    green[cat][cat_sub].SetFillColor(ROOT.kGreen+1)
-                    green[cat][cat_sub].SetLineColor(ROOT.kGreen+1)
+                    green[cat][cat_sub].SetFillColor(brazil_green)
+                    green[cat][cat_sub].SetLineColor(brazil_green)
                     green[cat][cat_sub].SetFillStyle(1001)
                     green[cat][cat_sub].Draw('Fsame')
                  
@@ -758,13 +763,13 @@ def plotUpperLimits(lumi_W,lumi_HF,lumi_ZTT,analyzed_lumi_W,analyzed_lumi_HF,ana
         
         
             for cat in range(Cat_No):
-                    #yellow[cat][cat_sub].SetFillColor(ROOT.kOrange)
-                    #yellow[cat][cat_sub].SetLineColor(ROOT.kOrange)
+                    #yellow[cat][cat_sub].SetFillColor(brazil_yellow)
+                    #yellow[cat][cat_sub].SetLineColor(brazil_yellow)
                     #yellow[cat][cat_sub].SetFillStyle(1001)
                     #yellow[cat][cat_sub].Draw('F')
                  
-                    #green[cat][cat_sub].SetFillColor(ROOT.kGreen+1)
-                    #green[cat][cat_sub].SetLineColor(ROOT.kGreen+1)
+                    #green[cat][cat_sub].SetFillColor(brazil_green)
+                    #green[cat][cat_sub].SetLineColor(brazil_green)
                     #green[cat][cat_sub].SetFillStyle(1001)
                     #green[cat][cat_sub].Draw('Fsame')
                  
@@ -838,9 +843,9 @@ def main():
         
 #    categories = ['ZTT','W']
 #    categories = ['W']
-    categories = ['ZTT']
+#    categories = ['ZTT']
 #    categories = ['HF']
-#    categories = ['ZTT','HF','W']
+    categories = ['ZTT','HF','W']
     
     Whether_Hybrid=False
     if(args.Method == 'H'):
