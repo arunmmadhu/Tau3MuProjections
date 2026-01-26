@@ -69,7 +69,7 @@ class makeCards:
         
         def FitBDT(self,datafile_for_norm,datafile_for_shape,categ):
                 
-                fit_range_lo = 1.6
+                fit_range_lo = 1.55
                 fit_range_hi = 2.0
                 
                 signal_range_lo = 1.74
@@ -269,7 +269,7 @@ class makeCards:
                 command_recreate_categ_dir = "rm -r lumi_limit_scans/{0}; mkdir lumi_limit_scans/{0}".format(categ)
                 os.system(command_recreate_categ_dir)
                 
-                fit_range_lo = 1.6
+                fit_range_lo = 1.55
                 fit_range_hi = 2.0
                 
                 signal_range_lo = 1.74
@@ -340,7 +340,7 @@ class makeCards:
                         #print('   exp_fact_different_pdf   ', exp_fact_different_pdf )
                         
                         exp_uncert = 1.0 + abs(exp_fact_different_pdf-exp_fact)/exp_fact
-                        exp_uncert = 1.10
+                        exp_uncert = 1.03
                         
                         #print("bdt point: ", point," sig_est: ", sig_est, " bkg_est: ", bkg_est, " sb_est: ", sb_est, " exp_uncert: ", exp_uncert)
                         
@@ -978,7 +978,7 @@ def getExtrapFactor(pdftype, categ, bdtcut):
 def MakeAndSaveExpFactors(datafile,categ,bdt_points):
         
         
-        fit_range_lo = 1.6
+        fit_range_lo = 1.55
         fit_range_hi = 2.0
         
         signal_range_lo = 1.74
@@ -1084,13 +1084,13 @@ if __name__ == "__main__":
         ROOT.gROOT.SetBatch(True)
         
         #categories = ['tauhA']
-        #categories = ['taue','taumu','tauhA','tauhB']
+        categories = ['taue','taumu','tauhA','tauhB','all']
         #categories = ['tauhA','tauhB','all']
-        categories = ['combined'] # Can only be run after the other 4 categories are read and copied
+        #categories = ['combined'] # Can only be run after the other 4 categories are read and copied
         
-        datafile_bdt_shape = "../../../../Combine_Tree_ztau3mutau_orig_PostBDT.root"
+        datafile_bdt_shape = "../../../../Combine_Tree_ztau3mutau_PostThesis_Relaxed.root"
         
-        datafile_main = "../../../../Combine_Tree_ztau3mutau_PF_PostBDT.root"#The final PF cuts I would prefer to use
+        datafile_main = "../../../../Combine_Tree_ztau3mutau_PostThesis_PF.root"#The final PF cuts I would prefer to use
         
         #lumi = np.round(np.arange(100,4500,500), 1)
         #lumi = np.insert(lumi, 0 , 59.83)
@@ -1172,11 +1172,9 @@ if __name__ == "__main__":
         #executeDataCards_onCondor(lumi,categories,False,bdt_points)
         #ReadAndCopyMinimumBDTCard(lumi,categories,False,bdt_points)
         
+        #Actual:
         #CalculateUL_fromDatacard(lumi,categories,False,bdt_points)
         #ReadAndCopyMinimumBDTCard_usingUL(lumi,categories,True,bdt_points)
-        
-        #executeDataCards_onCondor(lumi,categories,True,bdt_points)
-        #ReadAndCopyMinimumBDTCard(lumi,categories,True,bdt_points)
         
         
         
