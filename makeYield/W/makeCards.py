@@ -370,7 +370,7 @@ class makeCards:
                         exp_fact_different_pdf = getExtrapFactor('unfixed_exp', categ, point)
                         
                         exp_uncert = 1.0 + abs(exp_fact_different_pdf-exp_fact)/exp_fact
-                        exp_uncert = 1.10
+                        exp_uncert = 1.02
                         
                         #print("bdt point: ", point," sig_est: ", sig_est, " bkg_est: ", bkg_est, " sb_est: ", sb_est, " exp_uncert: ", exp_uncert)
                         
@@ -1175,8 +1175,8 @@ if __name__ == "__main__":
         ROOT.gROOT.SetBatch(True)
         
         #categories = ['CatC']
-        #categories = ['CatA','CatB','CatC']
-        categories = ['combined'] # Can only be run after the other 4 categories are read and copied
+        categories = ['CatA','CatB','CatC']
+        #categories = ['combined'] # Can only be run after the other 4 categories are read and copied
         
         datafile_sig = "luca_root/signal_threeMedium_weighted_16Mar2022.root"        
         datafile_bkg = "luca_root/background_threeMedium-UNBLINDED.root" 
