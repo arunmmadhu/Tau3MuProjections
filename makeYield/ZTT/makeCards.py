@@ -1084,13 +1084,15 @@ if __name__ == "__main__":
         ROOT.gROOT.SetBatch(True)
         
         #categories = ['tauhA']
-        categories = ['taue','taumu','tauhA','tauhB','all']
-        #categories = ['tauhA','tauhB','all']
-        #categories = ['combined'] # Can only be run after the other 4 categories are read and copied
+        #categories = ['taue','taumu','tauhA','tauhB','all']
+        #categories = ['all']
+        categories = ['combined'] # Can only be run after the other 4 categories are read and copied
         
         datafile_bdt_shape = "../../../../Combine_Tree_ztau3mutau_PostThesis_Relaxed.root"
         
         datafile_main = "../../../../Combine_Tree_ztau3mutau_PostThesis_PF.root"#The final PF cuts I would prefer to use
+        
+        datafile_main_incl = "../../../../Combine_Tree_ztau3mutau_PostThesis_PFandGL.root"
         
         #lumi = np.round(np.arange(100,4500,500), 1)
         #lumi = np.insert(lumi, 0 , 59.83)
@@ -1124,7 +1126,7 @@ if __name__ == "__main__":
         Cat_No = len(categories)
         
         #To create datacards
-        WhetherFitBDTandMakeCards = True
+        WhetherFitBDTandMakeCards = False
         
         for cat in range(Cat_No):
                 categ = categories[cat]
@@ -1150,8 +1152,8 @@ if __name__ == "__main__":
                         datafile_for_shape = datafile_bdt_shape
                 if(categ == 'all'):
                         analyzed_lumi = 59.83
-                        datafile_for_norm = datafile_main
-                        datafile_for_shape = datafile_main
+                        datafile_for_norm = datafile_main_incl
+                        datafile_for_shape = datafile_main_incl
                 if(categ == 'combined'):
                         analyzed_lumi = 59.83
                         datafile_for_norm = datafile_main

@@ -1175,8 +1175,8 @@ if __name__ == "__main__":
         ROOT.gROOT.SetBatch(True)
         
         #categories = ['CatC']
-        categories = ['CatA','CatB','CatC']
-        #categories = ['combined'] # Can only be run after the other 4 categories are read and copied
+        #categories = ['CatA','CatB','CatC']
+        categories = ['combined'] # Can only be run after the other 4 categories are read and copied
         
         datafile_sig = "luca_root/signal_threeMedium_weighted_16Mar2022.root"        
         datafile_bkg = "luca_root/background_threeMedium-UNBLINDED.root" 
@@ -1245,6 +1245,7 @@ if __name__ == "__main__":
         #executeDataCards_onCondor(lumi,categories,False,bdt_points)
         #ReadAndCopyMinimumBDTCard(lumi,categories,False,bdt_points)
         
+        #Actual
         #CalculateUL_fromDatacard(lumi,categories,False,bdt_points)
         #ReadAndCopyMinimumBDTCard_usingUL(lumi,categories,True,bdt_points)
         

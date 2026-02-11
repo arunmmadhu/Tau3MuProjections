@@ -114,9 +114,9 @@ def executeDataCards_onCondor(lumi_W,lumi_HF,lumi_ZTT,categories,Whether_Hybrid)
                     if(categories[cat]=="HF"):
                             subcat = ["HF"]
                     if(categories[cat]=="ZTT"):
-                            #subcat = ['taue','taumu','tauhA','tauhB','all','combined']
-                            subcat = ['taue','taumu','tauhA','tauhB','combined']
-                            #subcat = ['combined']
+                            subcat = ['taue','taumu','tauhA','tauhB','all','combined']
+                            #subcat = ['taue','taumu','tauhA','tauhB','combined']
+                            #subcat = ['all']
                     if(categories[cat]=="Combo"):
                             subcat = ["Combo"]
                     
@@ -181,7 +181,7 @@ def plotUpperLimits(lumi_W,lumi_HF,lumi_ZTT,analyzed_lumi_W,analyzed_lumi_HF,ana
     CMSStyle.lumi_13TeV = ""
     
     # Whether to make individual plots
-    WhetherIndividualPlots = False
+    #WhetherIndividualPlots = False
     
     WhetherMultipleBroadCategories = False
     if (Cat_No>1):
@@ -842,10 +842,10 @@ def main():
 
         
 #    categories = ['ZTT','W']
-#    categories = ['W']
+    categories = ['W']
 #    categories = ['ZTT']
 #    categories = ['HF']
-    categories = ['ZTT','HF','W']
+#    categories = ['ZTT','HF','W']
     
     Whether_Hybrid=False
     if(args.Method == 'H'):
@@ -854,12 +854,12 @@ def main():
     #actual categories
     #categories=[args.category]
     
-    #print(lumi_ZTT)
+    WhetherIndividualPlotsBySubcat = True
     
     if(args.runType == 'run'):
             executeDataCards_onCondor(lumi_W,lumi_HF,lumi_ZTT,categories,Whether_Hybrid)
     if(args.runType == 'plot'):
-            plotUpperLimits(lumi_W,lumi_HF,lumi_ZTT,analyzed_lumi_W,analyzed_lumi_HF,analyzed_lumi_ZTT,categories,Whether_Hybrid,False)
+            plotUpperLimits(lumi_W,lumi_HF,lumi_ZTT,analyzed_lumi_W,analyzed_lumi_HF,analyzed_lumi_ZTT,categories,Whether_Hybrid,WhetherIndividualPlotsBySubcat)
 
 if __name__ == '__main__':
     main()
